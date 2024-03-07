@@ -11,7 +11,7 @@ In chronological order:
 - slightly later 1980s, company goes bankrupt, project scrapped!
 - early 1990s, rewrote the demo for the 68K in mixed K&R C and 68K assembler, with polygons, sound, horizon, etc., but picked the "wrong horse" because the x86 was rapidly becoming dominant
 - early 1990s, rewrote the demo for the x86 in DOS in mostly ANSI C, no sound (native sound was just beeps back then)
-- later 1990s, use the demo to get a number of decent summer jobs!
+- later 1990s, used the demo to get a number of decent summer jobs!
 - slightly later 1990s, graphics cards made 3-D development much easier and faster, stopped developing the demo (e.g. just had yaw, was planning on adding pitch and roll)
 - 2000 to early 2020s, doing other things, forgot completely about the demo!
 - 2024, viewed a YouTube [video](https://www.youtube.com/watch?v=t2ESLQHOIhw) from David Murray, The 8-Bit Guy, where he mentioned he was interested in seeing 3-D games added to the body of existing programs available for the CX16 (a modern 6502 computer); that reminded me of the old demo from last century :wink:
@@ -22,13 +22,13 @@ So from the mid 1980s to the present day, went from the 6502, to the 68K, then t
 
 ## DOSBox
 
-This is the original x86 demo from 1992. I was still learning ANSI C at the time, so the code is not very good! As I port over functionality to the CX16 demo, I'm trying to clean it up and optimize it, before continuing with more functionality. Some places I'm really going to have to work to figure it out! Because the code was ported from a 68K base where it had a lot of registers available, the DOSBox code still has remnants of these, as well as a lot of other strange ideas I had at the time.
+This is the original x86 demo from 1992. I was still learning ANSI C at the time, so the code is not very good! As I port over functionality to the CX16 demo, I'm trying to clean it up and optimize it, before continuing with more functionality. Some places I'm really going to have to work to figure it out! Because the code was ported from a 68K base where it had a lot of registers available, the DOSBox code still has remnants of these keywords, as well as a lot of other strange ideas I had at the time.
 
-To run the DOSBox demo, install [DOSBox](https://www.dosbox.com/), run it, mount a drive to point to `«explore-repo»/dosbox/bin`, and run `rgntest.exe`. Suggest running at least at 5 frames/s, i.e. press CTRL-F12 until it's fast enough. Here's a [video](https://youtu.be/XTOIfkqW9O0?si=wh1oJeDKlLNBwxkr) of it in action.
+To run the DOSBox demo, install [DOSBox](https://www.dosbox.com/), run it, mount a drive to point to `«explore-repo»/dosbox/bin`, and run `rgntest.exe`. Suggest running at least at 5 frames/s, i.e. press CTRL-F12 until it's fast enough. Here's a [video](https://www.youtube.com/watch?v=XTOIfkqW9O0) of it in action.
 
 Controls:
 
-- numeric pad 1 and 0: speed up and slow down
+- numeric pad 1 and 0: accelerate and deaccelerate
 - cursor keys: climb, descend, turn left and right
 - mouse: slide around
 - left mouse click: "target" players, probably had some ideas for this at some time
