@@ -1,6 +1,6 @@
 # EXPLORE
 
-This is a 3-D demo written in 1992 for DOS computers being ported to CX16.
+This is a 3-D demo written in 1992 for DOS x86 computers being ported to Commander X16.
 
 ## History
 
@@ -9,12 +9,12 @@ In chronological order:
 - mid 1980s, met with a company in Chatsworth, CA to discuss a 3-D game for a popular 6502 system
 - later 1980s, using every scrap of CPU and memory created a very simple demo in 6502 assembler; it was just walls that you could fly over and around, still looked cool
 - slightly later 1980s, company goes bankrupt, project scrapped!
-- early 1990s, rewrote the demo for the 68K in mixed K&R C and 68K assembler, with polygons, sound, horizon, etc., but picked the "wrong horse" because the x86 was rapidly becoming dominant
+- early 1990s, rewrote the demo for the 68K in mixed K&R C and 68K assembler, with walls, polygons, horizon, sound, etc., but picked the "wrong horse" because the x86 was rapidly becoming dominant
 - early 1990s, rewrote the demo for the x86 in DOS in mostly ANSI C, no sound (native sound was just beeps back then)
-- later 1990s, used the demo to get a number of decent summer jobs!
-- slightly later 1990s, graphics cards made 3-D development much easier and faster, stopped developing the demo (e.g. just had yaw, was planning on adding pitch and roll)
-- 2000 to early 2020s, doing other things, forgot completely about the demo!
-- 2024, viewed a YouTube [video](https://www.youtube.com/watch?v=t2ESLQHOIhw) from David Murray, The 8-Bit Guy, where he mentioned he was interested in seeing 3-D games added to the body of existing programs available for the CX16 (a modern 6502 computer); that reminded me of the old demo from last century :wink:
+- mid 1990s, used the demo to get a number of decent summer jobs!
+- late 1990s, graphics cards made 3-D development much easier and faster, stopped developing the demo (e.g. just had yaw, was planning on adding pitch and roll)
+- 2000s to early 2020s, doing other things, forgot completely about the demo!
+- 2024, viewed a YouTube [video](https://www.youtube.com/watch?v=t2ESLQHOIhw) from David Murray, The 8-Bit Guy, where he mentioned he was interested in seeing 3-D games added to the body of existing programs available for the Commanderf X16 (a modern 6502 computer, abbreviated CX16); that reminded me of the old demo from last century :wink:
 - 2024, found out the old demo can run in DOSBox!
 - 2024 to present day, rewriting the demo for the CX16; the results so far are not impressive, but there are still opportunities to research
 
@@ -31,8 +31,8 @@ Controls:
 - numeric pad 1 and 0: accelerate and deaccelerate
 - cursor keys: climb, descend, turn left and right
 - mouse: slide around
-- left mouse click: "target" players, probably had some ideas for this at some time
-- right mouse click: cycle to the next player (the two-triangle things, this was way before drones!)
+- left button mouse click: "target" players, probably had some ideas for this at some time
+- right button mouse click: cycle to the next player (the two-triangle things, this was way before drones!)
 - escape: pause, press again to resume
 - CTRL-Q: quit, then displays a histogram<sup>†</sup> of how long it took to render all the frames
 
@@ -44,7 +44,7 @@ To build the DOSBox demo, you'll probably need Turbo C++. I distilled some origi
 
 This is a work in progress. So far:
 
-- uses two 16-color screens at 320x240 resolution, displaying one while drawing on the other, then swapping
+- uses two 16-color screens at 320×240 resolution, displaying one while drawing on the other, then swapping
 - uses an extended memory driver
 - loads pre-calculated data into extended memory
 - renders masked polygons
