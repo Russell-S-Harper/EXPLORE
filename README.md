@@ -1,6 +1,6 @@
 # EXPLORE
 
-This is a 3-D demo written in 1992 for DOS x86 computers being ported to Commander X16.
+This is a 3-D demo written in 1992 for DOS x86 computers being ported to the Commander X16.
 
 ## History
 
@@ -14,7 +14,7 @@ In chronological order:
 - mid 1990s, used the demo to get a number of decent summer jobs!
 - late 1990s, graphics cards made 3-D development much easier and faster, stopped developing the demo (e.g. just had yaw, was planning on adding pitch and roll)
 - 2000s to early 2020s, doing other things, forgot completely about the demo!
-- 2024, viewed a YouTube [video](https://www.youtube.com/watch?v=t2ESLQHOIhw) from David Murray, The 8-Bit Guy, where he mentioned he was interested in seeing 3-D games added to the body of existing programs available for the Commanderf X16 (a modern 6502 computer, abbreviated CX16); that reminded me of the old demo from last century :wink:
+- 2024, viewed a YouTube [video](https://www.youtube.com/watch?v=t2ESLQHOIhw) from David Murray, The 8-Bit Guy, where he mentioned he was interested in seeing 3-D games added to the body of existing programs available for the Commander X16 (a modern 6502 computer, a.k.a. CX16); that reminded me of the old demo from last century :wink:
 - 2024, found out the old demo can run in DOSBox!
 - 2024 to present day, rewriting the demo for the CX16; the results so far are not impressive, but there are still opportunities to research
 
@@ -22,9 +22,9 @@ So from the mid 1980s to the present day, went from the 6502, to the 68K, then t
 
 ## DOSBox
 
-This is the original x86 demo from 1992. I was still learning ANSI C at the time, so the code is not very good! As I port over functionality to the CX16 demo, I'm trying to clean it up and optimize it, before continuing with more functionality. Some places I'm really going to have to work to figure it out! Because the code was ported from a 68K base where it had a lot of registers available, the DOSBox code still has remnants of these keywords, as well as a lot of other strange ideas I had at the time.
+This is the original demo from 1992. I was still learning ANSI C at the time, so the code is not very good! As I port over functionality to the CX16 demo, I'm trying to clean it up and optimize it, before continuing with more functionality. Some places I'm really going to have to work to figure it out! Because the code was ported from a 68K base where it had a lot of registers available, the original code still has remnants of these keywords, as well as a lot of other strange ideas I had at the time.
 
-To run the DOSBox demo, install [DOSBox](https://www.dosbox.com/), run it, mount a drive to point to `«explore-repo»/dosbox/bin`, and run `rgntest.exe`. Suggest running at least at 5 frames/s, i.e. press CTRL-F12 until it's fast enough. Here's a [video](https://www.youtube.com/watch?v=XTOIfkqW9O0) of it in action.
+To run the original demo, install [DOSBox](https://www.dosbox.com/), run it, mount a drive to point to `«explore-repo»/dosbox/bin`, and run `rgntest.exe`. Suggest running at least at 5 frames/s, i.e. press CTRL-F12 until it's fast enough. Here's a [video](https://www.youtube.com/watch?v=XTOIfkqW9O0) of it in action.
 
 Controls:
 
@@ -36,7 +36,7 @@ Controls:
 - escape: pause, press again to resume
 - CTRL-Q: quit, then displays a histogram<sup>†</sup> of how long it took to render all the frames
 
-To build the DOSBox demo, you'll probably need Turbo C++. I distilled some original batch scripts into a sequence that might work as `«explore-repo»/dosbox/src/build.bat`, but no guarantees. It's not huge on my list of priorities!
+To build the original demo, you'll probably need Turbo C++. I distilled some original batch scripts into a sequence that might work as `«explore-repo»/dosbox/src/build.bat`, but no guarantees. It's not huge on my list of priorities!
 
 † The histogram is in units of 13.7 ms (1/72.82 Hz), so to get 5 frames/s (or 0.20 s/frame), you'll want the peak at 15 units or less.
 
@@ -49,7 +49,7 @@ This is a work in progress. So far:
 - loads pre-calculated data into extended memory
 - renders masked polygons
 
-As compared to the DOSBox "Explore" demo, even with a very simplified image, it is very slow at 0.91 s/frame, far from the 0.20 s/frame goal. I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there might be a way to use it to draw filled polygons. If I run out of options, might look into a hardware solution, like a cartridge with a co-processor on it.
+As compared to the original demo running in DOSBox, even with a very simplified image, it is very slow at 0.91 s/frame, far from the 0.20 s/frame goal. I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there might be a way to use it to draw filled polygons. If I run out of options, might look into a hardware solution, like a cartridge with a co-processor on it.
 
 To build the demo, you'll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
