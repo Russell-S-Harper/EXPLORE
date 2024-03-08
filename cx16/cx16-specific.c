@@ -68,7 +68,6 @@ static int16_t dxmouse, dymouse, altcntr, dircntr, vgear, lbutton, rbutton;
 void InitSpecific(void)
 {
 	int16_t i;
-	XM_HANDLE *p;
 
 	/* Set up */
 	tgi_install(tgi_static_stddrv);
@@ -80,11 +79,12 @@ void InitSpecific(void)
 	tgi_clear();
 
 	/* Reserve and clear memory for the mask */
-	mask_data = AllocXM(VERT_RES, sizeof(XM_HANDLE));
+	mask_data = GetXMAddressInitial(AllocXM(VERT_RES, sizeof(XM_HANDLE)));
+	mask_bank = XM_REGISTER;
 	for (i = 0; i < VERT_RES; ++i) {
-		p = GetXMAddress(mask_data, i);
-		*p = AllocXM(HORZ_RES, sizeof(unsigned char));
-		memset(GetXMAddressInitial(*p), 0, HORZ_RES);
+		XM_REGISTER = mask_bank;
+		mask_data[i] = AllocXM(HORZ_RES, sizeof(unsigned char));
+		memset(GetXMAddressInitial(mask_data[i]), 0, HORZ_RES);
 	}
 
 	/* Save the resolution */
@@ -115,7 +115,8 @@ void UpdateDisplay(void)
 
 	/* While waiting for the end of the screen display, clear some of the mask! */
 	do {
-		memset(GetXMAddressInitial(GetXMDirectSigned(mask_data, index)), 0, HORZ_RES);
+		XM_REGISTER = mask_bank;
+		memset(GetXMAddressInitial(mask_data[index]), 0, HORZ_RES);
 		if (++index >= VERT_RES)
 			index = 0;
 	} while (((VERA.irq_enable & 0x40)? 256: 0) + VERA.irq_raster < (VERT_RES * 2 - 1));

@@ -46,7 +46,7 @@ int16_t Cos(int16_t angle);
 /******** Variable declarations ********/
 extern XM_HANDLE
 	string_data,
-	mask_data,
+	*mask_data,
 	trig_data,
 	tan_data,
 	arctan_data,
@@ -57,7 +57,8 @@ extern bool
 	exit_program;
 
 extern unsigned char
-	mask_index;
+	mask_index,
+	mask_bank;
 
 extern uint16_t
 	display_width,

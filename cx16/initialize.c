@@ -12,7 +12,7 @@
 /* Global variables */
 XM_HANDLE
 	string_data,
-	mask_data,
+	*mask_data,
 	trig_data,
 	tan_data,
 	arctan_data,
@@ -23,7 +23,8 @@ bool
 	exit_program;
 
 unsigned char
-	mask_index;
+	mask_index,
+	mask_bank;
 
 uint16_t
 	display_width,
@@ -45,6 +46,9 @@ static void GetData(void *buffer, size_t size, FILE *ifile);
 
 void InitProgram(void)
 {
+	/* Set up extended memory */
+	InitXM();
+
 	/* Set up error messages, trigonometric data, etc. */
 	InitData("explore.dat");
 

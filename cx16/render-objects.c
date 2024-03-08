@@ -160,8 +160,10 @@ static void EndPolygon(void)
 	for (y = 0; y < display_height; ++y) {
 		GetXM(left_bounds, y, &x1);
 		GetXM(right_bounds, y, &x2);
-		if (x1 <= x2)
-			memset(GetXMAddress(GetXMDirectSigned(mask_data, y), x1), mask_index, x2 - x1 + 1);
+		if (x1 <= x2) {
+			XM_REGISTER = mask_bank;
+			memset(GetXMAddress(mask_data[y], x1), mask_index, x2 - x1 + 1);
+		}
 	}	
 }
 
@@ -177,7 +179,8 @@ static bool PolygonPointWithMask(int16_t x, int16_t y)
 		if (x > *p)
 			*p = Minimum(x, display_width - 1);
 		if (x >= 0 && x < display_width) {
-			GetXM(GetXMDirectSigned(mask_data, y), x, &m);
+			XM_REGISTER = mask_bank;
+			GetXM(mask_data[y], x, &m);
 			return (m != mask_index);
 		}	
 	}
@@ -189,7 +192,8 @@ static bool HorizonPointWithMask(int16_t x, int16_t y)
 	unsigned char m;
 	if (y >= 0 && y < display_height) {
 		if (x >= 0 && x < display_width) {
-			GetXM(GetXMDirectSigned(mask_data, y), x, &m);
+			XM_REGISTER = mask_bank;
+			GetXM(mask_data[y], x, &m);
 			return (m != mask_index);
 		}	
 	}

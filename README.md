@@ -49,7 +49,7 @@ This is a work in progress. So far:
 - loads pre-calculated data into extended memory
 - renders masked polygons
 
-As compared to the original demo running in DOSBox, even with a very simplified image, it is very slow at 0.91 s/frame, far from the 0.20 s/frame goal. I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there might be a way to use it to draw filled polygons. If I run out of options, might look into a hardware solution, like a cartridge with a co-processor on it.
+As compared to the original demo running in DOSBox, even with a very simplified image, it is very slow at 0.66 s/frame, far from the 0.20 s/frame goal. I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there might be a way to use it to draw filled polygons. If I run out of options, might look into a hardware solution, like a cartridge with a co-processor on it.
 
 To build the demo, you'll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
@@ -61,7 +61,7 @@ Run the emulator, then load and run `data.prg` to generate the `explore.dat` dat
 
 The only control is Q to quit, or you can just wait an eternity for 100 frames to finish. Depending on what I'm optimizing, it might print some timing statistics in `clock` units.
 
-Here's a stunning :wink: [video](https://www.youtube.com/watch?v=H0h6VMAwbqY) of the progress to date.
+Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of the progress to date.
 
 ## License
 

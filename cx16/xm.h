@@ -29,6 +29,7 @@ typedef struct { unsigned char bank, shift; size_t offset, limit, size; } ALLOC_
 
 #define ALLOC_XM_SHIFT	3		/* ceil(log2(sizeof(ALLOC_XM))) */
 
+void InitXM(void);
 XM_HANDLE AllocXM(size_t limit, size_t size);
 void GetOrSetXM(XM_HANDLE handle, int16_t index, void *data, XM_MODE get_or_set);
 void *GetXMAddress(XM_HANDLE handle, int16_t index);

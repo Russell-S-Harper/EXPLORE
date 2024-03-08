@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Set as required
-#XCC=«path-to-cc65-repo»
-#FLT=«path-to-FLT-repo»/flt
-#EMU=«path-to-x16-emulator»
+# XCC=«path-to-cc65-repo»
+# FLT=«path-to-FLT-repo»/flt
+# EMU=«path-to-x16-emulator»
 
 XCC=~/Documents/development/cc65
 FLT=~/Documents/development/FLT/flt
@@ -31,6 +31,6 @@ rm *-flt.c *.s *.o
 
 # Run the emulator
 cd $EMU
-./x16emu -scale 2 -mhz 8
+# ./x16emu -scale 2 -mhz 8
 # ./x16emu -scale 2 -warp -prg data.prg -run
-# ./x16emu -scale 2 -mhz 8 -prg explore.prg -run
+./x16emu -scale 2 -mhz 8 -prg explore.prg -run
