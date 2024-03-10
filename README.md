@@ -14,7 +14,7 @@ In chronological order:
 - mid 1990s, used the demo to get a number of decent summer jobs!
 - late 1990s, graphics cards made 3-D development much easier and faster, stopped developing the demo (e.g. just had yaw, was planning on adding pitch and roll)
 - 2000s to early 2020s, doing other things, forgot completely about the demo!
-- 2024, viewed a YouTube [video](https://www.youtube.com/watch?v=t2ESLQHOIhw) from David Murray, The 8-Bit Guy, where he mentioned he was interested in seeing 3-D games added to the body of existing programs available for the Commander X16 (a modern 6502 computer, a.k.a. CX16); that reminded me of the old demo from last century :wink:
+- 2024, viewed a [YouTube video](https://www.youtube.com/watch?v=t2ESLQHOIhw) from David Murray, The 8-Bit Guy, where he mentioned he was interested in seeing 3-D games added to the body of existing programs available for the Commander X16 (a modern 6502 computer, a.k.a. CX16); that reminded me of the old demo from last century :wink:
 - 2024, found out the old demo can run in DOSBox!
 - 2024 to present day, rewriting the demo for the CX16; the results so far are not impressive, but there are still opportunities to research
 
@@ -40,28 +40,50 @@ To build the original demo, you'll probably need Turbo C++. I distilled some ori
 
 † The histogram is in units of 13.7 ms (1/72.82 Hz), so to get 5 frames/s (or 0.20 s/frame), you'll want the peak at 15 units or less.
 
-## CX16
+## CX16 – v1. Masking Approach
 
-This is a work in progress. So far:
+Completed the following:
 
 - uses two 16-color screens at 320×240 resolution, displaying one while drawing on the other, then swapping
 - uses an extended memory driver
 - loads pre-calculated data into extended memory
 - renders masked polygons
 
-As compared to the original demo running in DOSBox, even with a very simplified image, it is very slow at 0.66 s/frame, far from the 0.20 s/frame goal. I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there might be a way to use it to draw filled polygons. If I run out of options, might look into a hardware solution, like a cartridge with a co-processor on it.
+As compared to the original demo running in DOSBox, even with a very simplified image, it is very slow. It was originally taking 1.30 s/frame and was brought down to 0.66 s/frame but it's still far from the 0.20 s/frame goal. After optimizing and calculating durations. This is how long each task takes per frame in the very simplified image:
 
-To build the demo, you'll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
+- `282 ms` – callback logic, for every point, a callback is made so it can check against the mask whether to plot the point; also polygons keep track of the left and right sides; the mask is very large, so it has to be maintained in extended memory, a lot of effort went into optimizing this
+- ` 33 ms` – callback call overhead, this is the time spent just making the calls
+- `282 ms` – drawing lines, these are the loops to draw lines using Bresenham’s Line Generation algorithm; I couldn't use the built-ins because: 16-color & 2 pixels/byte, and need to invoke a callback for each point
+- ` 17 ms` – rotating the points, sin and cos are pre-calculated, so this saves a lot
+- ` 50 ms` – baseline, these are routines to manage the dual screens: swapping and clearing, and clearing some of the mask
+
+Suppose the complexity of the image is tripled, i.e. three horizon lines and six polygons, you can probably make something decent with that. The estimated timing would be:
+
+- `845 ms` – callback logic
+- `100 ms` – callback call overhead
+- `847 ms` – drawing lines
+- ` 50 ms` – rotating the points
+- ` 50 ms` – baseline, unchanged
+
+To achieve 5 frames/s, that corresponds to a budget of 0.20 s/frame or 200 ms/frame. However note that the just the *callback call overhead* + *rotating the points* + *baseline* already adds up to 200 ms! All of these have been significantly optimized, so even if everything was written in 6502 assembly, there would not be enough improvement expected.
+
+### In summary, while rendering polygons using masking is an elegant solution and provides a lot of flexibility, it isn't appropriate for this platform!
+
+Should you want to build the demo, you'll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
 Edit the `«flt-repo»/flt/build-cc65` script to point `XCC` to where the ***cc65*** repo is located, and run the script to build the `flt.lib` library.
 
-Then edit the `«explore-repo»/cx16/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `explore.prg` and `data.prg`.
+Then edit the `«explore-repo»/cx16-v1/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `explore.prg` and `data.prg`.
 
-Run the emulator, then load and run `data.prg` to generate the `explore.dat` data file, and then load and run `explore.prg` to run the demo. A word of warning, you'll likely be underwhelmed! Once `explore.dat` is created, you don't need to run `data.prg` again, unless you change `«explore-repo»/cx16/data.c`.
+Run the emulator, then load and run `data.prg` to generate the `explore.dat` data file, and then load and run `explore.prg` to run the demo. A word of warning, you'll likely be underwhelmed! Once `explore.dat` is created, you don't need to run `data.prg` again, unless you change `«explore-repo»/cx16-v1/data.c`.
 
 The only control is Q to quit, or you can just wait an eternity for 100 frames to finish. Depending on what I'm optimizing, it might print some timing statistics in `clock` units.
 
-Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of the progress to date.
+Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of the very simplified image running at 0.61 s/frame.
+
+## CX16 – v2. Masking Approach
+
+I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there might be a way to use it to draw filled polygons. There is also a new feature in VERA called FX which aims to improve polygon rendering that I can research if it's appropriate. If I run out of options, might look into a hardware solution, like a cartridge with a co-processor on it.
 
 ## License
 
