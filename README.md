@@ -49,7 +49,7 @@ Completed the following:
 - loads pre-calculated data into extended memory
 - renders masked polygons
 
-As compared to the original demo running in DOSBox, even with a very simplified image, it is very slow. It was originally taking 1.30 s/frame and was brought down to 0.66 s/frame but it's still far from the 0.20 s/frame goal. After optimizing and calculating durations. This is how long each task takes per frame in the very simplified image:
+As compared to the original demo running in DOSBox, even with a very simplified image, it is very slow. It was originally taking 1.30 s/frame and was brought down to 0.66 s/frame but it's still far from the 0.20 s/frame goal. After optimizing and calculating durations, this is how long each task takes per frame in the very simplified image:
 
 - `282 ms` – callback logic, for every point, a callback is made so it can check against the mask whether to plot the point; also polygons keep track of the left and right sides; the mask is very large, so it has to be maintained in extended memory, a lot of effort went into optimizing this
 - ` 33 ms` – callback call overhead, this is the time spent just making the calls
