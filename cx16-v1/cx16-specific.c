@@ -12,7 +12,6 @@
 #include <tgi.h>
 #include <cx16.h>
 #include <unistd.h>
-
 #include "explore.h"
 
 /******** CX16 specific ********/
