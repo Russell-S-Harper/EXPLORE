@@ -83,7 +83,7 @@ Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of
 
 ## CX16 – v2. Masking Approach
 
-I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there might be a way to use it to draw filled polygons. There is also a new feature in VERA called FX which aims to improve polygon rendering that I can research if it's appropriate. If I run out of options, might look into a hardware solution, like a cartridge with a co-processor on it.
+I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there might be a way to use it to draw filled polygons. There is also a new feature in VERA, "FX", which aims to improve polygon rendering. If I run out of options, might look into a hardware solution, like a cartridge with a co-processor on it.
 
 ## License
 
