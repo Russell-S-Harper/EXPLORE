@@ -65,7 +65,7 @@ Suppose the complexity of the image is tripled, i.e. three horizon lines and six
 - ` 50 ms` – rotating the points
 - ` 50 ms` – baseline, unchanged
 
-To achieve 5 frames/s, that corresponds to a budget of 0.20 s/frame or 200 ms/frame. However note that the just the *callback call overhead* + *rotating the points* + *baseline* already adds up to 200 ms! All of these have been significantly optimized, so even if everything was written in 6502 assembly, there would not be enough improvement expected.
+To achieve 5 frames/s, that corresponds to a budget of 0.20 s/frame or 200 ms/frame. However note that just the *callback call overhead* + *rotating the points* + *baseline* already adds up to 200 ms! All of these have been significantly optimized, so even if everything was written in 6502 assembly, there would not be enough improvement expected.
 
 ### In summary, while rendering polygons using masking is an elegant solution and provides a lot of flexibility, it isn't appropriate for this platform!
 
