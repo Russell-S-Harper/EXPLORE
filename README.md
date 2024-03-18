@@ -79,11 +79,11 @@ Run the emulator, then load and run `data.prg` to generate the `explore.dat` dat
 
 The only control is Q to quit, or you can just wait an eternity for 100 frames to finish. Depending on what I'm optimizing, it might print some timing statistics in `clock` units.
 
-Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of the very simplified image running at 0.61 s/frame.
+Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of the very simplified demo running at 0.61 s/frame.
 
-## CX16 – v2. Masking Approach
+## CX16 – v2. VERA Approach
 
-I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there might be a way to use it to draw filled polygons. There is also a new feature in VERA, "FX", which aims to improve polygon rendering. If I run out of options, might look into a hardware solution, like a cartridge with a co-processor on it.
+I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there should be a way to use it to draw walls that a player can fly over and around. There is also a new feature in VERA, "FX", which aims to improve polygon rendering, although 
 
 ## License
 
