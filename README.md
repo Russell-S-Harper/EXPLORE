@@ -49,7 +49,7 @@ Completed the following:
 - loads pre-calculated data into extended memory
 - renders masked polygons
 
-As compared to the original demo running in DOSBox, even with a very simplified image, it is very slow. It was originally taking 1.30 s/frame and was brought down to 0.66 s/frame but it's still far from the 0.20 s/frame goal. After optimizing and calculating durations, this is how long each task takes per frame in the very simplified image:
+As compared to the original demo running in DOSBox, even a very simplified demo is very slow. It was originally taking 1.30 s/frame and was brought down to 0.66 s/frame but it's still far from the 0.20 s/frame goal. After optimizing and calculating durations, this is how long each task takes per frame in the very simplified demo:
 
 - `282 ms` – callback logic, for every point, a callback is made so it can check against the mask whether to plot the point; also polygons keep track of the left and right sides; the mask is very large, so it has to be maintained in extended memory, a lot of effort went into optimizing this
 - ` 33 ms` – callback call overhead, this is the time spent just making the calls
@@ -77,7 +77,7 @@ Then edit the `«explore-repo»/cx16-v1/build-cc65-cx16` script to point `XCC`, 
 
 Run the emulator, then load and run `data.prg` to generate the `explore.dat` data file, and then load and run `explore.prg` to run the demo. A word of warning, you'll likely be underwhelmed! Once `explore.dat` is created, you don't need to run `data.prg` again, unless you change `«explore-repo»/cx16-v1/data.c`.
 
-The only control is Q to quit, or you can just wait an eternity for 100 frames to finish. Depending on what I'm optimizing, it might print some timing statistics in `clock` units.
+The only controls are escape to pause (!) and Q to quit, or you can just wait an eternity for 100 frames to finish. Depending on what I'm optimizing, it might print some timing statistics in `clock` units.
 
 Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of the very simplified demo running at 0.61 s/frame.
 
