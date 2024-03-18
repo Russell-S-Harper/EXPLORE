@@ -83,7 +83,7 @@ Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of
 
 ## CX16 – v2. VERA Approach
 
-I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there should be a way to use it to draw walls that a player can fly over and around. There is also a new feature in VERA, "FX", which aims to improve polygon rendering, although 
+I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there should be a way to use it to draw walls that a player can fly over and around. There is also a new feature in VERA, "FX", which aims to improve polygon rendering. 
 
 ## License
 
