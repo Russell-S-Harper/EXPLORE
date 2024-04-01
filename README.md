@@ -57,7 +57,7 @@ As compared to the original demo running in DOSBox, even a very simplified demo 
 - ` 17 ms` – rotating the points, sin and cos are pre-calculated, so this saves a lot
 - ` 50 ms` – baseline, these are routines to manage the dual screens: swapping and clearing, and clearing some of the mask
 
-Suppose the complexity of the image is tripled, i.e. three horizon lines and six polygons, you can probably make something decent with that. The estimated timing would be:
+Suppose the complexity of the image is tripled, i.e. three horizon lines and six polygons, you can probably make a decent game with that. The estimated timing would be:
 
 - `845 ms` – callback logic
 - `100 ms` – callback call overhead
@@ -79,7 +79,7 @@ Run the emulator, then load and run `data.prg` to generate the `explore.dat` dat
 
 The only controls are escape to pause (!) and Q to quit, or you can just wait an eternity for 100 frames to finish. Depending on what I'm optimizing, it might print some timing statistics in `clock` units.
 
-Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of the very simplified demo running at 0.61 s/frame.
+Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of the very simplified demo running at 0.66 s/frame.
 
 ## CX16 – v2. VERA Approach
 
