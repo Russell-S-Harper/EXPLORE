@@ -1,6 +1,6 @@
-REM Where Turbo C++ is installed:
-REM Set DRV to the drive
-REM Set PTH to the directory
+rem Where Turbo C++ is installed:
+rem Set DRV to the drive
+rem Set PTH to the directory
 
 set DRV=f
 set PTH=%DRV%:\language\turbocpp
