@@ -83,7 +83,19 @@ Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of
 
 ## CX16 – v2. VERA Approach
 
-I'm currently researching if there are ways to leverage VERA, a display co-processor used in the CX16. VERA is currently being used to replicate some Doom-like games, so there should be a way to use it to draw walls that a player can fly over and around. There is also a new feature in VERA, "FX", which aims to improve polygon rendering. 
+VERA is a display co-processor used in the CX16. It has a new feature, "FX", which provides helpers to improve line drawing, polygon filling, and other functions. Using the line drawing helper, I was able to implement 16-color line drawing routines such that, even written in C and implementing clipping, they are still about 25% faster than the 256-color line drawing routines in TGI. As an aside, the line drawing routines in `cx16-v1` using Bresenham's algorithm took 3× the time to run than the TGI drawing routines, so a huge improvement gain using VERA.
+
+I'm still deciding which direction to go next. Stay tuned for further updates!
+
+As in `cx16-v1`, should you want to build the demo, you'll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
+
+Edit the `«flt-repo»/flt/build-cc65` script to point `XCC` to where the ***cc65*** repo is located, and run the script to build the `flt.lib` library.
+
+Then edit the `«explore-repo»/cx16-v2/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `explore.prg` and `data.prg`.
+
+Run the emulator, then load and run `data.prg` to generate the `explore.dat` data file, and then load and run `explore.prg` to run the demo. Once `explore.dat` is created, you don't need to run `data.prg` again, unless you change `«explore-repo»/cx16-v2/data.c`.
+
+The only controls are escape to pause and Q to quit. Depending on what I'm optimizing, it might print some timing statistics in `clock` units.
 
 ## License
 
