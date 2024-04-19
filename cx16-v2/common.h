@@ -26,14 +26,13 @@ extern clock_t
 
 	FOERR: data file open error
 	FCERR: file content error
-	MAERR: memory allocation error
-	GIERR: graphics initialization error
 	XMERR: extended memory allocation error
+	GIERR: graphics initialization error
 	OBERR: accessing array out-of-bounds error
 	DCERR: display configuration has been corrupted
 	NOERR: no error, used also to provide a count of errors
 */
-enum {FOERR, FCERR, MAERR, GIERR, XMERR, OBERR, DCERR, NOERR};
+enum {FOERR, FCERR, XMERR, GIERR, OBERR, DCERR, NOERR};
 
 /* Program data sections
 

@@ -15,13 +15,13 @@
 
 typedef struct {
 	int8_t z_delta, angle_delta;
-	uint8_t fire_count, player;
+	uint8_t player;
+	bool fire_missile;
 } PLAYER_STATUS;
 
 /******** Function declarations ********/
 
 /* Routines called by main */
-
 void InitProgram(void);		/* Defined in initialize.c */
 void ProcessVehicles(void);	/* Defined in process-vehicles.c */
 void ScanField(void);		/* Defined in scan-field.c */
@@ -42,7 +42,7 @@ void DrawLineJustTo16(int16_t x, int16_t y, uint8_t color);
 void PlotPoint16(uint16_t x, uint16_t y, uint8_t color);
 void ErasePoint16(uint16_t x, uint16_t y);
 
-/* Keyboard /joystick routine defined in cx16-specific.c and called by ProcessVehicle */
+/* Keyboard/joystick routine defined in cx16-specific.c and called by ProcessVehicle */
 PLAYER_STATUS *GetInput(uint8_t player);
 
 /* Other routines called throughout the program */

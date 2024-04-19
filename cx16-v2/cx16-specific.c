@@ -28,6 +28,11 @@
 /* Line drawing modes */
 enum {DRAW_JUST_TO = 0, DRAW_FROM_TO = 1};
 
+/* Hex digit defines */
+#define HEX_DGT_HI	0xF0
+#define HEX_DGT_LO	0x0F
+#define SHIFT_HEX_DGT	4
+
 static void DrawLine16(void);
 
 static int16_t Minimum(int16_t a, int16_t b);
@@ -123,14 +128,14 @@ void UpdateDisplay(void)
 	/* Clear the previous screen */
 	for (p = &VERA_DATA0, i = 0; i < VERA_VERT_RES; ++i) {
 		for (j = 0; j < VERA_HORZ_RES / VERA_PX_PER_BYTE / 8; ++j) {
-			*p = BLACK;
-			*p = BLACK;
-			*p = BLACK;
-			*p = BLACK;
-			*p = BLACK;
-			*p = BLACK;
-			*p = BLACK;
-			*p = BLACK;
+			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
+			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
+			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
+			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
+			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
+			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
+			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
+			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
 		}
 	}
 }
@@ -142,7 +147,7 @@ void DrawLineFromTo16(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t co
 	y_from_point = y1;
 	x_to_point = x2;
 	y_to_point = y2;
-	current_color = (color << 4) | color;
+	current_color = (color << SHIFT_HEX_DGT) | color;
 	DrawLine16();
 }
 
@@ -152,7 +157,7 @@ void DrawLineJustTo16(int16_t x, int16_t y, uint8_t color) {
 	y_from_point = y_to_point;
 	x_to_point = x;
 	y_to_point = y;
-	current_color = (color << 4) | color;
+	current_color = (color << SHIFT_HEX_DGT) | color;
 	DrawLine16();
 }
 
@@ -170,7 +175,7 @@ static void DrawLine16(void) {
 	x2 = x_to_point;
 	y2 = y_to_point;
 
-	/* Check if cropping is required */
+	/* Check if clipping is required */
 	if ((ymax = Maximum(y1, y2)) > (VERA_VERT_RES - 1) || (ymin = Minimum(y1, y2)) < 0
 	    || (xmax = Maximum(x1, x2)) > (VERA_HORZ_RES - 1) || (xmin = Minimum(x1, x2)) < 0) {
 	    	/* If there's no chance of intersection, just return */
@@ -235,7 +240,7 @@ static void DrawLine16(void) {
 				y2 = yt;
 			}
 			break;
-		/* Render "left to right" for line-to - automatically skips the first point */
+		/* Render "left to right" for just-to - will automatically skip the first point */
 		case DRAW_JUST_TO:
 			if (x2 > x1) {
 				xt = x1;
@@ -274,10 +279,10 @@ static void DrawLine16(void) {
 	VERA_CTRL = VERA_DCSEL_2;
 	
 	/* Turn on FX 4-bit mode and line helper */
-	VERA_FX_CTRL = (VERA_FX_4_BIT_MODE | VERA_FX_LINE_HELPER);
+	VERA_FX_CTRL = VERA_FX_4_BIT_MODE | VERA_FX_LINE_HELPER;
 
 	/* Select ADDR1 */
-	VERA_CTRL = (VERA_DCSEL_2 | VERA_ADDR_1);
+	VERA_CTRL = VERA_DCSEL_2 | VERA_ADDR_1;
 
 	/* Always increment setting */
 	VERA_ADDRx_H = d1;
@@ -292,7 +297,7 @@ static void DrawLine16(void) {
 	VERA_ADDRx_H |= address & 0x01;
 
 	/* Select ADDR0 */
-	VERA_CTRL = (VERA_DCSEL_2 | VERA_ADDR_0);
+	VERA_CTRL = VERA_DCSEL_2 | VERA_ADDR_0;
 
 	/* Occasionally increment setting */
 	VERA_ADDRx_H = d0;
@@ -341,11 +346,11 @@ void PlotPoint16(uint16_t x, uint16_t y, unsigned char color)
 	VERA_ADDRx_H = (uint8_t)(address & UINT8_MAX);
 
 	if (x & 1) {
-		VERA_DATA0 &= 0xF0;
-		VERA_DATA0 |= (color & 0x0F);
+		VERA_DATA0 &= HEX_DGT_HI;
+		VERA_DATA0 |= (color & HEX_DGT_LO);
 	} else {
-		VERA_DATA0 &= 0x0F;
-		VERA_DATA0 |= (color << 4);
+		VERA_DATA0 &= HEX_DGT_LO;
+		VERA_DATA0 |= (color << SHIFT_HEX_DGT);
 	}
 	
 	/* Set as the current "to-point" */
@@ -364,9 +369,9 @@ void ErasePoint16(uint16_t x, uint16_t y)
 	VERA_ADDRx_H = (uint8_t)(address & UINT8_MAX);
 	
 	if (x & 1)
-		VERA_DATA0 &= 0xF0;
+		VERA_DATA0 &= HEX_DGT_HI;
 	else
-		VERA_DATA0 &= 0x0F;
+		VERA_DATA0 &= HEX_DGT_LO;
 }
 
 /* Convenience functions usually done as macros, but using functions to avoid side effects! */
@@ -375,7 +380,7 @@ static int16_t Minimum(int16_t a, int16_t b) { return a < b? a: b; }
 
 static int16_t Maximum(int16_t a, int16_t b) { return a > b? a: b; }
 
-/* Processes keyboard and joystick input */
+/* Processes keyboard/joystick (pending) input */
 PLAYER_STATUS *GetInput(uint8_t player)
 {
 	static PLAYER_STATUS s;
@@ -410,7 +415,7 @@ PLAYER_STATUS *GetInput(uint8_t player)
 				break;
 
 			case FIRE_MISSILE:
-				++s.fire_count;
+				s.fire_missile = true;
 				break;
 
 			case CYCLE_PLAYER:

@@ -14,13 +14,12 @@
 
 /* Error messages */
 char *strings0[] = {
-	"\nThe data file has been erased or\nrenamed. Recreate or restore from\nbackup.\n",
-	"\nThe data file has been corrupted.\nRecreate or restore from backup.\n",
-	"\nThere is not enough memory to run the\nprogram. It can require 160K.\n",
-	"\nThere is a problem involving TGI\ninitialization.\n",
-	"\nA banked memory request larger than 8K\nwas requested.\n",
-	"\nThere was an attempt to access an array\nout of bounds.\n",
-	"\nThe display configuration has been\ncorrupted.\n"
+	/*FOERR*/ "\nThe data file has been erased or\nrenamed. Recreate or restore from\nbackup.\n",
+	/*FCERR*/ "\nThe data file has been corrupted.\nRecreate or restore from backup.\n",
+	/*XMERR*/ "\nA banked memory request larger than 8K\nwas requested.\n",
+	/*GIERR*/ "\nThere is a problem involving graphics\ninitialization.\n",
+	/*OBERR*/ "\nThere was an attempt to access an array\nout of bounds.\n",
+	/*DCERR*/ "\nThe display configuration has been\ncorrupted.\n"
 };
 
 /* Data used in vehicle scanning - related to arctangent, note VEH_DIR + 1 entries */
