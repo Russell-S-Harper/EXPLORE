@@ -4,6 +4,7 @@
      Contact: russell.s.harper@gmail.com
 */
 
+#include <time.h>
 #include "explore.h"
 
 void main()
@@ -17,12 +18,10 @@ void main()
 		ProcessVehicles();
 		ScanField();
 		RenderObjects();
-		UpdateDisplay();
+		UpdateDisplay(NULL);
 	}
 	t += clock();
 	OutputAsNumber('/', CLOCKS_PER_SEC * 100);
-	/* OutputAsNumber('P', accum_p); */
-	/* OutputAsNumber('Q', accum_q); */
 	OutputAsNumber('T', t);
 	ExitProgram(NOERR);
 }

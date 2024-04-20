@@ -7,12 +7,6 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
-#include <time.h>
-
-extern clock_t
-	accum_p,
-	accum_q;
-
 /* Constants */
 #define FULL_CIRC	512		/* 512 corresponds to 360 degrees */
 #define HALF_CIRC	(FULL_CIRC / 2)	/* Corresponds to 180 degrees */

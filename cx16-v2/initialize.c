@@ -23,10 +23,6 @@ uint16_t
 	display_width,
 	display_height;
 
-clock_t
-	accum_p,
-	accum_q;
-
 /* Internal functions */
 
 static void InitData(char *file);

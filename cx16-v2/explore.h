@@ -19,14 +19,16 @@ typedef struct {
 	bool fire_missile;
 } PLAYER_STATUS;
 
+enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
+
 /******** Function declarations ********/
 
 /* Routines called by main */
-void InitProgram(void);		/* Defined in initialize.c */
-void ProcessVehicles(void);	/* Defined in process-vehicles.c */
-void ScanField(void);		/* Defined in scan-field.c */
-void RenderObjects(void);	/* Defined in render-objects.c */
-void UpdateDisplay(void);	/* Defined in cx16-specific.c */
+void InitProgram(void);					/* Defined in initialize.c */
+void ProcessVehicles(void);				/* Defined in process-vehicles.c */
+void ScanField(void);					/* Defined in scan-field.c */
+void RenderObjects(void);				/* Defined in render-objects.c */
+void UpdateDisplay(void (*callback)(int waiting));	/* Defined in cx16-specific.c */
 
 /* Routines defined in cx16-specific.c and called by InitProgram */
 void InitSpecific(void);
@@ -39,8 +41,8 @@ int16_t SpecialDivide(int16_t num, int16_t denom);
 /* Drawing routines */
 void DrawLineFromTo16(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color);
 void DrawLineJustTo16(int16_t x, int16_t y, uint8_t color);
-void PlotPoint16(uint16_t x, uint16_t y, uint8_t color);
-void ErasePoint16(uint16_t x, uint16_t y);
+void PlotPoint16(int16_t x, int16_t y, uint8_t color);
+void ErasePoint16(int16_t x, int16_t y);
 
 /* Keyboard/joystick routine defined in cx16-specific.c and called by ProcessVehicle */
 PLAYER_STATUS *GetInput(uint8_t player);

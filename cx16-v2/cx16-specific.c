@@ -7,6 +7,7 @@
 /* cx16-specific.c */
 
 #include <limits.h>
+#include <time.h>
 #include <conio.h>
 #include <tgi.h>
 #include "explore.h"
@@ -21,9 +22,9 @@
 #define REQ_DIVE	17	/* cursor down: dive */
 #define TURN_RIGHT	29	/* cursor right: turn right */
 #define TURN_LEFT	157	/* cursor left: turn left */
-#define FIRE_MISSILE	20	/* space: fire */
-#define	CYCLE_PLAYER	49	/* 1: cycle */
-#define QUIT_PROGRAM	81	/* Q: quit */
+#define FIRE_MISSILE	20	/* space: fire missile */
+#define CYCLE_PLAYER	49	/* 1: cycle player */
+#define QUIT_PROGRAM	81	/* Q: quit program */
 
 /* Line drawing modes */
 enum {DRAW_JUST_TO = 0, DRAW_FROM_TO = 1};
@@ -34,7 +35,7 @@ enum {DRAW_JUST_TO = 0, DRAW_FROM_TO = 1};
 #define SHIFT_HEX_DGT	4
 
 static void DrawLine16(void);
-
+static void DefaultCallback(int waiting);
 static int16_t Minimum(int16_t a, int16_t b);
 static int16_t Maximum(int16_t a, int16_t b);
 
@@ -71,16 +72,20 @@ void InitSpecific(void)
 	VERA_L0_TILEBASE = VERA_SCR_2_BASE;
 
 	/* Clear the remainder of screen 2 */
-	UpdateDisplay();
+	UpdateDisplay(NULL);
 }
 
 /* Switch to the other screen, clear the previous screen, and perform other functions */
-void UpdateDisplay(void)
+void UpdateDisplay(void (*callback)(int waiting))
 {
 	static clock_t frame_clock;
 	uint8_t base, address, i, j;
 	clock_t current_clock;
 	register volatile unsigned char *p;
+
+	/* Provide a default if none given */
+	if (!callback)
+		callback = DefaultCallback;
 
 	/* Wait for the end of the frame based on clock cycles */
 	if (!frame_clock)
@@ -88,7 +93,8 @@ void UpdateDisplay(void)
 	else {
 		do {
 			/* While waiting for the end of the frame, do some work */
-			
+			callback(FRAME_TO_FINISH);
+			/* Check if the frame is done */
 			current_clock = clock();
 			/* Check for rollover - not likely to happen but JIC! */
 			if (current_clock < frame_clock)
@@ -99,9 +105,10 @@ void UpdateDisplay(void)
 	}
 
 	/* Wait for the end of the current screen based on scan lines */
-	do {
+	do
 		/* While waiting for the end of the current screen, do some work */
-	} while (((VERA_IEN & VERA_SCANLINE_H)? 256: 0) + VERA_IRQLINE_L < (VERA_VERT_RES * 2 - 1));
+		callback(SCREEN_TO_FINISH);
+	while (((VERA_IEN & VERA_SCANLINE_H)? 256: 0) + VERA_IRQLINE_L < (VERA_VERT_RES * 2 - 1));
 
 	/* Set up the next screen */
 	switch (VERA_L0_TILEBASE) {
@@ -140,8 +147,21 @@ void UpdateDisplay(void)
 	}
 }
 
+/* Default callback to do useful work while waiting */
+static void DefaultCallback(int waiting)
+{
+	/* Perform tasks dependent on what we're waiting for */
+	switch (waiting) {
+		case FRAME_TO_FINISH:
+			break;
+		case SCREEN_TO_FINISH:
+			break;
+	}
+}
+
 /* Drawing routines */
-void DrawLineFromTo16(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color) {
+void DrawLineFromTo16(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color)
+{
 	current_mode = DRAW_FROM_TO;
 	x_from_point = x1;
 	y_from_point = y1;
@@ -151,7 +171,8 @@ void DrawLineFromTo16(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t co
 	DrawLine16();
 }
 
-void DrawLineJustTo16(int16_t x, int16_t y, uint8_t color) {
+void DrawLineJustTo16(int16_t x, int16_t y, uint8_t color)
+{
 	current_mode = DRAW_JUST_TO;
 	x_from_point = x_to_point;
 	y_from_point = y_to_point;
@@ -161,7 +182,8 @@ void DrawLineJustTo16(int16_t x, int16_t y, uint8_t color) {
 	DrawLine16();
 }
 
-static void DrawLine16(void) {
+static void DrawLine16(void)
+{
 	uint8_t d0, d1;
 	int16_t x1, y1, x2, y2, xmin, xmax, ymin, ymax, xt, yt, dx, dy, slope;
 	uint32_t address;
@@ -226,10 +248,14 @@ static void DrawLine16(void) {
 		if (y1 < 0 || y2 < 0 || y1 > (VERA_VERT_RES - 1) || y2 > (VERA_VERT_RES - 1)
 		    || x1 < 0 || x2 < 0 || x1 > (VERA_HORZ_RES - 1) || x2 > (VERA_HORZ_RES - 1))
 			return;
+		/* Because clipping was required, change the mode to DRAW_FROM_TO
+			to ensure the initial point is rendered */
+		current_mode = DRAW_FROM_TO;
 	}
 
 	switch (current_mode) {
-		/* Render "right to left" for from-to - accounts for 0.5 pixel bias */
+		/* Render "right to left" for from-to
+			- accounts for 0.5 pixel bias */
 		case DRAW_FROM_TO:
 			if (x1 < x2) {
 				xt = x1;
@@ -240,7 +266,8 @@ static void DrawLine16(void) {
 				y2 = yt;
 			}
 			break;
-		/* Render "left to right" for just-to - will automatically skip the first point */
+		/* Render "left to right" for just-to
+			- 0.5 pixel bias will automatically skip the first one */
 		case DRAW_JUST_TO:
 			if (x2 > x1) {
 				xt = x1;
@@ -313,7 +340,7 @@ static void DrawLine16(void) {
 	/* Draw the line */
 	p = &VERA_DATA1;
 	c = current_color;
-	while (i > 8) {
+	while (i >= 8) {
 		*p = c;
 		*p = c;
 		*p = c;
@@ -335,43 +362,49 @@ static void DrawLine16(void) {
 }
 
 /* Pixel routines */
-void PlotPoint16(uint16_t x, uint16_t y, unsigned char color)
+void PlotPoint16(int16_t x, int16_t y, unsigned char color)
 {
-	uint32_t address = VERA_ADDR_PT(x, y);
+	uint32_t address;
 
-	VERA_ADDRx_L = (uint8_t)(address & UINT8_MAX);
-	address >>= CHAR_BIT;
-	VERA_ADDRx_M = (uint8_t)(address & UINT8_MAX);
-	address >>= CHAR_BIT;
-	VERA_ADDRx_H = (uint8_t)(address & UINT8_MAX);
+	if (y >= 0 && y < VERA_VERT_RES && x >= 0 && x < VERA_HORZ_RES) {
+		address = VERA_ADDR_PT(x, y);
+		VERA_ADDRx_L = (uint8_t)(address & UINT8_MAX);
+		address >>= CHAR_BIT;
+		VERA_ADDRx_M = (uint8_t)(address & UINT8_MAX);
+		address >>= CHAR_BIT;
+		VERA_ADDRx_H = (uint8_t)(address & UINT8_MAX);
 
-	if (x & 1) {
-		VERA_DATA0 &= HEX_DGT_HI;
-		VERA_DATA0 |= (color & HEX_DGT_LO);
-	} else {
-		VERA_DATA0 &= HEX_DGT_LO;
-		VERA_DATA0 |= (color << SHIFT_HEX_DGT);
+		if (x & 1) {
+			VERA_DATA0 &= HEX_DGT_HI;
+			VERA_DATA0 |= (color & HEX_DGT_LO);
+		} else {
+			VERA_DATA0 &= HEX_DGT_LO;
+			VERA_DATA0 |= (color << SHIFT_HEX_DGT);
+		}
 	}
-	
+
 	/* Set as the current "to-point" */
 	x_to_point = x;
 	y_to_point = y;
 }
 
-void ErasePoint16(uint16_t x, uint16_t y)
+void ErasePoint16(int16_t x, int16_t y)
 {
-	uint32_t address = VERA_ADDR_PT(x, y);
+	uint32_t address;
 
-	VERA_ADDRx_L = (uint8_t)(address & UINT8_MAX);
-	address >>= CHAR_BIT;
-	VERA_ADDRx_M = (uint8_t)(address & UINT8_MAX);
-	address >>= CHAR_BIT;
-	VERA_ADDRx_H = (uint8_t)(address & UINT8_MAX);
-	
-	if (x & 1)
-		VERA_DATA0 &= HEX_DGT_HI;
-	else
-		VERA_DATA0 &= HEX_DGT_LO;
+	if (y >= 0 && y < VERA_VERT_RES && x >= 0 && x < VERA_HORZ_RES) {
+		address = VERA_ADDR_PT(x, y);
+		VERA_ADDRx_L = (uint8_t)(address & UINT8_MAX);
+		address >>= CHAR_BIT;
+		VERA_ADDRx_M = (uint8_t)(address & UINT8_MAX);
+		address >>= CHAR_BIT;
+		VERA_ADDRx_H = (uint8_t)(address & UINT8_MAX);
+
+		if (x & 1)
+			VERA_DATA0 &= HEX_DGT_HI;
+		else
+			VERA_DATA0 &= HEX_DGT_LO;
+	}
 }
 
 /* Convenience functions usually done as macros, but using functions to avoid side effects! */

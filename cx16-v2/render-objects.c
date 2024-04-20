@@ -17,8 +17,10 @@ void RenderObjects(void)
 	if (!color)
 		++color;
 
-	x = 55;
-	y = 165;
+	DrawLineFromTo16(0, display_height / 2, display_width - 1, display_height / 2, WHITE);
+
+	x = 53;
+	y = 159;
 
 	s = Sin(angle);
 	c = Cos(angle);
@@ -35,7 +37,8 @@ void RenderObjects(void)
 	x3 = SpecialMultiply(x, c) - SpecialMultiply(y, s) + 160;
 	y3 = SpecialMultiply(y, c) + SpecialMultiply(x, s) + 120;
 
-	DrawLineFromTo16(x1, y1, x2, y2, color);
+	PlotPoint16(x1, y1, color);
+	DrawLineJustTo16(x2, y2, color);
 	DrawLineJustTo16(x3, y3, color);
 	DrawLineJustTo16(x1, y1, color);
 
@@ -54,12 +57,10 @@ void RenderObjects(void)
 	x3 = SpecialMultiply(x, c) - SpecialMultiply(y, s) + 160;
 	y3 = SpecialMultiply(y, c) + SpecialMultiply(x, s) + 120;
 
-
-	DrawLineFromTo16(x1, y1, x2, y2, 16 - color);
+	PlotPoint16(x1, y1, 16 - color);
+	DrawLineJustTo16(x2, y2, 16 - color);
 	DrawLineJustTo16(x3, y3, 16 - color);
 	DrawLineJustTo16(x1, y1, 16 - color);
-
-	DrawLineFromTo16(0, display_height / 2, display_width - 1, display_height / 2, WHITE);
 
 	angle = (angle + 8) & (FULL_CIRC - 1);
 	color = (angle >> 5) & (COLORS - 1);
