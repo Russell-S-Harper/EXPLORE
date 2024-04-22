@@ -23,5 +23,5 @@ void main()
 	t += clock();
 	OutputAsNumber('/', CLOCKS_PER_SEC * 100);
 	OutputAsNumber('T', t);
-	ExitProgram(NOERR);
+	ExitProgram(ERR_NO);
 }

@@ -18,43 +18,43 @@
 
 /* Errors
 
-	FOERR: data file open error
-	FCERR: file content error
-	XMERR: extended memory allocation error
-	GIERR: graphics initialization error
-	OBERR: accessing array out-of-bounds error
-	DCERR: display configuration has been corrupted
-	NOERR: no error, used also to provide a count of errors
+	ERR_FO: data file open error
+	ERR_FC: file content error
+	ERR_XM: extended memory allocation error
+	ERR_GI: graphics initialization error
+	ERR_OB: accessing array out-of-bounds error
+	ERR_DC: display configuration has been corrupted
+	ERR_NO: no error, used also to provide a count of errors
 */
-enum {FOERR, FCERR, XMERR, GIERR, OBERR, DCERR, NOERR};
+enum {ERR_FO, ERR_FC, ERR_XM, ERR_GI, ERR_OB, ERR_DC, ERR_NO};
 
 /* Program data sections
 
-	IDCODE:	initializing data
-	EMCODE:	error messages
-	FDCODE: field data
-	PDCODE: polygon data
-	PPCODE: polygon points
-	VDCODE: vehicle data
-	VPCODE: vehicle points
-	HZCODE: horizon data
-	SVCODE: scanning data
-	ATCODE: arctan data
-	TDCODE: sin data
-	HDCODE: tan data
-	EFCODE: end-of-file
+	CODE_ID: initializing data
+	CODE_EM: error messages
+	CODE_FD: field data
+	CODE_PD: polygon data
+	CODE_PP: polygon points
+	CODE_VD: vehicle data
+	CODE_VP: vehicle points
+	CODE_HZ: horizon data
+	CODE_SV: scanning data
+	CODE_AT: arctan data
+	CODE_TD: sin data
+	CODE_HD: tan data
+	CODE_EF: end-of-file
 */
-enum {IDCODE = 1, EMCODE, FDCODE, PDCODE,
-	PPCODE, VDCODE, VPCODE, HZCODE,
-	SVCODE,	ATCODE, TDCODE, HDCODE,
-	EFCODE};
+enum {CODE_ID, CODE_EM, CODE_FD, CODE_PD,
+	CODE_PP, CODE_VD, CODE_VP, CODE_HZ,
+	CODE_SV, CODE_AT, CODE_TD, CODE_HD,
+	CODE_EF};
 
 /* Colors */
-enum {BLACK, WHITE, RED, CYAN,
-	MAGENTA, GREEN, BLUE, YELLOW,
-	ORANGE, BROWN, LIGHTRED, DARKGRAY,
-	MEDIUMGRAY, LIGHTGREEN, LIGHTBLUE, LIGHTGRAY,
-	COLORS};
+enum {CLR16_BLACK, CLR16_WHITE, CLR16_RED, CLR16_CYAN,
+	CLR16_MAGENTA, CLR16_GREEN, CLR16_BLUE, CLR16_YELLOW,
+	CLR16_ORANGE, CLR16_BROWN, CLR16_LIGHTRED, CLR16_DARKGRAY,
+	CLR16_MEDIUMGRAY, CLR16_LIGHTGREEN, CLR16_LIGHTBLUE, CLR16_LIGHTGRAY,
+	CLR16_COUNT};
 
 /* To use for debugging */
 void OutputAsNumber(char prefix, int16_t value);

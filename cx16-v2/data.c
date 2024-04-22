@@ -14,12 +14,12 @@
 
 /* Error messages */
 char *strings0[] = {
-	/*FOERR*/ "\nThe data file has been erased or\nrenamed. Recreate or restore from\nbackup.\n",
-	/*FCERR*/ "\nThe data file has been corrupted.\nRecreate or restore from backup.\n",
-	/*XMERR*/ "\nA banked memory request larger than 8K\nwas requested.\n",
-	/*GIERR*/ "\nThere is a problem involving graphics\ninitialization.\n",
-	/*OBERR*/ "\nThere was an attempt to access an array\nout of bounds.\n",
-	/*DCERR*/ "\nThe display configuration has been\ncorrupted.\n"
+	/*ERR_FO*/ "\nThe data file has been erased or\nrenamed. Recreate or restore from\nbackup.\n",
+	/*ERR_FC*/ "\nThe data file has been corrupted.\nRecreate or restore from backup.\n",
+	/*ERR_XM*/ "\nA banked memory request larger than 8K\nwas requested.\n",
+	/*ERR_GI*/ "\nThere is a problem involving graphics\ninitialization.\n",
+	/*ERR_OB*/ "\nThere was an attempt to access an array\nout of bounds.\n",
+	/*ERR_DC*/ "\nThe display configuration has been\ncorrupted.\n"
 };
 
 /* Data used in vehicle scanning - related to arctangent, note VEH_DIR + 1 entries */
@@ -55,7 +55,7 @@ int main(void)
 	/* The remaining data */
 	
 	/* Indicate end-of-data */
-	fputc(EFCODE, ofile);
+	fputc(CODE_EF, ofile);
 	fclose(ofile);
 
 	return EXIT_SUCCESS;	
@@ -68,7 +68,7 @@ static void OutputStrings(FILE *ofile)
 	int16_t cnt = sizeof(strings0) / sizeof(char *);
 
 	fputs("\nError Messages\n", stdout);
-	fputc(EMCODE, ofile);
+	fputc(CODE_EM, ofile);
 	/* Get the longest string */
 	for (t = 0, max = 0; t < cnt; ++t) {
 		num = strlen(strings[t]);
@@ -94,7 +94,7 @@ static void OutputTrigData(FILE *ofile)
 
 	/* Sine and cosine data used throughout */
 	fputs("Sin Data ", stdout);
-	fputc(TDCODE, ofile);
+	fputc(CODE_TD, ofile);
 	d = 0.0;
 	i = 2.0 * DCPI / FULL_CIRC;
 	for (t = 0; t < FULL_CIRC; ++t, d += i) {
@@ -106,7 +106,7 @@ static void OutputTrigData(FILE *ofile)
 
 	/* Tangent data used to render the horizon */
 	fputs("Tan Data ", stdout);
-	fputc(HDCODE, ofile);
+	fputc(CODE_HD, ofile);
 	d = DCPI/-2.0 + DCPI/(double)HALF_CIRC;
 	for (t = 0; t < HALF_CIRC - 1; t++, d += i) {
 		dat = (int16_t)(tan(d) * SCALE_1_0);
@@ -117,6 +117,6 @@ static void OutputTrigData(FILE *ofile)
 
 	/* Arctangent data used in vehicle scanning */
 	fputs("Arctan Data\n", stdout);
-	fputc(ATCODE, ofile);
+	fputc(CODE_AT, ofile);
 	fwrite(arctan0, sizeof(arctan0), 1, ofile);
 }

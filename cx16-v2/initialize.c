@@ -56,37 +56,37 @@ static void InitData(char *file)
 	FILE *ifile;
 	size_t size;
 	int16_t t;
-	char code = IDCODE;
+	char code = CODE_ID;
 
 	if (!(ifile = fopen(file, "rb")))
-		ExitProgram(FOERR);
+		ExitProgram(ERR_FO);
 
-	while (code != EFCODE) {
+	while (code != CODE_EF) {
 		GetData(&code, sizeof(char), ifile);
 		switch (code) {
-			case EMCODE:
+			case CODE_EM:
 				GetData(&size, sizeof(size_t), ifile);
-				string_data = AllocXM(NOERR, size * sizeof(char *));
-				for (t = 0; t < NOERR; ++t)
+				string_data = AllocXM(ERR_NO, size * sizeof(char *));
+				for (t = 0; t < ERR_NO; ++t)
 					GetData(GetXMAddress(string_data, t), size, ifile);
 				break;
-			case TDCODE:
+			case CODE_TD:
 				trig_data = AllocXM(FULL_CIRC, sizeof(int16_t));
 				GetData(GetXMAddressInitial(trig_data), sizeof(int16_t) * FULL_CIRC, ifile);
 				break;
-			case HDCODE:
+			case CODE_HD:
 				tan_data = AllocXM(HALF_CIRC - 1, sizeof(int16_t));
 				GetData(GetXMAddressInitial(tan_data), sizeof(int16_t) * (HALF_CIRC - 1), ifile);
 				break;
-			case ATCODE:
+			case CODE_AT:
 				arctan_data = AllocXM(VEH_DIR + 1, sizeof(char));
 				GetData(GetXMAddressInitial(arctan_data), VEH_DIR + 1, ifile);
 				break;
-			case EFCODE:
+			case CODE_EF:
 				fclose(ifile);
 				break;
 			default:
-				ExitProgram(FCERR);
+				ExitProgram(ERR_FC);
 		}
 	}
 }
@@ -94,7 +94,7 @@ static void InitData(char *file)
 static void GetData(void *buffer, size_t size, FILE *ifile)
 {
 	if (!fread(buffer, size, 1, ifile))
-		ExitProgram(FCERR);
+		ExitProgram(ERR_FC);
 }
 
 static void InitBounds(void)
@@ -153,7 +153,7 @@ void OutputAsNumber(char prefix, int16_t value)
 
 void ExitProgram(int16_t stat)
 {
-	if (stat != NOERR) {
+	if (stat != ERR_NO) {
 		if (string_data)
 			fputs(GetXMAddress(string_data, stat), stdout);
 		else

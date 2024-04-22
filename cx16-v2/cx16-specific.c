@@ -55,7 +55,7 @@ void InitSpecific(void)
 	/* Set up */
 	tgi_install(tgi_static_stddrv);
 	if (tgi_geterror() != TGI_ERR_OK)
-		ExitProgram(GIERR);
+		ExitProgram(ERR_GI);
 
 	/* Initialize */
 	tgi_init();
@@ -121,7 +121,7 @@ void UpdateDisplay(void (*callback)(int waiting))
 			address = VERA_SCR_2_ADDR;
 			break;
 		default:
-			ExitProgram(DCERR);
+			ExitProgram(ERR_DC);
 	}
 
 	/* Switch to the other screen */
@@ -135,14 +135,14 @@ void UpdateDisplay(void (*callback)(int waiting))
 	/* Clear the previous screen */
 	for (p = &VERA_DATA0, i = 0; i < VERA_VERT_RES; ++i) {
 		for (j = 0; j < VERA_HORZ_RES / VERA_PX_PER_BYTE / 8; ++j) {
-			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
-			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
-			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
-			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
-			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
-			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
-			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
-			*p = ((BLACK << SHIFT_HEX_DGT) | BLACK);
+			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
+			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
+			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
+			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
+			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
+			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
+			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
+			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
 		}
 	}
 }
@@ -419,7 +419,7 @@ PLAYER_STATUS *GetInput(uint8_t player)
 	static PLAYER_STATUS s;
 	
 	if (player)
-		ExitProgram(OBERR);
+		ExitProgram(ERR_OB);
 
 	/* Process keyboard input */
 	while (kbhit()) {

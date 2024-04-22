@@ -40,7 +40,7 @@ XM_HANDLE AllocXM(size_t limit, size_t size) {
 
 	/* Check the allocation */
 	if ((total = limit * (1 << shift)) > XM_SIZE)
-		ExitProgram(XMERR);
+		ExitProgram(ERR_XM);
 
 	/* Get a new bank if required */
 	if (XM_SIZE - current_offset < total) {
@@ -77,7 +77,7 @@ void GetOrSetXM(XM_HANDLE handle, int16_t index, void *data, XM_MODE get_or_set)
 
 	/* Check for out of bounds */
 	if (index < 0 || index >= working->limit)
-		ExitProgram(OBERR);
+		ExitProgram(ERR_OB);
 
 	/* Get the address and size */
 	address = (void *)(working->offset + (index << working->shift));
@@ -115,7 +115,7 @@ void *GetXMAddress(XM_HANDLE handle, int16_t index) {
 
 	/* Check for out of bounds */
 	if (index < 0 || index >= working->limit)
-		ExitProgram(OBERR);
+		ExitProgram(ERR_OB);
 
 	/* Calculate the address */
 	address = (void *)(working->offset + (index << working->shift));

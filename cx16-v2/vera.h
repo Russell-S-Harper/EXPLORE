@@ -67,8 +67,8 @@
 #define VERA_FX_POLY_FILL_H	(*((const uint8_t *)0x9F2C))
 
 /* Various settings */
-#define VERA_ADDR_0		(0x00)
-#define VERA_ADDR_1		(0x01)
+#define VERA_ADDR_0		0x00
+#define VERA_ADDR_1		0x01
 
 #define VERA_16_COLOR_MODE	0x06
 #define VERA_SCANLINE_H		0x40

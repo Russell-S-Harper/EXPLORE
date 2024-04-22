@@ -17,7 +17,7 @@ void RenderObjects(void)
 	if (!color)
 		++color;
 
-	DrawLineFromTo16(0, display_height / 2, display_width - 1, display_height / 2, WHITE);
+	DrawLineFromTo16(0, display_height / 2, display_width - 1, display_height / 2, CLR16_WHITE);
 
 	x = 53;
 	y = 159;
@@ -63,5 +63,5 @@ void RenderObjects(void)
 	DrawLineJustTo16(x1, y1, 16 - color);
 
 	angle = (angle + 8) & (FULL_CIRC - 1);
-	color = (angle >> 5) & (COLORS - 1);
+	color = (angle >> 5) & (CLR16_COUNT - 1);
 }
