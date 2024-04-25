@@ -49,6 +49,8 @@ static int16_t
 	x_to_point,
 	y_to_point;
 
+static PLAYER_STATUS player_status;
+
 /* Initialize the hardware, etc. */
 void InitSpecific(void)
 {
@@ -81,7 +83,7 @@ void UpdateDisplay(void (*callback)(int waiting))
 	static clock_t frame_clock;
 	uint8_t base, address, i, j;
 	clock_t current_clock;
-	register volatile unsigned char *p;
+	register volatile uint8_t *p;
 
 	/* Provide a default if none given */
 	if (!callback)
@@ -167,7 +169,7 @@ void DrawLineFromTo16(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t co
 	y_from_point = y1;
 	x_to_point = x2;
 	y_to_point = y2;
-	current_color = (color << SHIFT_HEX_DGT) | color;
+	current_color = color;
 	DrawLine16();
 }
 
@@ -178,7 +180,7 @@ void DrawLineJustTo16(int16_t x, int16_t y, uint8_t color)
 	y_from_point = y_to_point;
 	x_to_point = x;
 	y_to_point = y;
-	current_color = (color << SHIFT_HEX_DGT) | color;
+	current_color = color;
 	DrawLine16();
 }
 
@@ -197,9 +199,14 @@ static void DrawLine16(void)
 	x2 = x_to_point;
 	y2 = y_to_point;
 
+	/* Will need these */
+	ymax = Maximum(y1, y2);
+	ymin = Minimum(y1, y2);
+	xmax = Maximum(x1, x2);
+	xmin = Minimum(x1, x2);
+
 	/* Check if clipping is required */
-	if ((ymax = Maximum(y1, y2)) > (VERA_VERT_RES - 1) || (ymin = Minimum(y1, y2)) < 0
-	    || (xmax = Maximum(x1, x2)) > (VERA_HORZ_RES - 1) || (xmin = Minimum(x1, x2)) < 0) {
+	if (ymax > (VERA_VERT_RES - 1) || ymin < 0 || xmax > (VERA_HORZ_RES - 1) || xmin < 0) {
 	    	/* If there's no chance of intersection, just return */
 		if (ymax < 0 || ymin > (VERA_VERT_RES - 1) || xmax < 0 || xmin > (VERA_HORZ_RES - 1))
 			return;
@@ -339,7 +346,7 @@ static void DrawLine16(void)
 
 	/* Draw the line */
 	p = &VERA_DATA1;
-	c = current_color;
+	c = (current_color << SHIFT_HEX_DGT) | current_color;
 	while (i >= 8) {
 		*p = c;
 		*p = c;
@@ -362,7 +369,7 @@ static void DrawLine16(void)
 }
 
 /* Pixel routines */
-void PlotPoint16(int16_t x, int16_t y, unsigned char color)
+void PlotPoint16(int16_t x, int16_t y, uint8_t color)
 {
 	uint32_t address;
 
@@ -416,15 +423,13 @@ static int16_t Maximum(int16_t a, int16_t b) { return a > b? a: b; }
 /* Processes keyboard/joystick (pending) input */
 PLAYER_STATUS *GetInput(uint8_t player)
 {
-	static PLAYER_STATUS s;
-	
 	if (player)
 		ExitProgram(ERR_OB);
 
 	/* Process keyboard input */
 	while (kbhit()) {
 
-		switch ((unsigned char)cgetc()) {
+		switch ((uint8_t)cgetc()) {
 
 			case PAUSE_PROGRAM:
 				/* Wait until it's pressed again */
@@ -432,27 +437,27 @@ PLAYER_STATUS *GetInput(uint8_t player)
 				break;
 
 			case REQ_CLIMB:
-				++s.z_delta;
+				++player_status.z_delta;
 				break;
 
 			case REQ_DIVE:
-				--s.z_delta;
+				--player_status.z_delta;
 				break;
 
 			case TURN_RIGHT:
-				++s.angle_delta;
+				player_status.angle_delta -= 2;
 				break;
 
 			case TURN_LEFT:
-				--s.angle_delta;
+				player_status.angle_delta += 2;
 				break;
 
 			case FIRE_MISSILE:
-				s.fire_missile = true;
+				player_status.fire_missile = true;
 				break;
 
 			case CYCLE_PLAYER:
-				++s.player;
+				++player_status.player;
 				break;
 
 			case QUIT_PROGRAM:
@@ -461,7 +466,7 @@ PLAYER_STATUS *GetInput(uint8_t player)
 				break;
 		}
 	}
-	return &s;
+	return &player_status;
 }
 
 /* The program insures that the values passed to and returned

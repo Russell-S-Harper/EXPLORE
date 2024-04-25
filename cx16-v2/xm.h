@@ -25,7 +25,7 @@
 
 typedef int16_t XM_HANDLE;
 typedef enum {XM_GET, XM_SET} XM_MODE;
-typedef struct { unsigned char bank, shift; size_t offset, limit, size; } ALLOC_XM;
+typedef struct { uint8_t bank, shift; size_t offset, limit, size; } ALLOC_XM;
 
 #define ALLOC_XM_SHIFT	3		/* ceil(log2(sizeof(ALLOC_XM))) */
 

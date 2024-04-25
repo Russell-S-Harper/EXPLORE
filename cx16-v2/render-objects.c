@@ -7,61 +7,35 @@
 #include "explore.h"
 
 /* Render all the objects */
-void RenderObjects(void)
+void RenderObjects(PLAYER_STATUS *p)
 {
-	static unsigned char color;
-	static int16_t angle;
-	int16_t s, c;
-	int16_t x, y, x1, y1, x2, y2, x3, y3;
+	static int16_t
+		X[4] = {-100, -100, +100, +100},
+		Y[4] = {-100, +100, +50, -50},
+		Z[4] = {0, 0, 0, 0};
+	int16_t x, y, xr, yr, w, h;
 
-	if (!color)
-		++color;
+	h = display_height >> 1;
+	w = display_width >> 1;
 
-	DrawLineFromTo16(0, display_height / 2, display_width - 1, display_height / 2, CLR16_WHITE);
+	xr = w + SpecialMultiply(X[0] - p->x, p->cos) - SpecialMultiply(Y[0] - p->y, p->sin);
+	yr = h - SpecialMultiply(Y[0] - p->y, p->cos) - SpecialMultiply(X[0] - p->x, p->sin);
+	PlotPoint16(xr, yr, CLR16_GREEN);
 
-	x = 53;
-	y = 159;
+	x = w + SpecialMultiply(X[1] - p->x, p->cos) - SpecialMultiply(Y[1] - p->y, p->sin);
+	y = h - SpecialMultiply(Y[1] - p->y, p->cos) - SpecialMultiply(X[1] - p->x, p->sin);
+	DrawLineJustTo16(x, y, CLR16_GREEN);
 
-	s = Sin(angle);
-	c = Cos(angle);
-	x1 = SpecialMultiply(x, c) - SpecialMultiply(y, s) + 160;
-	y1 = SpecialMultiply(y, c) + SpecialMultiply(x, s) + 120;
+	x = w + SpecialMultiply(X[2] - p->x, p->cos) - SpecialMultiply(Y[2] - p->y, p->sin);
+	y = h - SpecialMultiply(Y[2] - p->y, p->cos) - SpecialMultiply(X[2] - p->x, p->sin);
+	DrawLineJustTo16(x, y, CLR16_GREEN);
 
-	s = Sin(angle + FULL_CIRC / 3);
-	c = Cos(angle + FULL_CIRC / 3);
-	x2 = SpecialMultiply(x, c) - SpecialMultiply(y, s) + 160;
-	y2 = SpecialMultiply(y, c) + SpecialMultiply(x, s) + 120;
+	x = w + SpecialMultiply(X[3] - p->x, p->cos) - SpecialMultiply(Y[3] - p->y, p->sin);
+	y = h - SpecialMultiply(Y[3] - p->y, p->cos) - SpecialMultiply(X[3] - p->x, p->sin);
+	DrawLineJustTo16(x, y, CLR16_GREEN);
 
-	s = Sin(angle + 2 * FULL_CIRC / 3);
-	c = Cos(angle + 2 * FULL_CIRC / 3);
-	x3 = SpecialMultiply(x, c) - SpecialMultiply(y, s) + 160;
-	y3 = SpecialMultiply(y, c) + SpecialMultiply(x, s) + 120;
+	DrawLineJustTo16(xr, yr, CLR16_GREEN);
 
-	PlotPoint16(x1, y1, color);
-	DrawLineJustTo16(x2, y2, color);
-	DrawLineJustTo16(x3, y3, color);
-	DrawLineJustTo16(x1, y1, color);
-
-	s = Sin(-angle);
-	c = Cos(-angle);
-	x1 = SpecialMultiply(x, c) - SpecialMultiply(y, s) + 160;
-	y1 = SpecialMultiply(y, c) + SpecialMultiply(x, s) + 120;
-
-	s = Sin(-angle + FULL_CIRC / 3);
-	c = Cos(-angle + FULL_CIRC / 3);
-	x2 = SpecialMultiply(x, c) - SpecialMultiply(y, s) + 160;
-	y2 = SpecialMultiply(y, c) + SpecialMultiply(x, s) + 120;
-
-	s = Sin(-angle + 2 * FULL_CIRC / 3);
-	c = Cos(-angle + 2 * FULL_CIRC / 3);
-	x3 = SpecialMultiply(x, c) - SpecialMultiply(y, s) + 160;
-	y3 = SpecialMultiply(y, c) + SpecialMultiply(x, s) + 120;
-
-	PlotPoint16(x1, y1, 16 - color);
-	DrawLineJustTo16(x2, y2, 16 - color);
-	DrawLineJustTo16(x3, y3, 16 - color);
-	DrawLineJustTo16(x1, y1, 16 - color);
-
-	angle = (angle + 8) & (FULL_CIRC - 1);
-	color = (angle >> 5) & (CLR16_COUNT - 1);
+	DrawLineFromTo16(w - 10, h - 10, w + 10, h + 10, CLR16_WHITE);
+	DrawLineFromTo16(w - 10, h + 10, w + 10, h - 10, CLR16_WHITE);
 }

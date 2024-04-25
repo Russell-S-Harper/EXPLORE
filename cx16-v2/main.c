@@ -9,19 +9,22 @@
 
 void main()
 {
+	PLAYER_STATUS *p;
 	clock_t t;
-	char l = 100;
+	uint16_t f = 0;
 
 	InitProgram();
 	t = -clock();
-	while (!exit_program && l--) {
-		ProcessVehicles();
+	while (!exit_program) {
+		p = ProcessVehicles();
 		ScanField();
-		RenderObjects();
+		RenderObjects(p);
 		UpdateDisplay(NULL);
+		++f;
 	}
 	t += clock();
-	OutputAsNumber('/', CLOCKS_PER_SEC * 100);
+	OutputAsNumber('/', CLOCKS_PER_SEC);
+	OutputAsNumber('/', f);
 	OutputAsNumber('T', t);
 	ExitProgram(ERR_NO);
 }

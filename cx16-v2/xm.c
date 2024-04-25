@@ -27,10 +27,10 @@ void InitXM(void) {
 
 XM_HANDLE AllocXM(size_t limit, size_t size) {
 	static XM_HANDLE current_handle = ALLOC_XM_HANDLE + 1;
-	static unsigned char current_bank = ALLOC_XM_BANK + 1;
+	static uint8_t current_bank = ALLOC_XM_BANK + 1;
 	static size_t current_offset;
 	ALLOC_XM working;
-	unsigned char shift;
+	uint8_t shift;
 	size_t total;
 
 	// Find the smallest power of two to accommodate
@@ -69,7 +69,7 @@ void GetOrSetXM(XM_HANDLE handle, int16_t index, void *data, XM_MODE get_or_set)
 	size_t size;
 
 	/* Save the bank */
-	unsigned char bank = XM_REGISTER;
+	uint8_t bank = XM_REGISTER;
 
 	/* Get the ALLOC_XM record */
 	XM_REGISTER = ALLOC_XM_BANK;
