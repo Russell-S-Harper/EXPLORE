@@ -23,8 +23,8 @@ void main()
 		++f;
 	}
 	t += clock();
-	OutputAsNumber('/', CLOCKS_PER_SEC);
-	OutputAsNumber('/', f);
 	OutputAsNumber('T', t);
+	OutputAsNumber('/', f);
+	OutputAsNumber('/', CLOCKS_PER_SEC);
 	ExitProgram(ERR_NO);
 }

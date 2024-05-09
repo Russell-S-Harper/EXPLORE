@@ -56,7 +56,7 @@ enum {CLR16_BLACK, CLR16_WHITE, CLR16_RED, CLR16_CYAN,
 	CLR16_MEDIUMGRAY, CLR16_LIGHTGREEN, CLR16_LIGHTBLUE, CLR16_LIGHTGRAY,
 	CLR16_COUNT};
 
-/* To use for debugging */
+/* Defined in initialize.c, to use for debugging */
 void OutputAsNumber(char prefix, int16_t value);
 
 /* Defined in initialize.c, ExitProgram is called throughout the program as well as by main */

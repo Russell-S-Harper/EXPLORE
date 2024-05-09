@@ -81,7 +81,7 @@
 #define VERA_DECR		0x08
 #define VERA_INCR		0x00
 
-/* Miscellaneous */
+/* Screen related */
 #define VERA_HORZ_RES		320
 #define VERA_VERT_RES		240
 

@@ -13,7 +13,8 @@
 #include "explore.h"
 #include "vera.h"
 
-/* Ideal frames/s - adjust as required to prevent jerking */
+/* Ideal frames/s - adjust as required to prevent "jerking".
+	Limited by the resolution of CLOCKS_PER_SEC. */
 #define FRAMES_PER_SEC	10
 
 /* Keyboard defines used in GetInput */
@@ -26,9 +27,6 @@
 #define CYCLE_PLAYER	49	/* 1: cycle player */
 #define QUIT_PROGRAM	81	/* Q: quit program */
 
-/* Line drawing modes */
-enum {DRAW_JUST_TO = 0, DRAW_FROM_TO = 1};
-
 /* Hex digit defines */
 #define HEX_DGT_HI	0xF0
 #define HEX_DGT_LO	0x0F
@@ -40,7 +38,6 @@ static int16_t Minimum(int16_t a, int16_t b);
 static int16_t Maximum(int16_t a, int16_t b);
 
 static uint8_t
-	current_mode,
 	current_color;
 
 static int16_t
@@ -164,7 +161,6 @@ static void DefaultCallback(int waiting)
 /* Drawing routines */
 void DrawLineFromTo16(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color)
 {
-	current_mode = DRAW_FROM_TO;
 	x_from_point = x1;
 	y_from_point = y1;
 	x_to_point = x2;
@@ -175,7 +171,6 @@ void DrawLineFromTo16(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t co
 
 void DrawLineJustTo16(int16_t x, int16_t y, uint8_t color)
 {
-	current_mode = DRAW_JUST_TO;
 	x_from_point = x_to_point;
 	y_from_point = y_to_point;
 	x_to_point = x;
@@ -255,55 +250,33 @@ static void DrawLine16(void)
 		if (y1 < 0 || y2 < 0 || y1 > (VERA_VERT_RES - 1) || y2 > (VERA_VERT_RES - 1)
 		    || x1 < 0 || x2 < 0 || x1 > (VERA_HORZ_RES - 1) || x2 > (VERA_HORZ_RES - 1))
 			return;
-		/* Because clipping was required, change the mode to DRAW_FROM_TO
-			to ensure the initial point is rendered */
-		current_mode = DRAW_FROM_TO;
 	}
 
-	switch (current_mode) {
-		/* Render "right to left" for from-to
-			- accounts for 0.5 pixel bias */
-		case DRAW_FROM_TO:
-			if (x1 < x2) {
-				xt = x1;
-				x1 = x2;
-				x2 = xt;
-				yt = y1;
-				y1 = y2;
-				y2 = yt;
-			}
-			break;
-		/* Render "left to right" for just-to
-			- 0.5 pixel bias will automatically skip the first one */
-		case DRAW_JUST_TO:
-			if (x2 > x1) {
-				xt = x1;
-				x1 = x2;
-				x2 = xt;
-				yt = y1;
-				y1 = y2;
-				y2 = yt;
-			}
-			break;
+	/* Render "right to left" to account for 0.5 pixel bias */
+	if (x1 < x2) {
+		xt = x1;
+		x1 = x2;
+		x2 = xt;
+		yt = y1;
+		y1 = y2;
+		y2 = yt;
 	}
 
 	/* Will need these */
 	dx = x2 - x1;
 	dy = y2 - y1;
 
-	/* DRAW_FROM_TO will add 1 to i because we want to render all points,
-		up to and including the endpoints, while DRAW_JUST_TO will
-		not draw the first point, but will draw the last point */
+	/* Add 1 to i because we want to render all points up to and including the endpoints */
 	if (abs(dy) > abs(dx)) {
 		slope = abs(SpecialDivide(dx, dy)) >> 3;
 		d0 = VERA_ADV_BY_0_5 | (dx < 0? VERA_DECR: VERA_INCR);
 		d1 = VERA_ADV_BY_160 | (dy < 0? VERA_DECR: VERA_INCR);
-		i = abs(dy) + current_mode;
+		i = abs(dy) + 1;
 	} else {
 		slope = abs(SpecialDivide(dy, dx)) >> 3;
 		d0 = VERA_ADV_BY_160 | (dy < 0? VERA_DECR: VERA_INCR);
 		d1 = VERA_ADV_BY_0_5 | (dx < 0? VERA_DECR: VERA_INCR);
-		i = abs(dx) + current_mode;
+		i = abs(dx) + 1;
 	}
 
 	/* Get the address */
@@ -445,11 +418,11 @@ PLAYER_STATUS *GetInput(uint8_t player)
 				break;
 
 			case TURN_RIGHT:
-				player_status.angle_delta -= 2;
+				--player_status.angle_delta;
 				break;
 
 			case TURN_LEFT:
-				player_status.angle_delta += 2;
+				++player_status.angle_delta;
 				break;
 
 			case FIRE_MISSILE:
