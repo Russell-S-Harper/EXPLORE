@@ -60,7 +60,7 @@
 
 #define LGEAR 		9	/* Divide SCALE_1_0 by 2^LGEAR to give low gear */
 #define HGEAR 		6	/* and by 2^HGEAR to give high gear */
-	
+
 static int16_t dxmouse, dymouse, altcntr, dircntr, vgear, lbutton, rbutton;
 
 /* Initialize the hardware, etc. */
@@ -177,7 +177,7 @@ void Color16Erase(uint16_t x, uint16_t y)
 
 	VERA.address = (uint16_t)(address & UINT16_MAX);
 	VERA.address_hi = (uint16_t)(address >> BITS_PER_WORD);
-	
+
 	if (x & 1)
 		VERA.data0 &= 0xF0;
 	else

@@ -284,7 +284,7 @@ static void DrawLine16(void)
 
 	/* DCSEL = 2 */
 	VERA_CTRL = VERA_DCSEL_2;
-	
+
 	/* Turn on FX 4-bit mode and line helper */
 	VERA_FX_CTRL = VERA_FX_4_BIT_MODE | VERA_FX_LINE_HELPER;
 
@@ -336,7 +336,7 @@ static void DrawLine16(void)
 
 	/* DCSEL = 2 */
 	VERA_CTRL = VERA_DCSEL_2;
-	
+
 	/* Turn off 4-bit and line helper mode */
 	VERA_FX_CTRL = VERA_TRADITIONAL;
 }

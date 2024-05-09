@@ -119,7 +119,7 @@ void *GetXMAddress(XM_HANDLE handle, int16_t index) {
 
 	/* Calculate the address */
 	address = (void *)(working->offset + (index << working->shift));
-	
+
 	/* Switch to the correct bank */
 	XM_REGISTER = working->bank;
 

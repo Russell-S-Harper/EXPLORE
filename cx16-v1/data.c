@@ -54,12 +54,12 @@ int main(void)
 	OutputTrigData(ofile);
 
 	/* The remaining data */
-	
+
 	/* Indicate end-of-data */
 	fputc(EFCODE, ofile);
 	fclose(ofile);
 
-	return EXIT_SUCCESS;	
+	return EXIT_SUCCESS;
 }
 
 static void OutputStrings(FILE *ofile)

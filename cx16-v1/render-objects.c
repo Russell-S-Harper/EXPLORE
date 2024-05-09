@@ -98,12 +98,12 @@ void DrawLineWithCallback(int16_t x1, int16_t y1, int16_t x2, int16_t y2, unsign
 				i = y1;
 				y1 = y2;
 				y2 = i;
-			}			
+			}
 			for (i = x1, l = ((int32_t)y1 << SHIFT_1_0) + SCALE_0_5; i <= x2; ++i, l += slope) {
 				t = l >> SHIFT_1_0;
 				if ((*callback)(i, t))
 					Color16Plot((uint16_t)i, (uint16_t)t, color);
-			}		
+			}
 		} else {
 			/* |slope| >= 1 */
 			slope = SpecialDivide(dx, dy);
@@ -114,7 +114,7 @@ void DrawLineWithCallback(int16_t x1, int16_t y1, int16_t x2, int16_t y2, unsign
 				i = y1;
 				y1 = y2;
 				y2 = i;
-			}			
+			}
 			for (i = y1, l = ((int32_t)x1 << SHIFT_1_0) + SCALE_0_5; i <= y2; ++i, l += slope) {
 				t = l >> SHIFT_1_0;
 				if ((*callback)(t, i))
@@ -131,7 +131,7 @@ void DrawLineWithCallback(int16_t x1, int16_t y1, int16_t x2, int16_t y2, unsign
 		for (i = x1; i <= x2; ++i) {
 			if ((*callback)(i, y1))
 				Color16Plot((uint16_t)i, (uint16_t)y1, color);
-		}		
+		}
 	} else {
 		/* Vertical line */
 		if (y1 > y2) {
@@ -164,7 +164,7 @@ static void EndPolygon(void)
 			XM_REGISTER = mask_bank;
 			memset(GetXMAddress(mask_data[y], x1), mask_index, x2 - x1 + 1);
 		}
-	}	
+	}
 }
 
 static bool PolygonPointWithMask(int16_t x, int16_t y)
@@ -182,9 +182,9 @@ static bool PolygonPointWithMask(int16_t x, int16_t y)
 			XM_REGISTER = mask_bank;
 			GetXM(mask_data[y], x, &m);
 			return (m != mask_index);
-		}	
+		}
 	}
-	return false;	
+	return false;
 }
 
 static bool HorizonPointWithMask(int16_t x, int16_t y)
@@ -195,9 +195,9 @@ static bool HorizonPointWithMask(int16_t x, int16_t y)
 			XM_REGISTER = mask_bank;
 			GetXM(mask_data[y], x, &m);
 			return (m != mask_index);
-		}	
+		}
 	}
-	return false;	
+	return false;
 }
 
 /* Convenience functions usually done as macros, but using functions to avoid side effects! */
