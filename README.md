@@ -105,7 +105,7 @@ Your use of this code is subject to these license terms.
 
 ---
 
-If you have any questions and/or suggestions, would like to discuss commercial distribution rights, or if you find EXPLORE useful for your project, we encourage you to reach out to:
+If you have any questions and/or suggestions, would like to discuss commercial distribution rights, or if you find EXPLORE useful for your project, feel free to contact:
 
 Russell Harper
 
