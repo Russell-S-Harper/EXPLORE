@@ -24,7 +24,7 @@
 	ERR_GI: graphics initialization error
 	ERR_OB: accessing array out-of-bounds error
 	ERR_DC: display configuration has been corrupted
-	ERR_NO: no error, used also to provide a count of errors
+	ERR_NO: no error, also used to provide a count of errors
 */
 enum {ERR_FO, ERR_FC, ERR_XM, ERR_GI, ERR_OB, ERR_DC, ERR_NO};
 
@@ -32,22 +32,11 @@ enum {ERR_FO, ERR_FC, ERR_XM, ERR_GI, ERR_OB, ERR_DC, ERR_NO};
 
 	CODE_ID: initializing data
 	CODE_EM: error messages
-	CODE_FD: field data
-	CODE_PD: polygon data
-	CODE_PP: polygon points
-	CODE_VD: vehicle data
-	CODE_VP: vehicle points
-	CODE_HZ: horizon data
-	CODE_SV: scanning data
-	CODE_AT: arctan data
-	CODE_TD: sin data
-	CODE_HD: tan data
+	CODE_TD: trig data
+	CODE_AD: arena data
 	CODE_EF: end-of-file
 */
-enum {CODE_ID, CODE_EM, CODE_FD, CODE_PD,
-	CODE_PP, CODE_VD, CODE_VP, CODE_HZ,
-	CODE_SV, CODE_AT, CODE_TD, CODE_HD,
-	CODE_EF};
+enum {CODE_ID, CODE_EM, CODE_TD, CODE_AD, CODE_EF};
 
 /* Colors */
 enum {CLR16_BLACK, CLR16_WHITE, CLR16_RED, CLR16_CYAN,

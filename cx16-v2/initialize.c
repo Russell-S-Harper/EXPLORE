@@ -13,8 +13,7 @@
 XM_HANDLE
 	string_data,
 	trig_data,
-	tan_data,
-	arctan_data;
+	arena_data;
 
 bool
 	exit_program;
@@ -74,13 +73,8 @@ static void InitData(char *file)
 				trig_data = AllocXM(FULL_CIRC, sizeof(int16_t));
 				GetData(GetXMAddressInitial(trig_data), sizeof(int16_t) * FULL_CIRC, ifile);
 				break;
-			case CODE_HD:
-				tan_data = AllocXM(HALF_CIRC - 1, sizeof(int16_t));
-				GetData(GetXMAddressInitial(tan_data), sizeof(int16_t) * (HALF_CIRC - 1), ifile);
-				break;
-			case CODE_AT:
-				arctan_data = AllocXM(VEH_DIR + 1, sizeof(char));
-				GetData(GetXMAddressInitial(arctan_data), VEH_DIR + 1, ifile);
+			case CODE_AD:
+				/* TODO */
 				break;
 			case CODE_EF:
 				fclose(ifile);

@@ -22,20 +22,126 @@ char *strings0[] = {
 	/*ERR_DC*/ "\nThe display configuration has been\ncorrupted.\n"
 };
 
-/* Data used in vehicle scanning - related to arctangent, note VEH_DIR + 1 entries */
-char arctan0[] = {
-	0x03, 0x08, 0x0D, 0x12, 0x16, 0x1B, 0x1F, 0x24,
-	0x28, 0x2C, 0x2F, 0x33, 0x36, 0x39, 0x3C, 0x3F,
-	0x41, 0x44, 0x46, 0x48, 0x4A, 0x4C, 0x4E, 0x4F,
-	0x51, 0x52, 0x54, 0x55, 0x56, 0x58, 0x59, 0x5A,
-	0x5B, 0x5C, 0x5D, 0x5D, 0x5E, 0x5F, 0x60, 0x61,
-	0x61, 0x62, 0x63, 0x63, 0x64, 0x64, 0x65, 0x66,
-	0x66, 0x67, 0x67, 0x67, 0x68, 0x68, 0x69, 0x69,
-	0x6A, 0x6A, 0x6A, 0x6B, 0x6B, 0x6B, 0x6C, 0x6C, 0x6C
+/* Arenas are confined to cubes of size 16384.
+
+   Heights from lowest to highest: ! # $ % & * +, using formula 0.075 * ascii(x) - 2.225
+
+	!   25%
+	#   40%
+	$   47%
+	%   55%
+	&   63%
+	*   92%
+	+  100%
+*/
+char *arenas0[] = {
+	/* Arena 1 - room */
+	"+--------------+"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|   #------#   |"
+	"|   |      |   |"
+	"|   |      |   |"
+	"|   |      |   |"
+	"|   |      |   |"
+	"|   |      |   |"
+	"|   |      |   |"
+	"|   #------#   |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"+--------------+",
+	/* Arena 2 - north/south */
+	"+--------------+"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|  #        &  |"
+	"|  |  $  %  |  |"
+	"|  |  |  |  |  |"
+	"|  |  |  |  |  |"
+	"|  |  |  |  |  |"
+	"|  |  |  |  |  |"
+	"|  |  $  %  |  |"
+	"|  #        &  |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"+--------------+",
+	/* Arena 3 - east/west */
+	"+--------------+"
+	"|              |"
+	"|              |"
+	"|   &------&   |"
+	"|              |"
+	"|              |"
+	"|    $----$    |"
+	"|              |"
+	"|              |"
+	"|    #----#    |"
+	"|              |"
+	"|              |"
+	"|   %------%   |"
+	"|              |"
+	"|              |"
+	"+--------------+",
+	/* Arena 4 - isolation */
+	"+--------------+"
+	"|              |"
+	"|              |"
+	"|  *--------*  |"
+	"|  |        |  |"
+	"|  |        |  |"
+	"|  *--------*  |"
+	"|              |"
+	"|              |"
+	"|  *--------*  |"
+	"|  |        |  |"
+	"|  |        |  |"
+	"|  *--------*  |"
+	"|              |"
+	"|              |"
+	"+--------------+",
+	/* Arena 5 - corners */
+	"+--------------+"
+	"|              |"
+	"|              |"
+	"|     $  &     |"
+	"|     |  |     |"
+	"|     |  |     |"
+	"|  $--$  &--&  |"
+	"|              |"
+	"|              |"
+	"|  !--!  %--%  |"
+	"|     |  |     |"
+	"|     |  |     |"
+	"|     !  %     |"
+	"|              |"
+	"|              |"
+	"+--------------+",
+	/* Arena 6 - empty */
+	"+--------------+"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"|              |"
+	"+--------------+"
 };
 
 static void OutputStrings(FILE *ofile);
 static void OutputTrigData(FILE *ofile);
+static void OutputArenaData(FILE *ofile);
 
 int main(void)
 {
@@ -53,6 +159,7 @@ int main(void)
 	OutputTrigData(ofile);
 
 	/* The remaining data */
+	OutputArenaData(ofile);
 
 	/* Indicate end-of-data */
 	fputc(CODE_EF, ofile);
@@ -103,20 +210,10 @@ static void OutputTrigData(FILE *ofile)
 		if (t % 26 == 17) fputc('*', stdout);
 	}
 	fputc('\n', stdout);
+}
 
-	/* Tangent data used to render the horizon */
-	fputs("Tan Data ", stdout);
-	fputc(CODE_HD, ofile);
-	d = DCPI/-2.0 + DCPI/(double)HALF_CIRC;
-	for (t = 0; t < HALF_CIRC - 1; t++, d += i) {
-		dat = (int16_t)(tan(d) * SCALE_1_0);
-		fwrite(&dat, sizeof(int16_t), 1, ofile);
-		if (t % 13 == 7) fputc('*', stdout);
-	}
-	fputc('\n', stdout);
-
-	/* Arctangent data used in vehicle scanning */
-	fputs("Arctan Data\n", stdout);
-	fputc(CODE_AT, ofile);
-	fwrite(arctan0, sizeof(arctan0), 1, ofile);
+static void OutputArenaData(FILE *ofile)
+{
+	if (!ofile)
+		fputs("?", stdout);
 }

@@ -56,8 +56,7 @@ int16_t Cos(int16_t angle);
 extern XM_HANDLE
 	string_data,
 	trig_data,
-	tan_data,
-	arctan_data;
+	arena_data;
 
 extern bool
 	exit_program;
