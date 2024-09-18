@@ -7,10 +7,10 @@
 #include "explore.h"
 
 #define ANGLE_DELTA_SHIFT	1
-#define XY_DELTA_SHIFT		10
-#define UPPER_Z			(SCALE_1_0 * 7 - 1)
-#define LOWER_Z			0
+#define XY_DELTA_SHIFT		4
 #define Z_DELTA_SHIFT		7
+#define MAX_XYZ			16384
+#define MIN_XYZ			0
 
 /* Process every active vehicle; the player-controlled one is done first */
 PLAYER_STATUS *ProcessVehicles(void)
@@ -26,14 +26,13 @@ PLAYER_STATUS *ProcessVehicles(void)
 	}
 	if (p->z_delta) {
 		p->z += (int16_t)p->z_delta << Z_DELTA_SHIFT;
-		if (p->z < LOWER_Z)
-			p->z = LOWER_Z;
-		else if (p->z > UPPER_Z)
-			p->z = UPPER_Z;
+		p->z = Minimum(Maximum(p->z, MIN_XYZ), MAX_XYZ);
 		p->z_delta = 0;
 	}
 	p->x += p->sin >> XY_DELTA_SHIFT;
+	p->x = Minimum(Maximum(p->x, MIN_XYZ), MAX_XYZ);
 	p->y += p->cos >> XY_DELTA_SHIFT;
+	p->y = Minimum(Maximum(p->y, MIN_XYZ), MAX_XYZ);
 
 	return p;
 }

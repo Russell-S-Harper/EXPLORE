@@ -7,65 +7,36 @@
 #include "explore.h"
 
 #define SCALE_SHIFT	4
+#define SCREEN_SHIFT	5
 
 /* Render all the objects */
 void RenderObjects(PLAYER_STATUS *p)
 {
-	static int16_t
-		X[4] = {-100, -100, +100, +100},
-		Y[4] = {-100, +100, +50, -50},
-		Z[4] = {+12000, +12000, +12000, +12000};
-	int16_t xr, yr, x, y, w, h, scale;
+	static POINT *points;
+	char *v = GetXMAddress(arena_data, arena_index);
+	int16_t h, w, scale;
+	POINT *P, *p1, *p2;
+	VERTEX *V = (VERTEX *)(v + X_LIMIT * Y_LIMIT * sizeof(int16_t));
+	SEGMENT *S = (SEGMENT *)(v + X_LIMIT * Y_LIMIT * sizeof(int16_t) + sizeof(VERTEX) * (max_vertices + 1));
+
+	if (!points)
+		points = malloc(sizeof(POINT) * (max_vertices + 1));
 
 	h = 3 * display_height >> 2;
 	w = display_width >> 1;
 
-	scale = SCALE_1_0 + (p->z >> SCALE_SHIFT);
+	for (P = points; V->z >= 0; ++V, ++P) {
+		scale = SCALE_1_0 - ((V->z - p->z) >> SCALE_SHIFT);
+		P->x = w + ((MultiplyThenDivide(V->x - p->x, p->cos, scale) - MultiplyThenDivide(V->y - p->y, p->sin, scale)) >> SCREEN_SHIFT);
+		P->y = h + ((MultiplyThenDivide(V->y - p->y, p->cos, -scale) + MultiplyThenDivide(V->x - p->x, p->sin, -scale)) >> SCREEN_SHIFT);
+	}
 
-	xr = w + MultiplyThenDivide(X[0] - p->x, p->cos, scale) - MultiplyThenDivide(Y[0] - p->y, p->sin, scale);
-	yr = h - MultiplyThenDivide(Y[0] - p->y, p->cos, scale) - MultiplyThenDivide(X[0] - p->x, p->sin, scale);
-	PlotPoint16(xr, yr, CLR16_GREEN);
+	for (; S->index_from != S->index_to; ++S) {
+		p1 = points + S->index_from;
+		p2 = points + S->index_to;
+		DrawLineFromTo16(p1->x, p1->y, p2->x, p2->y, CLR16_GREEN);
+	}
 
-	x = w + MultiplyThenDivide(X[1] - p->x, p->cos, scale) - MultiplyThenDivide(Y[1] - p->y, p->sin, scale);
-	y = h - MultiplyThenDivide(Y[1] - p->y, p->cos, scale) - MultiplyThenDivide(X[1] - p->x, p->sin, scale);
-	DrawLineJustTo16(x, y, CLR16_GREEN);
-
-	x = w + MultiplyThenDivide(X[2] - p->x, p->cos, scale) - MultiplyThenDivide(Y[2] - p->y, p->sin, scale);
-	y = h - MultiplyThenDivide(Y[2] - p->y, p->cos, scale) - MultiplyThenDivide(X[2] - p->x, p->sin, scale);
-	DrawLineJustTo16(x, y, CLR16_GREEN);
-
-	x = w + MultiplyThenDivide(X[3] - p->x, p->cos, scale) - MultiplyThenDivide(Y[3] - p->y, p->sin, scale);
-	y = h - MultiplyThenDivide(Y[3] - p->y, p->cos, scale) - MultiplyThenDivide(X[3] - p->x, p->sin, scale);
-	DrawLineJustTo16(x, y, CLR16_GREEN);
-
-	DrawLineJustTo16(xr, yr, CLR16_GREEN);
-/*
-	scale = SCALE_1_0 + ((p->z - Z[0]) >> SCALE_SHIFT);
-
-	xr = w + MultiplyThenDivide(X[0] - p->x, p->cos, scale) - MultiplyThenDivide(Y[0] - p->y, p->sin, scale);
-	yr = h - MultiplyThenDivide(Y[0] - p->y, p->cos, scale) - MultiplyThenDivide(X[0] - p->x, p->sin, scale);
-	PlotPoint16(xr, yr, CLR16_GREEN);
-
-	scale = SCALE_1_0 + ((p->z - Z[1]) >> SCALE_SHIFT);
-
-	x = w + MultiplyThenDivide(X[1] - p->x, p->cos, scale) - MultiplyThenDivide(Y[1] - p->y, p->sin, scale);
-	y = h - MultiplyThenDivide(Y[1] - p->y, p->cos, scale) - MultiplyThenDivide(X[1] - p->x, p->sin, scale);
-	DrawLineJustTo16(x, y, CLR16_GREEN);
-
-	scale = SCALE_1_0 + ((p->z - Z[2]) >> SCALE_SHIFT);
-
-	x = w + MultiplyThenDivide(X[2] - p->x, p->cos, scale) - MultiplyThenDivide(Y[2] - p->y, p->sin, scale);
-	y = h - MultiplyThenDivide(Y[2] - p->y, p->cos, scale) - MultiplyThenDivide(X[2] - p->x, p->sin, scale);
-	DrawLineJustTo16(x, y, CLR16_GREEN);
-
-	scale = SCALE_1_0 + ((p->z - Z[3]) >> SCALE_SHIFT);
-
-	x = w + MultiplyThenDivide(X[3] - p->x, p->cos, scale) - MultiplyThenDivide(Y[3] - p->y, p->sin, scale);
-	y = h - MultiplyThenDivide(Y[3] - p->y, p->cos, scale) - MultiplyThenDivide(X[3] - p->x, p->sin, scale);
-	DrawLineJustTo16(x, y, CLR16_GREEN);
-
-	DrawLineJustTo16(xr, yr, CLR16_GREEN);
-*/
 	DrawLineFromTo16(w - 12, h - 12, w + 12, h + 12, CLR16_WHITE);
 	DrawLineFromTo16(w - 12, h + 12, w + 12, h - 12, CLR16_WHITE);
 }

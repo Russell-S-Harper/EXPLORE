@@ -34,8 +34,6 @@
 
 static void DrawLine16(void);
 static void DefaultCallback(int waiting);
-static int16_t Minimum(int16_t a, int16_t b);
-static int16_t Maximum(int16_t a, int16_t b);
 
 static uint8_t
 	current_color;
@@ -389,9 +387,9 @@ void ErasePoint16(int16_t x, int16_t y)
 
 /* Convenience functions usually done as macros, but using functions to avoid side effects! */
 
-static int16_t Minimum(int16_t a, int16_t b) { return a < b? a: b; }
+int16_t Minimum(int16_t a, int16_t b) { return a < b? a: b; }
 
-static int16_t Maximum(int16_t a, int16_t b) { return a > b? a: b; }
+int16_t Maximum(int16_t a, int16_t b) { return a > b? a: b; }
 
 /* Processes keyboard/joystick (pending) input */
 PLAYER_STATUS *GetInput(uint8_t player)
@@ -418,11 +416,11 @@ PLAYER_STATUS *GetInput(uint8_t player)
 				break;
 
 			case TURN_RIGHT:
-				--player_status.angle_delta;
+				++player_status.angle_delta;
 				break;
 
 			case TURN_LEFT:
-				++player_status.angle_delta;
+				--player_status.angle_delta;
 				break;
 
 			case FIRE_MISSILE:

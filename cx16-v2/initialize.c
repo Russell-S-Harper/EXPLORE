@@ -22,6 +22,12 @@ uint16_t
 	display_width,
 	display_height;
 
+int16_t
+	max_vertices,
+	max_segments,
+	arena_index,
+	arena_limit;
+
 /* Internal functions */
 
 static void InitData(char *file);
@@ -37,7 +43,7 @@ void InitProgram(void)
 	/* Set up extended memory */
 	InitXM();
 
-	/* Set up error messages, trigonometric data, etc. */
+	/* Set up error messages, trigonometric data, arenas, etc. */
 	InitData("explore.dat");
 
 	/* Initialize the hardware, etc. */
@@ -53,8 +59,7 @@ void InitProgram(void)
 static void InitData(char *file)
 {
 	FILE *ifile;
-	size_t size;
-	int16_t t;
+	int16_t t, count, size;
 	char code = CODE_ID;
 
 	if (!(ifile = fopen(file, "rb")))
@@ -64,7 +69,7 @@ static void InitData(char *file)
 		GetData(&code, sizeof(char), ifile);
 		switch (code) {
 			case CODE_EM:
-				GetData(&size, sizeof(size_t), ifile);
+				GetData(&size, sizeof(int16_t), ifile);
 				string_data = AllocXM(ERR_NO, size * sizeof(char *));
 				for (t = 0; t < ERR_NO; ++t)
 					GetData(GetXMAddress(string_data, t), size, ifile);
@@ -74,7 +79,15 @@ static void InitData(char *file)
 				GetData(GetXMAddressInitial(trig_data), sizeof(int16_t) * FULL_CIRC, ifile);
 				break;
 			case CODE_AD:
-				/* TODO */
+				GetData(&count, sizeof(int16_t), ifile);
+				GetData(&size, sizeof(int16_t), ifile);
+				arena_data = AllocXM(count, size);
+				arena_index = 0;
+				arena_limit = count;
+				GetData(&max_vertices, sizeof(int16_t), ifile);
+				GetData(&max_segments, sizeof(int16_t), ifile);
+				for (t = 0; t < count; ++t)
+					GetData(GetXMAddress(arena_data, t), size, ifile);
 				break;
 			case CODE_EF:
 				fclose(ifile);

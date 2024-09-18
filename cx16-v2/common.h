@@ -16,6 +16,15 @@
 #define SCALE_0_5	(SCALE_1_0 / 2)	/* Equivalent to 0.5 in some contexts */
 #define SHIFT_1_0	12		/* log2(SCALE_1_0) */
 
+/* Arenas are confined to cubes of size 16384 = (X|Y|Z)_LIMIT * 1024 */
+#define X_LIMIT		16
+#define Y_LIMIT		16
+#define Z_LIMIT		16
+
+typedef struct {int16_t x, y, z;} VERTEX;
+typedef struct {int16_t index_from, index_to;} SEGMENT;
+typedef struct {int16_t x, y;} POINT;
+
 /* Errors
 
 	ERR_FO: data file open error

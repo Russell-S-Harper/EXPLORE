@@ -49,6 +49,8 @@ void ErasePoint16(int16_t x, int16_t y);
 PLAYER_STATUS *GetInput(uint8_t player);
 
 /* Other routines called throughout the program */
+int16_t Minimum(int16_t a, int16_t b);
+int16_t Maximum(int16_t a, int16_t b);
 int16_t Sin(int16_t angle);
 int16_t Cos(int16_t angle);
 
@@ -64,5 +66,11 @@ extern bool
 extern uint16_t
 	display_width,
 	display_height;
+
+extern int16_t
+	max_vertices,
+	max_segments,
+	arena_index,
+	arena_limit;
 
 #endif /* _EXPLORE_H */
