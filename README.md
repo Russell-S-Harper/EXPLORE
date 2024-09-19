@@ -87,7 +87,7 @@ VERA is a display co-processor used in the CX16. It has a new feature, "FX", whi
 
 V2 takes a different perspective looking overhead into an arena setting with walls and rooms. There's no masking, just lines. Here's a [video](https://youtube.com/watch?v=RPV9IS4tWk4) of a simple room-with-a-room setting. You can see it chugging at 4 frames/s in some places, whick is too slow. Something like 5 frames/s would be satisfactory, but to get that will have to simplify the setting to something even more abstract. An alternative would be to make the viewing area smaller, but that's not somewhere I'd like to go just yet.
 
-I have a game in mind, a recreation of something I wrote a long time ago, unfortunately the original is lost to history…
+I have a game in mind, a recreation of something I wrote a long time ago – unfortunately the original is lost to history…
 
 As in `cx16-v1`, should you want to build the demo, you'll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
