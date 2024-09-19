@@ -83,9 +83,11 @@ Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of
 
 ## CX16 – v2. VERA Approach
 
-VERA is a display co-processor used in the CX16. It has a new feature, "FX", which provides helpers to improve line drawing, polygon filling, and other functions. Using the line drawing helper, I was able to implement 16-color line drawing routines such that, even written in C and implementing clipping, they are still about 25% faster than the 256-color line drawing routines in TGI. As an aside, the line drawing routines in `cx16-v1` using Bresenham's algorithm took 3× the time to run than the TGI drawing routines, so a huge improvement gain using VERA.
+VERA is a display co-processor used in the CX16. It has a new feature, "FX", which provides helpers to improve line drawing, polygon filling, and other functions. Using the line drawing helper, I was able to implement 16-color line drawing routines such that, even written in C and implementing clipping, they still run in about 80% of the time required by the 256-color line drawing routines in TGI. As an aside, the line drawing routines in `cx16-v1` using Bresenham's algorithm took 3× the time to run than the TGI drawing routines, so a huge improvement gain using VERA.
 
-I'm still deciding which direction to go next. Stay tuned for further updates!
+V2 takes a different perspective looking overhead into an arena setting with walls and rooms. I've foregone any masking, so just lines. Here's a [video](https://youtube.com/watch?v=RPV9IS4tWk4) of a simple room-with-a-room setting. I'm not really happy with it because you can see it chugging at 4 frames/s in some places. whick is too slow. Something like 6 frames/s would be satisfactory, but to get that will have to simplify the setting to something even more abstract. An alternative would be to make the viewing area smaller, but that's not somewhere I'd like to go just yet.
+
+I have a game in mind, a recreation of something I wrote a long time ago, unfortunately the original is lost to history…
 
 As in `cx16-v1`, should you want to build the demo, you'll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
