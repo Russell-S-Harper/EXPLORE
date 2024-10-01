@@ -15,6 +15,9 @@ XM_HANDLE
 	trig_data,
 	arena_data;
 
+VEHICLE
+	vehicles[VEHICLE_COUNT];
+
 bool
 	exit_program;
 
@@ -23,10 +26,10 @@ uint16_t
 	display_height;
 
 int16_t
-	max_vertices,
-	max_segments,
 	arena_index,
-	arena_limit;
+	max_segments,
+	max_vertices,
+	vehicle_index;
 
 /* Internal functions */
 
@@ -49,10 +52,7 @@ void InitProgram(void)
 	/* Initialize the hardware, etc. */
 	InitSpecific();
 
-	/* Generic initializations */
-	InitBounds();
-	InitHorizon();
-	InitWalls();
+	/* Initialize the vehicles */
 	InitVehicles();
 }
 
@@ -83,7 +83,6 @@ static void InitData(char *file)
 				GetData(&size, sizeof(int16_t), ifile);
 				arena_data = AllocXM(count, size);
 				arena_index = 0;
-				arena_limit = count;
 				GetData(&max_vertices, sizeof(int16_t), ifile);
 				GetData(&max_segments, sizeof(int16_t), ifile);
 				for (t = 0; t < count; ++t)
@@ -104,20 +103,17 @@ static void GetData(void *buffer, size_t size, FILE *ifile)
 		ExitProgram(ERR_FC);
 }
 
-static void InitBounds(void)
-{
-}
-
-static void InitHorizon(void)
-{
-}
-
-static void InitWalls(void)
-{
-}
-
 static void InitVehicles(void)
 {
+	int i;
+
+	for (i = 0; i < VEHICLE_COUNT; ++i) {
+		vehicles[i].x = MAX_XYZ >> 1;
+		vehicles[i].y = MAX_XYZ >> 1;
+		vehicles[i].z = MIN_XYZ << 1;
+		vehicles[i].sin = Sin(vehicles[i].angle);
+		vehicles[i].cos = Cos(vehicles[i].angle);
+	}
 }
 
 /* Convenience methods to return Sin/Cos from lookup */
@@ -139,13 +135,11 @@ void OutputAsNumber(char prefix, int16_t value)
 
 	/* Output the prefix, can be anything */
 	fputc(prefix, stdout);
-
 	/* Handle negative numbers */
 	if (value < 0) {
 		value = -value;
 		fputc('-', stdout);
 	}
-
 	/* Add 1 to account for bias */
 	for (value += 1, i = 10000; i > 0; i /= 10) {
 		c = '0';

@@ -9,7 +9,8 @@
 #include <stdbool.h>
 #include "xm.h"
 
-void InitXM(void) {
+void InitXM(void)
+{
 	ALLOC_XM working;
 
 	/* Clear the space */
@@ -25,7 +26,8 @@ void InitXM(void) {
 	memcpy((void *)XM_ADDRESS, &working, sizeof(ALLOC_XM));
 }
 
-XM_HANDLE AllocXM(size_t limit, size_t size) {
+XM_HANDLE AllocXM(size_t limit, size_t size)
+{
 	static XM_HANDLE current_handle = ALLOC_XM_HANDLE + 1;
 	static uint8_t current_bank = ALLOC_XM_BANK + 1;
 	static size_t current_offset;
@@ -63,7 +65,27 @@ XM_HANDLE AllocXM(size_t limit, size_t size) {
 	return current_handle++;
 }
 
-void GetOrSetXM(XM_HANDLE handle, int16_t index, void *data, XM_MODE get_or_set) {
+bool IndexExistsForXM(XM_HANDLE handle, int16_t index)
+{
+	ALLOC_XM *working;
+	uint8_t bank;
+	bool result;
+
+	/* Confirm index is non-negative */
+	if (result = (index >= 0)) {
+		/* Retrieve the allocation details and check against the limit */
+		bank = XM_REGISTER;
+		XM_REGISTER = ALLOC_XM_BANK;
+		working = (ALLOC_XM *)(XM_ADDRESS + (handle << ALLOC_XM_SHIFT));
+		result = (index < working->limit);
+		XM_REGISTER = bank;
+	}
+
+	return result;
+}
+
+void GetOrSetXM(XM_HANDLE handle, int16_t index, void *data, XM_MODE get_or_set)
+{
 	ALLOC_XM *working;
 	void *address;
 	size_t size;
@@ -105,7 +127,8 @@ void GetOrSetXM(XM_HANDLE handle, int16_t index, void *data, XM_MODE get_or_set)
 	restore it. If you're alternating among banked memory
 	allocations, it's best to refresh the address before each
 	access, or keep track of the banks, or use a copy with GetXM. */
-void *GetXMAddress(XM_HANDLE handle, int16_t index) {
+void *GetXMAddress(XM_HANDLE handle, int16_t index)
+{
 	ALLOC_XM *working;
 	void *address;
 
@@ -128,22 +151,26 @@ void *GetXMAddress(XM_HANDLE handle, int16_t index) {
 }
 
 /* For the direct XM functions, just call the standard procedure using the address of the value. */
-int16_t GetXMDirectSigned(XM_HANDLE handle, int16_t index) {
+int16_t GetXMDirectSigned(XM_HANDLE handle, int16_t index)
+{
 	int16_t value;
 	GetOrSetXM(handle, index, &value, XM_GET);
 	return value;
 }
 
-uint16_t GetXMDirectUnsigned(XM_HANDLE handle, int16_t index) {
+uint16_t GetXMDirectUnsigned(XM_HANDLE handle, int16_t index)
+{
 	uint16_t value;
 	GetOrSetXM(handle, index, &value, XM_GET);
 	return value;
 }
 
-void SetXMDirectSigned(XM_HANDLE handle, int16_t index, int16_t value) {
+void SetXMDirectSigned(XM_HANDLE handle, int16_t index, int16_t value)
+{
 	GetOrSetXM(handle, index, &value, XM_SET);
 }
 
-void SetXMDirectUnsigned(XM_HANDLE handle, int16_t index, uint16_t value) {
+void SetXMDirectUnsigned(XM_HANDLE handle, int16_t index, uint16_t value)
+{
 	GetOrSetXM(handle, index, &value, XM_SET);
 }

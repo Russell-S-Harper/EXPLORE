@@ -9,15 +9,13 @@
 #define ANGLE_DELTA_SHIFT	1
 #define XY_DELTA_SHIFT		4
 #define Z_DELTA_SHIFT		7
-#define MAX_XYZ			16384
-#define MIN_XYZ			0
 
-/* Process every active vehicle; the player-controlled one is done first */
-PLAYER_STATUS *ProcessVehicles(void)
+/* Process every vehicle; the player-controlled one is done first */
+void ProcessVehicles(void)
 {
-	PLAYER_STATUS *p;
+	VEHICLE *p = vehicles + PLAYER_INDEX;
 
-	p = GetInput(0);
+	GetInput(p);
 	if (p->angle_delta || (!p->sin && !p->cos)) {
 		p->angle += (int16_t)p->angle_delta << ANGLE_DELTA_SHIFT;
 		p->sin = Sin(p->angle);
@@ -33,6 +31,4 @@ PLAYER_STATUS *ProcessVehicles(void)
 	p->x = Minimum(Maximum(p->x, MIN_XYZ), MAX_XYZ);
 	p->y += p->cos >> XY_DELTA_SHIFT;
 	p->y = Minimum(Maximum(p->y, MIN_XYZ), MAX_XYZ);
-
-	return p;
 }

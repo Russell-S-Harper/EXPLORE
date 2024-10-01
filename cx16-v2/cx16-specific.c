@@ -15,7 +15,7 @@
 
 /* Ideal frames/s - adjust as required to prevent "jerking".
 	Limited by the resolution of CLOCKS_PER_SEC. */
-#define FRAMES_PER_SEC	10
+#define FRAMES_PER_SEC	6
 
 /* Keyboard defines used in GetInput */
 #define PAUSE_PROGRAM	27	/* escape: pause/unpause program */
@@ -43,8 +43,6 @@ static int16_t
 	y_from_point,
 	x_to_point,
 	y_to_point;
-
-static PLAYER_STATUS player_status;
 
 /* Initialize the hardware, etc. */
 void InitSpecific(void)
@@ -392,11 +390,8 @@ int16_t Minimum(int16_t a, int16_t b) { return a < b? a: b; }
 int16_t Maximum(int16_t a, int16_t b) { return a > b? a: b; }
 
 /* Processes keyboard/joystick (pending) input */
-PLAYER_STATUS *GetInput(uint8_t player)
+void GetInput(VEHICLE *vehicle)
 {
-	if (player)
-		ExitProgram(ERR_OB);
-
 	/* Process keyboard input */
 	while (kbhit()) {
 
@@ -408,27 +403,28 @@ PLAYER_STATUS *GetInput(uint8_t player)
 				break;
 
 			case REQ_CLIMB:
-				++player_status.z_delta;
+				vehicle->z_delta += 1;
 				break;
 
 			case REQ_DIVE:
-				--player_status.z_delta;
+				vehicle->z_delta -= 1;
 				break;
 
 			case TURN_RIGHT:
-				++player_status.angle_delta;
+				vehicle->angle_delta += 1;
 				break;
 
 			case TURN_LEFT:
-				--player_status.angle_delta;
+				vehicle->angle_delta -= 1;
 				break;
 
 			case FIRE_MISSILE:
-				player_status.fire_missile = true;
+				vehicle->fire_missile = true;
 				break;
 
 			case CYCLE_PLAYER:
-				++player_status.player;
+				if (++vehicle_index >= VEHICLE_COUNT)
+					vehicle_index = 0;
 				break;
 
 			case QUIT_PROGRAM:
@@ -437,7 +433,6 @@ PLAYER_STATUS *GetInput(uint8_t player)
 				break;
 		}
 	}
-	return &player_status;
 }
 
 /* The program insures that the values passed to and returned

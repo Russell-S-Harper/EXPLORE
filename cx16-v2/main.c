@@ -7,20 +7,25 @@
 #include <time.h>
 #include "explore.h"
 
+#define DEMO_FRAMES_PER_ARENA	120
+
 void main()
 {
-	PLAYER_STATUS *p;
 	clock_t t;
 	uint16_t f = 0;
 
 	InitProgram();
 	t = -clock();
 	while (!exit_program) {
-		p = ProcessVehicles();
+		ProcessVehicles();
 		ScanField();
-		RenderObjects(p);
+		RenderObjects();
 		UpdateDisplay(NULL);
 		++f;
+		if (!(f % DEMO_FRAMES_PER_ARENA)) {
+			if (!IndexExistsForXM(arena_data, ++arena_index))
+				arena_index = 0;
+		}
 	}
 	t += clock();
 	OutputAsNumber('T', t);

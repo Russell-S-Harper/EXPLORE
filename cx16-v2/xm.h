@@ -8,6 +8,7 @@
 #define _XM_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <cx16.h>
 #include "common.h"
 
@@ -31,6 +32,7 @@ typedef struct { uint8_t bank, shift; size_t offset, limit, size; } ALLOC_XM;
 
 void InitXM(void);
 XM_HANDLE AllocXM(size_t limit, size_t size);
+bool IndexExistsForXM(XM_HANDLE handle, int16_t index);
 void GetOrSetXM(XM_HANDLE handle, int16_t index, void *data, XM_MODE get_or_set);
 void *GetXMAddress(XM_HANDLE handle, int16_t index);
 int16_t GetXMDirectSigned(XM_HANDLE handle, int16_t index);
