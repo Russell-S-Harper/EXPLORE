@@ -20,11 +20,11 @@ void main()
 		ProcessVehicles();
 		ScanField();
 		RenderObjects();
-		UpdateDisplay(NULL);
+		UpdateDisplay();
 		++f;
 		if (!(f % DEMO_FRAMES_PER_ARENA)) {
 			if (!IndexExistsForXM(arena_data, ++arena_index))
-				arena_index = 0;
+				exit_program = true; // arena_index = 0;
 		}
 	}
 	t += clock();

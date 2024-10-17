@@ -8,12 +8,10 @@
 #define _COMMON_H
 
 /* Constants */
-#define FULL_CIRC	512		/* 512 corresponds to 360 degrees */
-#define HALF_CIRC	(FULL_CIRC / 2)	/* Corresponds to 180 degrees */
-#define VEH_DIR		64		/* Vehicles can move in VEH_DIR directions */
+#define SCALE_FC	512		/* 512 corresponds to a Full Circle or 360 degrees */
+#define SHIFT_FC	9		/* log2(SCALE_FC) */
 
 #define SCALE_1_0	4096		/* Equivalent to 1.0 in some contexts */
-#define SCALE_0_5	(SCALE_1_0 / 2)	/* Equivalent to 0.5 in some contexts */
 #define SHIFT_1_0	12		/* log2(SCALE_1_0) */
 
 /* Arenas are confined to cubes of size 16384 = (X|Y|Z)_LIMIT * 1024 */

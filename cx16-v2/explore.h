@@ -20,9 +20,9 @@
 #define PLAYER_INDEX		0
 
 typedef struct {
+	bool airborne, fire_missile;
 	int8_t z_delta, angle_delta;
 	int16_t x, y, z, angle, sin, cos;
-	bool fire_missile;
 } VEHICLE;
 
 enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
@@ -30,19 +30,19 @@ enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
 /******** Function declarations ********/
 
 /* Routines called by main */
-void InitProgram(void);					/* Defined in initialize.c */
-void ProcessVehicles(void);				/* Defined in process-vehicles.c */
-void ScanField(void);					/* Defined in scan-field.c */
-void RenderObjects(void);				/* Defined in render-objects.c */
-void UpdateDisplay(void (*callback)(int waiting));	/* Defined in cx16-specific.c */
+void InitProgram(void);			/* Defined in initialize.c */
+void ProcessVehicles(void);		/* Defined in process-vehicles.c */
+void ScanField(void);			/* Defined in scan-field.c */
+void RenderObjects(void);		/* Defined in render-objects.c */
+void UpdateDisplay(void);		/* Defined in cx16-specific.c */
 
 /* Routines defined in cx16-specific.c and called by InitProgram */
 void InitSpecific(void);
 
 /* Math routines defined in cx16-specific.c and called throughout the program */
 int16_t MultiplyThenDivide(int16_t num1, int16_t num2, int16_t denom);
-int16_t SpecialMultiply(int16_t num1, int16_t num2);
-int16_t SpecialDivide(int16_t num, int16_t denom);
+#define SpecialMultiply(num1, num2)	MultiplyThenDivide((num1), (num2), SCALE_1_0)
+#define SpecialDivide(num, denom)	MultiplyThenDivide((num), SCALE_1_0, (denom))
 
 /* Drawing routines */
 void DrawLineFromTo16(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color);

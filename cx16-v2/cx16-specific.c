@@ -14,8 +14,21 @@
 #include "vera.h"
 
 /* Ideal frames/s - adjust as required to prevent "jerking".
-	Limited by the resolution of CLOCKS_PER_SEC. */
-#define FRAMES_PER_SEC	6
+	Limited by the resolution of CLOCKS_PER_SEC.
+
+	FRAMES_PER_SEC | Actual frames/s
+	------------- -+----------------
+	1 - 6          | 1 - 6
+	7              | 7.500
+	8              | 8.571
+	9, 10          | 10
+	11, 12         | 12
+	13 - 15        | 15
+	16 - 20        | 20
+	21 - 30        | 30
+	31 - 60        | 60
+*/
+#define FRAMES_PER_SEC	8
 
 /* Keyboard defines used in GetInput */
 #define PAUSE_PROGRAM	27	/* escape: pause/unpause program */
@@ -67,20 +80,16 @@ void InitSpecific(void)
 	VERA_L0_TILEBASE = VERA_SCR_2_BASE;
 
 	/* Clear the remainder of screen 2 */
-	UpdateDisplay(NULL);
+	UpdateDisplay();
 }
 
 /* Switch to the other screen, clear the previous screen, and perform other functions */
-void UpdateDisplay(void (*callback)(int waiting))
+void UpdateDisplay(void)
 {
 	static clock_t frame_clock;
 	uint8_t base, address, i, j;
 	clock_t current_clock;
 	register volatile uint8_t *p;
-
-	/* Provide a default if none given */
-	if (!callback)
-		callback = DefaultCallback;
 
 	/* Wait for the end of the frame based on clock cycles */
 	if (!frame_clock)
@@ -88,7 +97,7 @@ void UpdateDisplay(void (*callback)(int waiting))
 	else {
 		do {
 			/* While waiting for the end of the frame, do some work */
-			callback(FRAME_TO_FINISH);
+			DefaultCallback(FRAME_TO_FINISH);
 			/* Check if the frame is done */
 			current_clock = clock();
 			/* Check for rollover - not likely to happen but JIC! */
@@ -102,7 +111,7 @@ void UpdateDisplay(void (*callback)(int waiting))
 	/* Wait for the end of the current screen based on scan lines */
 	do
 		/* While waiting for the end of the current screen, do some work */
-		callback(SCREEN_TO_FINISH);
+		DefaultCallback(SCREEN_TO_FINISH);
 	while (((VERA_IEN & VERA_SCANLINE_H)? 256: 0) + VERA_IRQLINE_L < (VERA_VERT_RES * 2 - 1));
 
 	/* Set up the next screen */
@@ -440,103 +449,48 @@ void GetInput(VEHICLE *vehicle)
 	never exceed |32767|. Since these three routines are used
 	frequently, it is well worth the effort to optimize them. */
 
-/* Multiplication and division constants */
-#define BITS_PER_WORD	16
-#define SHIFT_MASK	0x8000
-
 /* Equivalent to (int16_t)((int32_t)num1 * num2 / denom) */
 int16_t MultiplyThenDivide(int16_t num1, int16_t num2, int16_t denom)
 {
-	uint32_t divisor, product;
-	uint16_t i, working;
-	int16_t result = 0, sign = 0, shifts = BITS_PER_WORD - 1;
+	uint8_t *p, *q, *r;
+	int32_t c;
 
-	if (num1 && num2 && denom) {
-		/* Normalize to positive */
-		if (num1 < 0) {
-			++sign;
-			num1 = -num1;
-		}
-		if (num2 < 0) {
-			++sign;
-			num2 = -num2;
-		}
-		if (denom < 0) {
-			++sign;
-			denom = -denom;
-		}
-		/* num1 * num2 to 32-bit product */
-		if (num1 > 1 && num2 > 1) {
-			/* Check if num2 or num1 are powers of two, e.g. for SpecialMultiply */
-			if (!(num2 & (num2 - 1))) {
-				product = num1;
-				while (num2 > 1) {
-					product <<= 1;
-					num2 >>= 1;
-				}
-			} else if (!(num1 & (num1 - 1))) {
-				product = num2;
-				while (num1 > 1) {
-					product <<= 1;
-					num1 >>= 1;
-				}
-			} else {
-				/* Regular multiply */
-				i = SHIFT_MASK;
-				product = 0;
-				while (i) {
-					product <<= 1;
-					if (i & num2)
-						product += num1;
-					i >>= 1;
-				}
-			}
-		} else
-			product = num1 > num2? num1: num2;
-		/* product / denom to 16-bit result */
-		if (denom > 1) {
-			/* Check for powers of two, e.g. for SpecialDivide */
-			if (!(denom & (denom - 1))) {
-				while (denom > 1) {
-					product >>= 1;
-					denom >>= 1;
-				}
-				result = product;
-			} else {
-				divisor = (uint32_t)denom;
-				/* Align */
-				while (divisor < product) {
-					divisor <<= 1;
-					--shifts;
-				}
-				i = SHIFT_MASK;
-				working = 0;
-				while (i) {
-					if (product >= divisor) {
-						product -= divisor;
-						working |= i;
-					}
-					product <<= 1;
-					i >>= 1;
-				}
-				working >>= shifts;
-				result = (int16_t)working;
-			}
-		} else
-			result = product;
-		if (sign & 1) result = -result;
-	}
-	return result;
-}
+	/* Using the VERA multiplier so representing the parameters as sequences of bytes */
+	p = (uint8_t *)&num1;
+	q = (uint8_t *)&num2;
+	r = (uint8_t *)&c;
 
-/* Equivalent to (int16_t)(((int32_t)num1 * num2) >> SHIFT_1_0) */
-int16_t SpecialMultiply(int16_t num1, int16_t num2)
-{
-	return MultiplyThenDivide(num1, num2, SCALE_1_0);
-}
+	/* Set up the multiplier */
+	VERA_CTRL = VERA_DCSEL_2;
+	VERA_FX_MULT = VERA_FX_MULTIPLIER;
 
-/* Equivalent to (int16_t)(((int32_t)num << SHIFT_1_0) / denom) */
-int16_t SpecialDivide(int16_t num, int16_t denom)
-{
-	return MultiplyThenDivide(num, SCALE_1_0, denom);
+	/* Set the operands */
+	VERA_CTRL = VERA_DCSEL_6;
+	VERA_FX_CACHE_L = p[0];
+	VERA_FX_CACHE_M = p[1];
+	VERA_FX_CACHE_H = q[0];
+	VERA_FX_CACHE_U = q[1];
+
+	/* Set to write in unused space between the screens */
+	VERA_CTRL = VERA_DCSEL_2 | VERA_ADDR_0;
+	VERA_FX_CTRL = VERA_FX_CACHE_WRITE;
+	VERA_ADDRx_L = 0x00;
+	VERA_ADDRx_M = VERA_UNUSED_ADDR;
+	VERA_ADDRx_H = 0x00;
+
+	/* Trigger the multiply */
+	VERA_DATA0 = 0x00;
+
+	/* Save the result */
+	VERA_ADDRx_H = VERA_INC_1;
+	r[0] = VERA_DATA0;
+	r[1] = VERA_DATA0;
+	r[2] = VERA_DATA0;
+	r[3] = VERA_DATA0;
+
+	/* Restore */
+	VERA_FX_CTRL = VERA_TRADITIONAL;
+
+	/* Unfortunately, no VERA divider (yet!) */
+	return (int16_t)(c / denom);
 }

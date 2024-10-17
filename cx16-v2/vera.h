@@ -7,6 +7,8 @@
 #ifndef _VERA_H
 #define _VERA_H
 
+#include <stdint.h>
+
 #define VERA_ADDRx_L		(*((uint8_t *)0x9F20))
 #define VERA_ADDRx_M		(*((uint8_t *)0x9F21))
 #define VERA_ADDRx_H		(*((uint8_t *)0x9F22))
@@ -66,15 +68,25 @@
 #define VERA_FX_POLY_FILL_L	(*((const uint8_t *)0x9F2B))
 #define VERA_FX_POLY_FILL_H	(*((const uint8_t *)0x9F2C))
 
+/* DCSEL = 6 */
+#define VERA_DCSEL_6		(0x06 << 1)
+#define VERA_FX_CACHE_L		(*((uint8_t *)0x9F29))
+#define VERA_FX_CACHE_M		(*((uint8_t *)0x9F2A))
+#define VERA_FX_CACHE_H		(*((uint8_t *)0x9F2B))
+#define VERA_FX_CACHE_U		(*((uint8_t *)0x9F2C))
+
 /* Various settings */
 #define VERA_ADDR_0		0x00
 #define VERA_ADDR_1		0x01
 
 #define VERA_16_COLOR_MODE	0x06
 #define VERA_SCANLINE_H		0x40
+
 #define VERA_TRADITIONAL	0x00
-#define VERA_FX_4_BIT_MODE	0x04
 #define VERA_FX_LINE_HELPER	0x01
+#define VERA_FX_4_BIT_MODE	0x04
+#define VERA_FX_MULTIPLIER	0x10
+#define VERA_FX_CACHE_WRITE	0x40
 
 #define VERA_ADV_BY_160		0xD0
 #define VERA_ADV_BY_0_5		0x04
@@ -89,6 +101,7 @@
 #define VERA_SCR_1_ADDR		(VERA_SCR_1_BASE << 1)
 #define VERA_SCR_2_BASE		0x4C
 #define VERA_SCR_2_ADDR		(VERA_SCR_2_BASE << 1)
+#define VERA_UNUSED_ADDR	(VERA_SCR_2_ADDR - 2)
 
 #define VERA_PX_PER_BYTE	2
 

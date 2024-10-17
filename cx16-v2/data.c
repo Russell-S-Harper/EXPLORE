@@ -39,17 +39,17 @@ const char *strings0[] = {
 const char *vertices0 = "!#$%&*+";
 
 const char *arenas0[] = {
-	/* Arena 1 - room */
+	/* Arena 1 - welcome */
 	"+--------------+"
 	"|              |"
 	"|              |"
 	"|              |"
 	"|   #------#   |"
 	"|   |      |   |"
-	"|   |      |   |"
-	"|   |      |   |"
-	"|   |      |   |"
-	"|   |      |   |"
+	"|   #      #   |"
+	"|              |"
+	"|              |"
+	"|   #      #   |"
 	"|   |      |   |"
 	"|   #------#   |"
 	"|              |"
@@ -61,14 +61,14 @@ const char *arenas0[] = {
 	"|              |"
 	"|              |"
 	"|              |"
-	"|  #        &  |"
-	"|  |  $  %  |  |"
+	"|  #        #  |"
+	"|  |  %  %  |  |"
 	"|  |  |  |  |  |"
 	"|  |  |  |  |  |"
 	"|  |  |  |  |  |"
 	"|  |  |  |  |  |"
-	"|  |  $  %  |  |"
-	"|  #        &  |"
+	"|  |  %  %  |  |"
+	"|  #        #  |"
 	"|              |"
 	"|              |"
 	"|              |"
@@ -77,16 +77,16 @@ const char *arenas0[] = {
 	"+--------------+"
 	"|              |"
 	"|              |"
-	"|  *--------*  |"
+	"|  +        +  |"
 	"|  |        |  |"
 	"|  |        |  |"
-	"|  *--------*  |"
+	"|  +--------+  |"
 	"|              |"
 	"|              |"
-	"|  *--------*  |"
+	"|  +--------+  |"
 	"|  |        |  |"
 	"|  |        |  |"
-	"|  *--------*  |"
+	"|  +        +  |"
 	"|              |"
 	"|              |"
 	"+--------------+",
@@ -100,10 +100,10 @@ const char *arenas0[] = {
 	"|    $----$    |"
 	"|              |"
 	"|              |"
-	"|    #----#    |"
+	"|    $----$    |"
 	"|              |"
 	"|              |"
-	"|   %------%   |"
+	"|   &------&   |"
 	"|              |"
 	"|              |"
 	"+--------------+",
@@ -111,32 +111,32 @@ const char *arenas0[] = {
 	"+--------------+"
 	"|              |"
 	"|              |"
-	"|     $  &     |"
-	"|     |  |     |"
-	"|     |  |     |"
-	"|  $--$  &--&  |"
-	"|              |"
-	"|              |"
-	"|  !--!  %--%  |"
-	"|     |  |     |"
-	"|     |  |     |"
-	"|     !  %     |"
+	"|     $        |"
+	"|     |        |"
+	"|     |        |"
+	"|     |        |"
+	"|  $--$        |"
+	"|        $--$  |"
+	"|        |     |"
+	"|        |     |"
+	"|        |     |"
+	"|        $     |"
 	"|              |"
 	"|              |"
 	"+--------------+",
-	/* Arena 6 - empty */
+	/* Arena 6 - pillars */
 	"+--------------+"
 	"|              |"
 	"|              |"
 	"|              |"
+	"|      **      |"
+	"|      **      |"
 	"|              |"
 	"|              |"
 	"|              |"
 	"|              |"
-	"|              |"
-	"|              |"
-	"|              |"
-	"|              |"
+	"|      **      |"
+	"|      **      |"
 	"|              |"
 	"|              |"
 	"|              |"
@@ -187,7 +187,7 @@ static void OutputStrings(FILE *ofile)
 	const char **strings = strings0;
 	int16_t t, u, length, max, count = sizeof(strings0) / sizeof(char *);
 
-	fputs("\nError Messages\n", stdout);
+	fputs("\nError Messages ", stdout);
 	fputc(CODE_EM, ofile);
 	/* Get the longest string */
 	for (t = 0, max = 0; t < count; ++t) {
@@ -205,6 +205,7 @@ static void OutputStrings(FILE *ofile)
 		for (u = length; u < max; ++u)
 			fputc('\0', ofile);
 	}
+	fputs("done\n", stdout);
 }
 
 static void OutputTrigData(FILE *ofile)
@@ -216,13 +217,13 @@ static void OutputTrigData(FILE *ofile)
 	fputs("Trig Data ", stdout);
 	fputc(CODE_TD, ofile);
 	d = 0.0;
-	i = 2.0 * DCPI / FULL_CIRC;
-	for (t = 0; t < FULL_CIRC; ++t, d += i) {
+	i = 2.0 * DCPI / SCALE_FC;
+	for (t = 0; t < SCALE_FC; ++t, d += i) {
 		tmp = (int16_t)(sin(d) * SCALE_1_0);
 		fwrite(&tmp, sizeof(int16_t), 1, ofile);
 		if (t % 32 == 31) fputc('*', stdout);
 	}
-	fputc('\n', stdout);
+	fputs(" done\n", stdout);
 }
 
 static void OutputArenaData(FILE *ofile)
@@ -258,7 +259,7 @@ static void OutputArenaData(FILE *ofile)
 		OutputArenaSegments(arenas0[t], V, segments + 1, ofile);
 		fputc('*', stdout);
 	}
-	fputc('\n', stdout);
+	fputs(" done\n", stdout);
 }
 
 static void OutputArena16x16(const char *arena, FILE *ofile)
@@ -433,11 +434,11 @@ static int CompareVertices(const void *p, const void *q)
 	int16_t result;
 	const VERTEX *a = p, *b = q;
 
-	result = a->x - b->x;
+	result = a->z - b->z;
+	if (!result)
+		result = a->x - b->x;
 	if (!result)
 		result = a->y - b->y;
-	if (!result)
-		result = a->z - b->z;
 
 	return (int)result;
 }

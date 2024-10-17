@@ -75,8 +75,8 @@ static void InitData(char *file)
 					GetData(GetXMAddress(string_data, t), size, ifile);
 				break;
 			case CODE_TD:
-				trig_data = AllocXM(FULL_CIRC, sizeof(int16_t));
-				GetData(GetXMAddressInitial(trig_data), sizeof(int16_t) * FULL_CIRC, ifile);
+				trig_data = AllocXM(SCALE_FC, sizeof(int16_t));
+				GetData(GetXMAddressInitial(trig_data), sizeof(int16_t) * SCALE_FC, ifile);
 				break;
 			case CODE_AD:
 				GetData(&count, sizeof(int16_t), ifile);
@@ -108,23 +108,25 @@ static void InitVehicles(void)
 	int i;
 
 	for (i = 0; i < VEHICLE_COUNT; ++i) {
-		vehicles[i].x = MAX_XYZ >> 1;
-		vehicles[i].y = MAX_XYZ >> 1;
-		vehicles[i].z = MIN_XYZ << 1;
+		vehicles[i].angle = (i << (SHIFT_FC - 2)) + (SCALE_FC / 8);
 		vehicles[i].sin = Sin(vehicles[i].angle);
 		vehicles[i].cos = Cos(vehicles[i].angle);
+		vehicles[i].x = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicles[i].sin);
+		vehicles[i].y = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicles[i].cos);
+		vehicles[i].z = MIN_XYZ;
+		vehicles[i].airborne = true;
 	}
 }
 
 /* Convenience methods to return Sin/Cos from lookup */
 int16_t Sin(int16_t angle)
 {
-	return GetXMDirectSigned(trig_data, angle & (FULL_CIRC-1));
+	return GetXMDirectSigned(trig_data, angle & (SCALE_FC-1));
 }
 
 int16_t Cos(int16_t angle)
 {
-	return GetXMDirectSigned(trig_data, (angle + FULL_CIRC/4) & (FULL_CIRC-1));
+	return GetXMDirectSigned(trig_data, (angle + SCALE_FC/4) & (SCALE_FC-1));
 }
 
 /* Convenience method to output numbers for debugging purposes without loading in the entire stdio library! */
