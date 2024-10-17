@@ -22,9 +22,9 @@ So from the mid 1980s to the present day, went from the 6502, to the 68K, then t
 
 ## DOSBox
 
-This is the original demo from 1992. I was still learning ANSI C at the time, so the code is not very good! As I port over functionality to the CX16 demo, I'm trying to clean it up and optimize it, before continuing with more functionality. Some places I'm really going to have to work to figure it out! Because the code was ported from a 68K base where it had a lot of registers available, the original code still has remnants of these keywords, as well as a lot of other strange ideas I had at the time.
+This is the original demo from 1992. I was still learning ANSI C at the time, so the code is not very good! As I port over functionality to the CX16 demo, I’m trying to clean it up and optimize it, before continuing with more functionality. Some places I’m really going to have to work to figure it out! Because the code was ported from a 68K base where it had a lot of registers available, the original code still has remnants of these keywords, as well as a lot of other strange ideas I had at the time.
 
-To run the original demo, install [DOSBox](https://www.dosbox.com/), run it, mount a drive to point to `«explore-repo»/dosbox/bin`, and run `rgntest.exe`. Suggest running at least at 5 frames/s, i.e. press CTRL-F12 until it's fast enough. Here's a [video](https://www.youtube.com/watch?v=XTOIfkqW9O0) of it in action.
+To run the original demo, install [DOSBox](https://www.dosbox.com/), run it, mount a drive to point to `«explore-repo»/dosbox/bin`, and run `rgntest.exe`. Suggest running at least at 5 frames/s, i.e. press CTRL-F12 until it’s fast enough. Here’s a [video](https://www.youtube.com/watch?v=XTOIfkqW9O0) of it in action.
 
 Controls:
 
@@ -36,9 +36,9 @@ Controls:
 - escape: pause, press again to resume
 - CTRL-Q: quit, then displays a histogram<sup>†</sup> of how long it took to render all the frames
 
-To build the original demo, you'll probably need Turbo C++. I distilled some original batch scripts into a sequence that might work as `«explore-repo»/dosbox/src/build.bat`, but no guarantees. It's not huge on my list of priorities!
+To build the original demo, you’ll probably need Turbo C++. I distilled some original batch scripts into a sequence that might work as `«explore-repo»/dosbox/src/build.bat`, but no guarantees. It’s not huge on my list of priorities!
 
-† The histogram is in units of 13.7 ms (1/72.82 Hz), so to get 5 frames/s (or 0.20 s/frame), you'll want the peak at 15 units or less.
+† The histogram is in units of 13.7 ms (1/72.82 Hz), so to get 5 frames/s (or 0.20 s/frame), you’ll want the peak at 15 units or less.
 
 ## CX16 – v1. Masking Approach
 
@@ -49,11 +49,11 @@ Completed the following:
 - loads pre-calculated data into extended memory
 - renders masked polygons
 
-As compared to the original demo running in DOSBox, even a very simplified demo is very slow. It was originally taking 1.30 s/frame and was brought down to 0.66 s/frame but it's still far from the 0.20 s/frame goal. After optimizing and calculating durations, this is how long each task takes per frame in the very simplified demo:
+As compared to the original demo running in DOSBox, even a very simplified demo is very slow. It was originally taking 1.30 s/frame and was brought down to 0.66 s/frame but it’s still far from the 0.20 s/frame goal. After optimizing and calculating durations, this is how long each task takes per frame in the very simplified demo:
 
 - `282 ms` – callback logic, for every point, a callback is made so it can check against the mask whether to plot the point; also polygons keep track of the left and right sides; the mask is very large, so it has to be maintained in extended memory, a lot of effort went into optimizing this
 - ` 33 ms` – callback call overhead, this is the time spent just making the calls
-- `282 ms` – drawing lines, these are the loops to draw lines using Bresenham’s Line Generation algorithm; I couldn't use the built-ins because: 16-color & 2 pixels/byte, and need to invoke a callback for each point
+- `282 ms` – drawing lines, these are the loops to draw lines using Bresenham’s Line Generation algorithm; I couldn’t use the built-ins because: 16-color & 2 pixels/byte, and need to invoke a callback for each point
 - ` 17 ms` – rotating the points, sin and cos are pre-calculated, so this saves a lot
 - ` 50 ms` – baseline, these are routines to manage the dual screens: swapping and clearing, and clearing some of the mask
 
@@ -67,37 +67,35 @@ Suppose the complexity of the image is tripled, i.e. three horizon lines and six
 
 To achieve 5 frames/s, that corresponds to a budget of 0.20 s/frame or 200 ms/frame. However note that just the *callback call overhead* + *rotating the points* + *baseline* already adds up to 200 ms! All of these have been significantly optimized, so even if everything was written in 6502 assembly, there would not be enough improvement expected.
 
-### In summary, while rendering polygons using masking is an elegant solution and provides a lot of flexibility, it isn't appropriate for this platform!
+### In summary, while rendering polygons using masking is an elegant solution and provides a lot of flexibility, it isn’t appropriate for this platform!
 
-Should you want to build the demo, you'll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
+Should you want to build the demo, you’ll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
 Edit the `«flt-repo»/flt/build-cc65` script to point `XCC` to where the ***cc65*** repo is located, and run the script to build the `flt.lib` library.
 
 Then edit the `«explore-repo»/cx16-v1/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `explore.prg` and `data.prg`.
 
-Run the emulator, then load and run `data.prg` to generate the `explore.dat` data file, and then load and run `explore.prg` to run the demo. A word of warning, you'll likely be underwhelmed! Once `explore.dat` is created, you don't need to run `data.prg` again, unless you change `«explore-repo»/cx16-v1/data.c`.
+Run the emulator, then load and run `data.prg` to generate the `explore.dat` data file, and then load and run `explore.prg` to run the demo. A word of warning, you’ll likely be underwhelmed! Once `explore.dat` is created, you don’t need to run `data.prg` again, unless you change `«explore-repo»/cx16-v1/data.c`.
 
-The only controls are escape to pause (!) and Q to quit, or you can just wait an eternity for 100 frames to finish. Depending on what I'm optimizing, it might print some timing statistics in `clock` units.
+The only controls are escape to pause (!) and Q to quit, or you can just wait an eternity for 100 frames to finish. Depending on what I’m optimizing, it might print some timing statistics in `clock` units.
 
-Here's a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of the very simplified demo running at 0.66 s/frame.
+Here’s a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of the very simplified demo running at 0.66 s/frame.
 
 ## CX16 – v2. VERA Approach
 
-VERA is a display co-processor used in the CX16. It has a new feature, "FX", which provides helpers to improve line drawing, polygon filling, and other functions. Using the line drawing helper, I was able to implement 16-color line drawing routines such that, even written in C and implementing clipping, they still run in about 80% of the time required by the 256-color line drawing routines in TGI. As an aside, the line drawing routines in `cx16-v1` using Bresenham's algorithm took 3× the time to run than the TGI drawing routines, so a huge improvement gain using VERA.
+VERA is a display co-processor used in the CX16. It has a new feature, "FX", which provides helpers to improve line drawing, polygon filling, and other functions. Using the line drawing helper, I was able to implement 16-color line drawing routines such that, even written in C and implementing clipping, they still run in about 80% of the time required by the 256-color line drawing routines in TGI. As an aside, the line drawing routines in `cx16-v1` using Bresenham’s algorithm took 3× the time to run than the TGI drawing routines, so a huge improvement gain using VERA.
 
-V2 takes a different perspective looking overhead into an arena setting with walls and rooms. There's no masking, just lines. Here's a [video](https://youtube.com/watch?v=RPV9IS4tWk4) of a simple room-with-a-room setting. You can see it chugging at 4 frames/s in some places, whick is too slow. Something like 5 frames/s would be satisfactory, but to get that will have to simplify the setting to something even more abstract. An alternative would be to make the viewing area smaller, but that's not somewhere I'd like to go just yet.
+V2 takes a different perspective looking overhead into an arena setting with walls and rooms. There’s no masking, just lines. Here’s a [video](https://youtube.com/watch?v=o9vB4gN9Nhg) of some sample settings. By using the multiplier in VERA, the frame rate was increased from the initial 4.0 frames/s to 8.5 frames/s. Given that 5.0 frames/s is acceptable, there’s lots of room to add more details. I have a game in mind, a recreation of something I wrote a long time ago – unfortunately the original is lost to history…
 
-I have a game in mind, a recreation of something I wrote a long time ago – unfortunately the original is lost to history…
-
-As in `cx16-v1`, should you want to build the demo, you'll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
+As in `cx16-v1`, should you want to build the demo, you’ll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
 Edit the `«flt-repo»/flt/build-cc65` script to point `XCC` to where the ***cc65*** repo is located, and run the script to build the `flt.lib` library.
 
 Then edit the `«explore-repo»/cx16-v2/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `explore.prg` and `data.prg`.
 
-Run the emulator, then load and run `data.prg` to generate the `explore.dat` data file, and then load and run `explore.prg` to run the demo. Once `explore.dat` is created, you don't need to run `data.prg` again, unless you change `«explore-repo»/cx16-v2/data.c`.
+Run the emulator, then load and run `data.prg` to generate the `explore.dat` data file, and then load and run `explore.prg` to run the demo. Once `explore.dat` is created, you don’t need to run `data.prg` again, unless you change `«explore-repo»/cx16-v2/data.c`.
 
-The only controls are escape to pause and Q to quit. Depending on what I'm optimizing, it might print some timing statistics in `clock` units.
+The only controls are escape to pause and Q to quit. Depending on what I’m optimizing, it might print some timing statistics in `clock` units.
 
 ## License
 
