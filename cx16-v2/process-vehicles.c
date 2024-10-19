@@ -52,6 +52,11 @@ void ProcessVehicles(void)
 		player->x = x;
 		player->y = y;
 	}
+	/* Can't move? Try sliding! */
+	else if (z >= arena[ArenaIndex(player->x, y)])
+		player->y = y;
+	else if (z >= arena[ArenaIndex(x, player->y)])
+		player->x = x;
 
 	if (z >= arena[ArenaIndex(player->x, player->y)])
 		player->z = z;

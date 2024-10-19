@@ -13,7 +13,7 @@
 #include "common.h"
 #include "xm.h"
 
-#define MAX_XYZ			16384
+#define MAX_XYZ			16383
 #define MIN_XYZ			0
 
 #define VEHICLE_COUNT		4

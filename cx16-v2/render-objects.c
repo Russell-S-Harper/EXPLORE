@@ -48,7 +48,7 @@ void RenderObjects(void)
 	for (; segment->index_from != segment->index_to; ++segment) {
 		p1 = working + segment->index_from;
 		p2 = working + segment->index_to;
-		DrawLineFromTo16(p1->x, p1->y, p2->x, p2->y, CLR16_ORANGE);
+		DrawLineFromTo16(p1->x, p1->y, p2->x, p2->y, CLR16_BLUE);
 	}
 
 	DrawLineFromTo16(w - 12, h - 12, w + 12, h + 12, CLR16_WHITE);
