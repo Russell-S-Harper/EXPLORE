@@ -30,15 +30,15 @@
 */
 #define FRAMES_PER_SEC	8
 
-/* Keyboard defines used in GetInput */
-#define PAUSE_PROGRAM	27	/* escape: pause/unpause program */
-#define REQ_CLIMB	145	/* cursor up: climb */
-#define REQ_DIVE	17	/* cursor down: dive */
-#define TURN_RIGHT	29	/* cursor right: turn right */
-#define TURN_LEFT	157	/* cursor left: turn left */
-#define FIRE_MISSILE	20	/* space: fire missile */
-#define CYCLE_PLAYER	49	/* 1: cycle player */
-#define QUIT_PROGRAM	81	/* Q: quit program */
+/* Keyboard defines used in GetPlayerInput */
+#define PAUSE_PROGRAM		27	/* escape: pause/unpause program */
+#define REQ_CLIMB_OR_GEAR_FWD	145	/* cursor up: climb or gear forward */
+#define REQ_DIVE_OR_GEAR_REV	17	/* cursor down: dive or gear reverse */
+#define TURN_RIGHT		29	/* cursor right: turn right */
+#define TURN_LEFT		157	/* cursor left: turn left */
+#define FIRE_MISSILE		20	/* space: fire missile */
+#define CYCLE_PLAYER		49	/* 1: cycle player */
+#define QUIT_PROGRAM		81	/* Q: quit program */
 
 /* Hex digit defines */
 #define HEX_DGT_HI	0xF0
@@ -399,7 +399,7 @@ int16_t Minimum(int16_t a, int16_t b) { return a < b? a: b; }
 int16_t Maximum(int16_t a, int16_t b) { return a > b? a: b; }
 
 /* Processes keyboard/joystick (pending) input */
-void GetInput(VEHICLE *vehicle)
+void GetPlayerInput(VEHICLE *vehicle)
 {
 	/* Process keyboard input */
 	while (kbhit()) {
@@ -411,12 +411,18 @@ void GetInput(VEHICLE *vehicle)
 				while (cgetc() != PAUSE_PROGRAM);
 				break;
 
-			case REQ_CLIMB:
-				vehicle->z_delta += 1;
+			case REQ_CLIMB_OR_GEAR_FWD:
+				if (vehicle->airborne)
+					vehicle->z_delta += 1;
+				else
+					vehicle->gear += 1;
 				break;
 
-			case REQ_DIVE:
-				vehicle->z_delta -= 1;
+			case REQ_DIVE_OR_GEAR_REV:
+				if (vehicle->airborne)
+					vehicle->z_delta -= 1;
+				else
+					vehicle->gear -= 1;
 				break;
 
 			case TURN_RIGHT:
@@ -445,9 +451,8 @@ void GetInput(VEHICLE *vehicle)
 }
 
 /* The program insures that the values passed to and returned
-	from MultiplyThenDivide, SpecialMultiply and SpecialDivide
-	never exceed |32767|. Since these three routines are used
-	frequently, it is well worth the effort to optimize them. */
+	from MultiplyThenDivide never exceed |32767|. Since this routine
+	is used frequently, it is well worth the effort to optimize it. */
 
 /* Equivalent to (int16_t)((int32_t)num1 * num2 / denom) */
 int16_t MultiplyThenDivide(int16_t num1, int16_t num2, int16_t denom)

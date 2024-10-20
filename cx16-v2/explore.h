@@ -21,7 +21,7 @@
 
 typedef struct {
 	bool airborne, fire_missile;
-	int8_t z_delta, angle_delta;
+	int8_t z_delta, angle_delta, gear;
 	int16_t x, y, z, angle, sin, cos;
 } VEHICLE;
 
@@ -51,7 +51,7 @@ void PlotPoint16(int16_t x, int16_t y, uint8_t color);
 void ErasePoint16(int16_t x, int16_t y);
 
 /* Keyboard/joystick routine defined in cx16-specific.c and called by ProcessVehicle */
-void GetInput(VEHICLE *p);
+void GetPlayerInput(VEHICLE *p);
 
 /* Other routines called throughout the program */
 int16_t Minimum(int16_t a, int16_t b);

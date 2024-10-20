@@ -114,7 +114,6 @@ static void InitVehicles(void)
 		vehicles[i].x = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicles[i].sin);
 		vehicles[i].y = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicles[i].cos);
 		vehicles[i].z = MIN_XYZ;
-		vehicles[i].airborne = true;
 	}
 }
 

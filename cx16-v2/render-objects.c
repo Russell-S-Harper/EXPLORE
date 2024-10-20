@@ -16,7 +16,7 @@ void RenderObjects(void)
 {
 	static POINT *working;
 	char *xm;
-	int16_t h, w, scale, dx, dy, dz, last_dz;
+	int16_t h, w, dx, dy, dz, last_dz, scale;
 	POINT *point, *p1, *p2;
 	VERTEX *vertex;
 	SEGMENT *segment;
