@@ -19,10 +19,14 @@
 #define VEHICLE_COUNT		4
 #define PLAYER_INDEX		0
 
+/* How +/- close in height needed to be considered targetable */
+#define VEHICLE_Z_TOLERANCE	191
+
 typedef struct {
 	bool airborne, fire_missile;
 	int8_t z_delta, angle_delta, gear;
 	int16_t x, y, z, angle, sin, cos;
+	XM_HANDLE appearance;
 } VEHICLE;
 
 enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
@@ -63,7 +67,8 @@ int16_t Cos(int16_t angle);
 extern XM_HANDLE
 	string_data,
 	trig_data,
-	arena_data;
+	arena_data,
+	*vehicle_data;
 
 extern VEHICLE
 	vehicles[VEHICLE_COUNT];
@@ -77,8 +82,10 @@ extern uint16_t
 
 extern int16_t
 	arena_index,
-	max_segments,
-	max_vertices,
-	vehicle_index;
+	max_arena_segments,
+	max_arena_vertices,
+	vehicle_index,
+	max_vehicle_segments,
+	max_vehicle_vertices;
 
 #endif /* _EXPLORE_H */

@@ -13,7 +13,8 @@
 XM_HANDLE
 	string_data,
 	trig_data,
-	arena_data;
+	arena_data,
+	*vehicle_data;
 
 VEHICLE
 	vehicles[VEHICLE_COUNT];
@@ -27,9 +28,11 @@ uint16_t
 
 int16_t
 	arena_index,
-	max_segments,
-	max_vertices,
-	vehicle_index;
+	max_arena_segments,
+	max_arena_vertices,
+	vehicle_index,
+	max_vehicle_segments,
+	max_vehicle_vertices;
 
 /* Internal functions */
 
@@ -83,10 +86,21 @@ static void InitData(char *file)
 				GetData(&size, sizeof(int16_t), ifile);
 				arena_data = AllocXM(count, size);
 				arena_index = 0;
-				GetData(&max_vertices, sizeof(int16_t), ifile);
-				GetData(&max_segments, sizeof(int16_t), ifile);
+				GetData(&max_arena_vertices, sizeof(int16_t), ifile);
+				GetData(&max_arena_segments, sizeof(int16_t), ifile);
 				for (t = 0; t < count; ++t)
 					GetData(GetXMAddress(arena_data, t), size, ifile);
+				break;
+			case CODE_VD:
+				GetData(&count, sizeof(int16_t), ifile);
+				GetData(&size, sizeof(int16_t), ifile);
+				vehicle_data = malloc(sizeof(XM_HANDLE) * count);
+				for (t = 0; t < count; ++t)
+					vehicle_data[t] = AllocXM(1, size);
+				GetData(&max_vehicle_vertices, sizeof(int16_t), ifile);
+				GetData(&max_vehicle_segments, sizeof(int16_t), ifile);
+				for (t = 0; t < count; ++t)
+					GetData(GetXMAddressInitial(vehicle_data[t]), size, ifile);
 				break;
 			case CODE_EF:
 				fclose(ifile);
@@ -114,6 +128,8 @@ static void InitVehicles(void)
 		vehicles[i].x = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicles[i].sin);
 		vehicles[i].y = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicles[i].cos);
 		vehicles[i].z = MIN_XYZ;
+		vehicles[i].appearance = vehicle_data[0];
+		vehicles[i].airborne = !i;
 	}
 }
 
@@ -128,7 +144,7 @@ int16_t Cos(int16_t angle)
 	return GetXMDirectSigned(trig_data, (angle + SCALE_FC/4) & (SCALE_FC-1));
 }
 
-/* Convenience method to output numbers for debugging purposes without loading in the entire stdio library! */
+/* Convenience method to output numbers for debugging purposes without linking in the entire stdio library! */
 void OutputAsNumber(char prefix, int16_t value)
 {
 	int16_t i;
@@ -141,15 +157,17 @@ void OutputAsNumber(char prefix, int16_t value)
 		value = -value;
 		fputc('-', stdout);
 	}
-	/* Add 1 to account for bias */
-	for (value += 1, i = 10000; i > 0; i /= 10) {
+	/* Output each digit */
+	for (i = 10000; i > 1; i /= 10) {
 		c = '0';
-		while (value > i) {
+		while (value >= i) {
 			++c;
 			value -= i;
 		}
 		fputc(c, stdout);
 	}
+	/* Last digit */
+	fputc('0' + value, stdout);
 	fputc('\n', stdout);
 }
 

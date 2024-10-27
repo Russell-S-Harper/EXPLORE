@@ -9,7 +9,7 @@
 #define ANGLE_DELTA_SHIFT	1
 #define XY_AIR_DELTA_SHIFT	4
 #define XY_GND_DELTA_SHIFT	7
-#define Z_DELTA_SHIFT		7
+#define Z_DELTA_SHIFT		6
 
 #define MAX_GEAR		2
 #define MIN_GEAR		-1
@@ -32,7 +32,7 @@ void ProcessVehicles(void)
 		if (i == PLAYER_INDEX)
 			GetPlayerInput(player);
 
-		/* Important: "bump up" if a wall was created underneath */
+		/* Important: "bump" if a wall was created or removed underneath */
 		z = arena[ArenaIndex(player->x, player->y)];
 		if (player->z < z || !player->airborne)
 			player->z = z;
@@ -97,5 +97,5 @@ void ProcessVehicles(void)
 		if (z >= arena[ArenaIndex(player->x, player->y)])
 			player->z = z;
 	}
-	/* TODO: process every missle */
+	/* TODO: process every missile */
 }

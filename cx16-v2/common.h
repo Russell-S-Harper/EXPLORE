@@ -14,14 +14,18 @@
 #define SCALE_1_0	4096		/* Equivalent to 1.0 in some contexts */
 #define SHIFT_1_0	12		/* log2(SCALE_1_0) */
 
-/* Arenas are confined to cubes of size 16384 = (X|Y|Z)_LIMIT * 1024 */
-#define X_LIMIT		16
-#define Y_LIMIT		16
-#define Z_LIMIT		16
+/* Arenas are confined to cubes of size 16384 = ARENA_(X|Y|Z)_LIMIT * 1024 */
+#define ARENA_X_LIMIT		16
+#define ARENA_Y_LIMIT		16
+#define ARENA_Z_LIMIT		16
+
+/* Vehicle resolutions when rendering */
+#define VEHICLE_HGTS		8
+#define VEHICLE_DIRS		32
 
 typedef struct {int16_t x, y, z;} VERTEX;
-typedef struct {int16_t index_from, index_to;} SEGMENT;
 typedef struct {int16_t x, y;} POINT;
+typedef struct {int16_t index_from, index_to;} SEGMENT;
 
 /* Errors
 
@@ -41,9 +45,10 @@ enum {ERR_FO, ERR_FC, ERR_XM, ERR_GI, ERR_OB, ERR_DC, ERR_NO};
 	CODE_EM: error messages
 	CODE_TD: trig data
 	CODE_AD: arena data
+	CODE_VD: vehicle data
 	CODE_EF: end-of-file
 */
-enum {CODE_ID, CODE_EM, CODE_TD, CODE_AD, CODE_EF};
+enum {CODE_ID, CODE_EM, CODE_TD, CODE_AD, CODE_VD, CODE_EF};
 
 /* Colors */
 enum {CLR16_BLACK, CLR16_WHITE, CLR16_RED, CLR16_CYAN,

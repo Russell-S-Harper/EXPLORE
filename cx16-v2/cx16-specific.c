@@ -28,7 +28,7 @@
 	21 - 30        | 30
 	31 - 60        | 60
 */
-#define FRAMES_PER_SEC	8
+#define FRAMES_PER_SEC	6
 
 /* Keyboard defines used in GetPlayerInput */
 #define PAUSE_PROGRAM		27	/* escape: pause/unpause program */
