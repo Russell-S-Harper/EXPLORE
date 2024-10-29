@@ -733,12 +733,13 @@ static void OutputVehicleSegments(const char *vehicle, OFFSET *vertices, int16_t
 
 static void OutputVehicleVertices(const char *vehicle, OFFSET *vertices, int16_t limit, FILE *ofile)
 {
+	static OFFSET *offsets = NULL;
 	static double *sines, *cosines;
-	int8_t tmp;
 	int16_t t, u, height, count;
 	double d, i, scale, x, y;
 
-	if (!sines || !cosines) {
+	if (!offsets) {
+		offsets = malloc(sizeof(OFFSET) * limit);
 		sines = malloc(sizeof(double) * VEHICLE_DIRS);
 		cosines = malloc(sizeof(double) * VEHICLE_DIRS);
 		d = 0.0;
@@ -757,15 +758,12 @@ static void OutputVehicleVertices(const char *vehicle, OFFSET *vertices, int16_t
 			for (u = 0; u < count; ++u) {
 				x = vertices[u].x - VEH_XY_OFFSET;
 				y = vertices[u].y - VEH_XY_OFFSET;
-				tmp = (cosines[t] * x - sines[t] * y) / scale;
-				fwrite(&tmp, sizeof(int8_t), 1, ofile);
-				tmp = (sines[t] * x + cosines[t] * y) / scale;
-				fwrite(&tmp, sizeof(int8_t), 1, ofile);
+				offsets[u].x = (cosines[t] * x - sines[t] * y) / scale;
+				offsets[u].y = (sines[t] * x + cosines[t] * y) / scale;
 			}
-			for (tmp = -1; u < limit; ++u) {
-				fwrite(&tmp, sizeof(int8_t), 1, ofile);
-				fwrite(&tmp, sizeof(int8_t), 1, ofile);
-			}
+			for (; u < limit; ++u)
+				offsets[u].x = offsets[u].y = -1;
+			fwrite(offsets, sizeof(OFFSET), limit, ofile);
 		}
 		fputc('*', stdout);
 	}
