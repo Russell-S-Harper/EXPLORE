@@ -129,7 +129,7 @@ static void InitVehicles(void)
 		vehicles[i].y = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicles[i].cos);
 		vehicles[i].z = MIN_XYZ;
 		vehicles[i].appearance = vehicle_data[0];
-		// vehicles[i].airborne = !i;
+		vehicles[i].airborne = !i;
 	}
 }
 

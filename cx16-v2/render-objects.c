@@ -12,7 +12,6 @@
 #define ARENA_XY_SHIFT		5
 
 /* Revise if VEHICLE_HGTS or VEHICLE_DIRS is changed */
-// #define VEHICLE_POINTS(dz, da)	((((((dz) + 16384) >> 7) & 0xE0) + (((da) >> 4) & 0x1F)) * sizeof(POINT) * max_vehicle_vertices)
 #define VEHICLE_POINTS(dz, da)	((((((dz) + 16384) >> 7) & 0xE0) + (((da) >> 4) & 0x1F)) * sizeof(OFFSET) * max_vehicle_vertices)
 
 static int CompareIndexedVehiclesByHeight(void *p, void *q);
