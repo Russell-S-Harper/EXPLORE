@@ -8,24 +8,25 @@
 #define _COMMON_H
 
 /* Constants */
-#define SCALE_FC	512		/* 512 corresponds to a Full Circle or 360 degrees */
-#define SHIFT_FC	9		/* log2(SCALE_FC) */
+#define SCALE_FC	512	/* 512 corresponds to a Full Circle or 360 degrees */
+#define SHIFT_FC	9	/* log2(SCALE_FC) */
 
-#define SCALE_1_0	4096		/* Equivalent to 1.0 in some contexts */
-#define SHIFT_1_0	12		/* log2(SCALE_1_0) */
+#define SCALE_1_0	4096	/* Equivalent to 1.0 in some contexts */
+#define SHIFT_1_0	12	/* log2(SCALE_1_0) */
 
 /* Arenas are confined to cubes of size 16384 = ARENA_(X|Y|Z)_LIMIT * 1024 */
-#define ARENA_X_LIMIT		16
-#define ARENA_Y_LIMIT		16
-#define ARENA_Z_LIMIT		16
+#define ARENA_X_LIMIT	16
+#define ARENA_Y_LIMIT	16
+#define ARENA_Z_LIMIT	16
 
 /* Vehicle resolutions when rendering */
-#define VEHICLE_HGTS		8
-#define VEHICLE_DIRS		32
+#define VEHICLE_HGTS	8
+#define VEHICLE_DIRS	32
 
 typedef struct {int16_t x, y, z;} VERTEX;
 typedef struct {int16_t x, y;} POINT;
 typedef struct {int16_t index_from, index_to;} SEGMENT;
+typedef struct {int8_t x, y;} OFFSET;
 
 /* Errors
 

@@ -17,8 +17,8 @@
 
 #define VEH_X_LIMIT		25
 #define VEH_Y_LIMIT		25
-#define MAX_VEH_VERTICES	6
-#define MAX_VEH_SEGMENTS	6
+#define MAX_VEH_VERTICES	6	/* Maximum V = 15 */
+#define MAX_VEH_SEGMENTS	6	/* Maximum S = V(V - 1)/2 */
 
 #define MIN_VEH_SCALE		0.5625
 #define MAX_VEH_SCALE		1.1250
@@ -329,12 +329,12 @@ static char ArenaCharacterAt(const char *arena, int16_t x, int16_t y);
 static int16_t IndexOfArenaVertex(VERTEX *vertices, VERTEX *vertex, int16_t count);
 static int CompareArenaVertices(const void *p, const void *q);
 
-static POINT *GetVehicleVertices(const char *vehicle, int16_t limit);
+static OFFSET *GetVehicleVertices(const char *vehicle, int16_t limit);
 static int16_t CountVehicleVertices(const char *vehicle);
-static void OutputVehicleSegments(const char *vehicle, POINT *vertices, int16_t limit, FILE *ofile);
-static void OutputVehicleVertices(const char *vehicle, POINT *vertices, int16_t limit, FILE *ofile);
+static void OutputVehicleSegments(const char *vehicle, OFFSET *vertices, int16_t limit, FILE *ofile);
+static void OutputVehicleVertices(const char *vehicle, OFFSET *vertices, int16_t limit, FILE *ofile);
 
-static bool VehicleVerticesAreConnected(const char *vehicle, POINT *v1, POINT *v2);
+static bool VehicleVerticesAreConnected(const char *vehicle, OFFSET *v1, OFFSET *v2);
 static char VehicleCharacterAt(const char *vehicle, int16_t x, int16_t y);
 static int CompareVehicleVertices(const void *p, const void *q);
 
@@ -632,7 +632,7 @@ static void OutputVehicleData(FILE *ofile)
 		"\n  7 ", "\n  8 ", "\n  9 ", "\n 10 ", "\n 11 ", "\n 12 "
 	};
 	int16_t t, tmp, vertices, segments;
-	POINT *V;
+	OFFSET *V;
 
 	/* Vehicle data */
 	fputs("Vehicle Data", stdout);
@@ -644,7 +644,7 @@ static void OutputVehicleData(FILE *ofile)
 	vertices = MAX_VEH_VERTICES;
 	segments = MAX_VEH_SEGMENTS;
 	/* Size of a vehicle data structure */
-	tmp = (segments + 1) * sizeof(SEGMENT) + vertices * sizeof(POINT) * VEHICLE_HGTS * VEHICLE_DIRS;
+	tmp = (segments + 1) * sizeof(SEGMENT) + vertices * sizeof(OFFSET) * VEHICLE_HGTS * VEHICLE_DIRS;
 	fwrite(&tmp, sizeof(int16_t), 1, ofile);
 	/* Max number of vertices */
 	fwrite(&vertices, sizeof(int16_t), 1, ofile);
@@ -674,14 +674,14 @@ static int16_t CountVehicleVertices(const char *vehicle)
 	return count;
 }
 
-static POINT *GetVehicleVertices(const char *vehicle, int16_t limit)
+static OFFSET *GetVehicleVertices(const char *vehicle, int16_t limit)
 {
-	static POINT *vertices = NULL;
+	static OFFSET *vertices = NULL;
 	char focus;
 	int16_t i, x, y;
 
 	if (!vertices)
-		vertices = malloc(sizeof(POINT) * limit);
+		vertices = malloc(sizeof(OFFSET) * limit);
 	for (y = 0, i = 0; y < VEH_Y_LIMIT; ++y) {
 		for (x = 0; x < VEH_X_LIMIT; ++x) {
 			focus = VehicleCharacterAt(vehicle, x, y);
@@ -697,7 +697,7 @@ static POINT *GetVehicleVertices(const char *vehicle, int16_t limit)
 		}
 	}
 	/* Sorting for easier searching later */
-	qsort(vertices, i, sizeof(POINT), CompareVehicleVertices);
+	qsort(vertices, i, sizeof(OFFSET), CompareVehicleVertices);
 	for (; i < limit; ++i)
 		vertices[i].y = vertices[i].x = -1;
 
@@ -705,7 +705,7 @@ static POINT *GetVehicleVertices(const char *vehicle, int16_t limit)
 	return vertices;
 }
 
-static void OutputVehicleSegments(const char *vehicle, POINT *vertices, int16_t limit, FILE *ofile)
+static void OutputVehicleSegments(const char *vehicle, OFFSET *vertices, int16_t limit, FILE *ofile)
 {
 	static SEGMENT *S = NULL;
 	int16_t i, j1, j2, count;
@@ -731,10 +731,11 @@ static void OutputVehicleSegments(const char *vehicle, POINT *vertices, int16_t 
 	fwrite(S, sizeof(SEGMENT), limit, ofile);
 }
 
-static void OutputVehicleVertices(const char *vehicle, POINT *vertices, int16_t limit, FILE *ofile)
+static void OutputVehicleVertices(const char *vehicle, OFFSET *vertices, int16_t limit, FILE *ofile)
 {
 	static double *sines, *cosines;
-	int16_t t, u, height, count, tmp;
+	int8_t tmp;
+	int16_t t, u, height, count;
 	double d, i, scale, x, y;
 
 	if (!sines || !cosines) {
@@ -757,20 +758,20 @@ static void OutputVehicleVertices(const char *vehicle, POINT *vertices, int16_t 
 				x = vertices[u].x - VEH_XY_OFFSET;
 				y = vertices[u].y - VEH_XY_OFFSET;
 				tmp = (cosines[t] * x - sines[t] * y) / scale;
-				fwrite(&tmp, sizeof(int16_t), 1, ofile);
+				fwrite(&tmp, sizeof(int8_t), 1, ofile);
 				tmp = (sines[t] * x + cosines[t] * y) / scale;
-				fwrite(&tmp, sizeof(int16_t), 1, ofile);
+				fwrite(&tmp, sizeof(int8_t), 1, ofile);
 			}
 			for (tmp = -1; u < limit; ++u) {
-				fwrite(&tmp, sizeof(int16_t), 1, ofile);
-				fwrite(&tmp, sizeof(int16_t), 1, ofile);
+				fwrite(&tmp, sizeof(int8_t), 1, ofile);
+				fwrite(&tmp, sizeof(int8_t), 1, ofile);
 			}
 		}
 		fputc('*', stdout);
 	}
 }
 
-static bool VehicleVerticesAreConnected(const char *vehicle, POINT *v1, POINT *v2)
+static bool VehicleVerticesAreConnected(const char *vehicle, OFFSET *v1, OFFSET *v2)
 {
 	double x1, y1, x2, y2, x3, y3;
 	int16_t x, y, count = 0;
@@ -823,8 +824,8 @@ static char VehicleCharacterAt(const char *vehicle, int16_t x, int16_t y)
 
 static int CompareVehicleVertices(const void *p, const void *q)
 {
-	int16_t result;
-	const POINT *a = p, *b = q;
+	int8_t result;
+	const OFFSET *a = p, *b = q;
 
 	result = a->x - b->x;
 	if (!result)

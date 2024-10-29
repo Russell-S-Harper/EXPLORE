@@ -12,7 +12,8 @@
 #define ARENA_XY_SHIFT		5
 
 /* Revise if VEHICLE_HGTS or VEHICLE_DIRS is changed */
-#define VEHICLE_POINTS(dz, da)	((((((dz) + 16384) >> 7) & 0xE0) + (((da) >> 4) & 0x1F)) * sizeof(POINT) * max_vehicle_vertices)
+// #define VEHICLE_POINTS(dz, da)	((((((dz) + 16384) >> 7) & 0xE0) + (((da) >> 4) & 0x1F)) * sizeof(POINT) * max_vehicle_vertices)
+#define VEHICLE_POINTS(dz, da)	((((((dz) + 16384) >> 7) & 0xE0) + (((da) >> 4) & 0x1F)) * sizeof(OFFSET) * max_vehicle_vertices)
 
 static int CompareIndexedVehiclesByHeight(void *p, void *q);
 
@@ -26,6 +27,7 @@ void RenderObjects(void)
 	uint8_t color;
 	int16_t i, dx, dy, dz, da, screen_x, screen_y, last_dz, scale;
 	POINT *P, *p1, *p2;
+	OFFSET *O, *o1, *o2;
 	VERTEX *V;
 	SEGMENT *S;
 	VEHICLE *focus, *vehicle;
@@ -39,10 +41,10 @@ void RenderObjects(void)
 			indices[i] = i;
 	}
 
+	focus = vehicles + vehicle_index;
 	xm = GetXMAddress(arena_data, arena_index);
 	V = (VERTEX *)(xm + ARENA_X_LIMIT * ARENA_Y_LIMIT * sizeof(int16_t));
 	S = (SEGMENT *)(xm + ARENA_X_LIMIT * ARENA_Y_LIMIT * sizeof(int16_t) + sizeof(VERTEX) * (max_arena_vertices + 1));
-	focus = vehicles + vehicle_index;
 
 	for (P = working, last_dz = INT16_MIN; V->z >= 0; ++V, ++P) {
 		dx = V->x - focus->x;
@@ -67,31 +69,39 @@ void RenderObjects(void)
 
 	for (i = 0, last_dz = INT16_MIN; i < VEHICLE_COUNT; ++i) {
 		vehicle = vehicles + indices[i];
-		dx = vehicle->x - focus->x;
-		dy = vehicle->y - focus->y;
-		dz = vehicle->z - focus->z;
-		da = vehicle->angle - focus->angle;
-		if (last_dz != dz) {
-			last_dz = dz;
-			scale = MultiplyThenDivide(dz, ARENA_SCALE_M1, ARENA_SCALE_M2) + ARENA_SCALE_B;
-			if (dz < -VEHICLE_Z_TOLERANCE)
-				color = CLR16_ORANGE;
-			else if (dz > VEHICLE_Z_TOLERANCE)
-				color = CLR16_LIGHTBLUE;
-			else
-				color = CLR16_WHITE;
+		if (vehicle == focus) {
+			last_dz = dz = da = 0;
+			scale = ARENA_SCALE_B;
+			color = CLR16_WHITE;
+			screen_x = w;
+			screen_y = h;
+		} else {
+			dx = vehicle->x - focus->x;
+			dy = vehicle->y - focus->y;
+			dz = vehicle->z - focus->z;
+			da = vehicle->angle - focus->angle;
+			if (last_dz != dz) {
+				last_dz = dz;
+				scale = MultiplyThenDivide(dz, ARENA_SCALE_M1, ARENA_SCALE_M2) + ARENA_SCALE_B;
+				if (dz < -VEHICLE_Z_TOLERANCE)
+					color = CLR16_ORANGE;
+				else if (dz > VEHICLE_Z_TOLERANCE)
+					color = CLR16_LIGHTBLUE;
+				else
+					color = CLR16_WHITE;
+			}
+			screen_x = w + ((MultiplyThenDivide(dx, focus->cos, scale) - MultiplyThenDivide(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
+			screen_y = h + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
 		}
-		screen_x = w + ((MultiplyThenDivide(dx, focus->cos, scale) - MultiplyThenDivide(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
-		screen_y = h + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
 
 		xm = GetXMAddressInitial(vehicle->appearance);
 		S = (SEGMENT *)xm;
-		P = (POINT *)(xm + sizeof(SEGMENT) * (max_vehicle_segments + 1) + VEHICLE_POINTS(dz, da));
+		O = (OFFSET *)(xm + sizeof(SEGMENT) * (max_vehicle_segments + 1) + VEHICLE_POINTS(dz, da));
 
 		for (; S->index_from != S->index_to; ++S) {
-			p1 = P + S->index_from;
-			p2 = P + S->index_to;
-			DrawLineFromTo16(screen_x + p1->x, screen_y + p1->y, screen_x + p2->x, screen_y + p2->y, color);
+			o1 = O + S->index_from;
+			o2 = O + S->index_to;
+			DrawLineFromTo16(screen_x + o1->x, screen_y + o1->y, screen_x + o2->x, screen_y + o2->y, color);
 		}
 	}
 }
