@@ -392,7 +392,7 @@ void ErasePoint16(int16_t x, int16_t y)
 	}
 }
 
-/* Convenience functions usually done as macros, but using functions to avoid side effects! */
+/* Convenience functions usually implemented as macros, but using functions to avoid side effects! */
 
 int16_t Minimum(int16_t a, int16_t b) { return a < b? a: b; }
 

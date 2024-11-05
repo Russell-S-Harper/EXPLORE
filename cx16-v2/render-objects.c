@@ -24,7 +24,7 @@ void RenderObjects(void)
 	static unsigned char *indices;
 	char *xm;
 	uint8_t color;
-	int16_t i, dx, dy, dz, da, screen_x, screen_y, last_dz, scale;
+	int16_t i, j, dx, dy, dz, da, screen_x, screen_y, last_dz, scale;
 	POINT *P, *p1, *p2;
 	OFFSET *O, *o1, *o2;
 	VERTEX *V;
@@ -92,15 +92,17 @@ void RenderObjects(void)
 			screen_x = w + ((MultiplyThenDivide(dx, focus->cos, scale) - MultiplyThenDivide(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
 			screen_y = h + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
 		}
-
-		xm = GetXMAddressInitial(vehicle->appearance);
-		S = (SEGMENT *)xm;
-		O = (OFFSET *)(xm + sizeof(SEGMENT) * (max_vehicle_segments + 1) + VEHICLE_POINTS(dz, da));
-
-		for (; S->index_from != S->index_to; ++S) {
-			o1 = O + S->index_from;
-			o2 = O + S->index_to;
-			DrawLineFromTo16(screen_x + o1->x, screen_y + o1->y, screen_x + o2->x, screen_y + o2->y, color);
+		for (j = 0; j < sizeof(vehicle->appearance) / sizeof(XM_HANDLE); ++j) {
+			if (vehicle->appearance[j]) {
+				xm = GetXMAddressInitial(vehicle->appearance[j]);
+				S = (SEGMENT *)xm;
+				O = (OFFSET *)(xm + sizeof(SEGMENT) * (max_vehicle_segments + 1) + VEHICLE_POINTS(dz, da));
+				for (; S->index_from != S->index_to; ++S) {
+					o1 = O + S->index_from;
+					o2 = O + S->index_to;
+					DrawLineFromTo16(screen_x + o1->x, screen_y + o1->y, screen_x + o2->x, screen_y + o2->y, color);
+				}
+			}
 		}
 	}
 }

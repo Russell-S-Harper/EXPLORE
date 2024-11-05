@@ -14,7 +14,7 @@
 #define MAX_GEAR		2
 #define MIN_GEAR		-1
 
-#define ArenaIndex(x, y)	((((y) >> 6) & 0xF0) + ((x) >> 10))
+#define ARENA_INDEX(x, y)	((((y) >> 6) & 0xF0) + ((x) >> 10))
 
 /* Process every vehicle */
 void ProcessVehicles(void)
@@ -33,7 +33,7 @@ void ProcessVehicles(void)
 			GetPlayerInput(player);
 
 		/* Important: "bump" if a wall was created or removed underneath */
-		z = arena[ArenaIndex(player->x, player->y)];
+		z = arena[ARENA_INDEX(player->x, player->y)];
 		if (player->z < z || !player->airborne)
 			player->z = z;
 
@@ -83,18 +83,18 @@ void ProcessVehicles(void)
 		}
 
 		/* Try moving to new XY */
-		if (z >= arena[ArenaIndex(x, y)]) {
+		if (z >= arena[ARENA_INDEX(x, y)]) {
 			player->x = x;
 			player->y = y;
 		}
 		/* Can't move? Try sliding along the wall */
-		else if (z >= arena[ArenaIndex(player->x, y)])
+		else if (z >= arena[ARENA_INDEX(player->x, y)])
 			player->y = y;
-		else if (z >= arena[ArenaIndex(x, player->y)])
+		else if (z >= arena[ARENA_INDEX(x, player->y)])
 			player->x = x;
 
 		/* Finalize Z */
-		if (z >= arena[ArenaIndex(player->x, player->y)])
+		if (z >= arena[ARENA_INDEX(player->x, player->y)])
 			player->z = z;
 	}
 	/* TODO: process every missile */

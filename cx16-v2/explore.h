@@ -22,14 +22,16 @@
 /* How +/- close in height needed to be considered targetable */
 #define VEHICLE_Z_TOLERANCE	191
 
+enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
+
+enum {APP_PRM, APP_AUX, APP_CNT};
+
 typedef struct {
 	bool airborne, fire_missile;
 	int8_t z_delta, angle_delta, gear;
 	int16_t x, y, z, angle, sin, cos;
-	XM_HANDLE appearance;
+	XM_HANDLE appearance[APP_CNT];
 } VEHICLE;
-
-enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
 
 /******** Function declarations ********/
 

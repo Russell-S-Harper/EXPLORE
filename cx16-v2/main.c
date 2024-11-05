@@ -26,7 +26,7 @@ void main()
 			if (!IndexExistsForXM(arena_data, ++arena_index))
 				exit_program = true; // arena_index = 0;
 			else
-				vehicles[PLAYER_INDEX].appearance = vehicle_data[arena_index];
+				vehicles[PLAYER_INDEX].appearance[APP_PRM] = vehicle_data[arena_index];
 		}
 	}
 	t += clock();

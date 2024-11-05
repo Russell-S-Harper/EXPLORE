@@ -48,7 +48,7 @@ const char *strings0[] = {
 const char *arena_vertices0 = "!#$%&*+";
 
 const char *arenas0[] = {
-	/* Arena 1 - welcome */
+	/* a00 - Arena 1 - welcome */
 	"+--------------+"
 	"|              |"
 	"|              |"
@@ -65,7 +65,7 @@ const char *arenas0[] = {
 	"|              |"
 	"|              |"
 	"+--------------+",
-	/* Arena 2 - north/south */
+	/* a01 - Arena 2 - north/south */
 	"+--------------+"
 	"|              |"
 	"|              |"
@@ -82,7 +82,7 @@ const char *arenas0[] = {
 	"|              |"
 	"|              |"
 	"+--------------+",
-	/* Arena 3 - isolation */
+	/* a02 - Arena 3 - isolation */
 	"+--------------+"
 	"|              |"
 	"|              |"
@@ -99,7 +99,7 @@ const char *arenas0[] = {
 	"|              |"
 	"|              |"
 	"+--------------+",
-	/* Arena 4 - east/west */
+	/* a03 - Arena 4 - east/west */
 	"+--------------+"
 	"|              |"
 	"|              |"
@@ -116,7 +116,7 @@ const char *arenas0[] = {
 	"|              |"
 	"|              |"
 	"+--------------+",
-	/* Arena 5 - corners */
+	/* a04 - Arena 5 - corners */
 	"+--------------+"
 	"|              |"
 	"|              |"
@@ -133,7 +133,7 @@ const char *arenas0[] = {
 	"|              |"
 	"|              |"
 	"+--------------+",
-	/* Arena 6 - pillars */
+	/* a05 - Arena 6 - pillars */
 	"+--------------+"
 	"|              |"
 	"|              |"
@@ -155,7 +155,7 @@ const char *arenas0[] = {
 const char *vehicle_vertices0 = "@";
 
 const char *vehicles0[] = {
-	/* air-level-1 */
+	/* v00-airborne-1 */
 	"            @            "
 	"           + +           "
 	"          +   +          "
@@ -181,7 +181,7 @@ const char *vehicles0[] = {
 	"     +             +     "
 	"      +           +      "
 	"       @+++++++++@       ",
-	/* air-level-2 */
+	/* v01-airborne-2 */
 	"        @+++++++@        "
 	"        +       +        "
 	"       +         +       "
@@ -207,7 +207,7 @@ const char *vehicles0[] = {
 	" + ++               ++ + "
 	"+++                   +++"
 	"@                       @",
-	/* air-level-3 */
+	/* v02-airborne-3 */
 	"           +@+           "
 	"          +   +          "
 	"          +   +          "
@@ -233,7 +233,7 @@ const char *vehicles0[] = {
 	"        +       +        "
 	"         ++   ++         "
 	"           +@+           ",
-	/* air-level-4 */
+	/* v03-airborne-4 */
 	"           +@+           "
 	"           +++           "
 	"          + + +          "
@@ -259,7 +259,7 @@ const char *vehicles0[] = {
 	" +   ++           ++   + "
 	"+  ++               ++  +"
 	"@++                   ++@",
-	/* air-level-5 */
+	/* v04-airborne-5 */
 	"      @           @      "
 	"      +           +      "
 	"     +             +     "
@@ -285,7 +285,7 @@ const char *vehicles0[] = {
 	"         +     +         "
 	"          ++ ++          "
 	"            @            ",
-	/* air-level-6 */
+	/* v05-airborne-6 */
 	"            @            "
 	"            +            "
 	"           + +           "
@@ -310,7 +310,85 @@ const char *vehicles0[] = {
 	"   + +  ++     ++  + +   "
 	"   ++  +         +  ++   "
 	"    + +           + +    "
-	"    @+             +@    "
+	"    @+             +@    ",
+	/* v06-missile-1 */
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"            @            "
+	"            +            "
+	"            +            "
+	"            +            "
+	"            +            "
+	"            +            "
+	"            @            "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         ",
+	/* v07-missile-2 */
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"            @            "
+	"           + +           "
+	"           + +           "
+	"          +   +          "
+	"          +   +          "
+	"         @     @         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         ",
+	/* v08-missile-3 */
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"           +@+           "
+	"          ++ ++          "
+	"         ++   ++         "
+	"         @     @         "
+	"         ++   ++         "
+	"          ++ ++          "
+	"           +@+           "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
 };
 
 static void OutputStrings(FILE *ofile);
@@ -412,7 +490,6 @@ static void OutputArenaData(FILE *ofile)
 {
 	int16_t t, tmp, vertices = 0, segments = 0;
 	VERTEX *V;
-
 	/* Arena data */
 	fputs("Arena Data ", stdout);
 	fputc(CODE_AD, ofile);
@@ -734,19 +811,19 @@ static void OutputVehicleSegments(const char *vehicle, OFFSET *vertices, int16_t
 static void OutputVehicleVertices(const char *vehicle, OFFSET *vertices, int16_t limit, FILE *ofile)
 {
 	static OFFSET *offsets = NULL;
-	static double *sines, *cosines;
+	static double *sn, *cs;
 	int16_t t, u, height, count;
 	double d, i, scale, x, y;
 
 	if (!offsets) {
 		offsets = malloc(sizeof(OFFSET) * limit);
-		sines = malloc(sizeof(double) * VEHICLE_DIRS);
-		cosines = malloc(sizeof(double) * VEHICLE_DIRS);
+		sn = malloc(sizeof(double) * VEHICLE_DIRS);
+		cs = malloc(sizeof(double) * VEHICLE_DIRS);
 		d = 0.0;
 		i = 2.0 * DCPI / VEHICLE_DIRS;
 		for (t = 0; t < VEHICLE_DIRS; ++t, d += i) {
-			sines[t] = sin(d);
-			cosines[t] = cos(d);
+			sn[t] = sin(d);
+			cs[t] = cos(d);
 		}
 		fputc('*', stdout);
 	}
@@ -758,8 +835,8 @@ static void OutputVehicleVertices(const char *vehicle, OFFSET *vertices, int16_t
 			for (u = 0; u < count; ++u) {
 				x = vertices[u].x - VEH_XY_OFFSET;
 				y = vertices[u].y - VEH_XY_OFFSET;
-				offsets[u].x = (cosines[t] * x - sines[t] * y) / scale;
-				offsets[u].y = (sines[t] * x + cosines[t] * y) / scale;
+				offsets[u].x = (cs[t] * x - sn[t] * y) / scale;
+				offsets[u].y = (sn[t] * x + cs[t] * y) / scale;
 			}
 			for (; u < limit; ++u)
 				offsets[u].x = offsets[u].y = -1;
