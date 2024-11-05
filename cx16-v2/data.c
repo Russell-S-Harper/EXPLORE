@@ -48,7 +48,7 @@ const char *strings0[] = {
 const char *arena_vertices0 = "!#$%&*+";
 
 const char *arenas0[] = {
-	/* a00 - Arena 1 - welcome */
+	/* a00-arena-1 - welcome */
 	"+--------------+"
 	"|              |"
 	"|              |"
@@ -65,7 +65,7 @@ const char *arenas0[] = {
 	"|              |"
 	"|              |"
 	"+--------------+",
-	/* a01 - Arena 2 - north/south */
+	/* a01-arena-2 - north/south */
 	"+--------------+"
 	"|              |"
 	"|              |"
@@ -82,7 +82,7 @@ const char *arenas0[] = {
 	"|              |"
 	"|              |"
 	"+--------------+",
-	/* a02 - Arena 3 - isolation */
+	/* a02-arena-3 - isolation */
 	"+--------------+"
 	"|              |"
 	"|              |"
@@ -99,7 +99,7 @@ const char *arenas0[] = {
 	"|              |"
 	"|              |"
 	"+--------------+",
-	/* a03 - Arena 4 - east/west */
+	/* a03-arena-4 - east/west */
 	"+--------------+"
 	"|              |"
 	"|              |"
@@ -116,7 +116,7 @@ const char *arenas0[] = {
 	"|              |"
 	"|              |"
 	"+--------------+",
-	/* a04 - Arena 5 - corners */
+	/* a04-arena-5 - corners */
 	"+--------------+"
 	"|              |"
 	"|              |"
@@ -133,7 +133,7 @@ const char *arenas0[] = {
 	"|              |"
 	"|              |"
 	"+--------------+",
-	/* a05 - Arena 6 - pillars */
+	/* a05-arena-6 - pillars */
 	"+--------------+"
 	"|              |"
 	"|              |"
@@ -155,7 +155,7 @@ const char *arenas0[] = {
 const char *vehicle_vertices0 = "@";
 
 const char *vehicles0[] = {
-	/* v00-airborne-1 */
+	/* v00-airborne-1 - slow w/ missile 1 */
 	"            @            "
 	"           + +           "
 	"          +   +          "
@@ -181,7 +181,7 @@ const char *vehicles0[] = {
 	"     +             +     "
 	"      +           +      "
 	"       @+++++++++@       ",
-	/* v01-airborne-2 */
+	/* v01-airborne-2 - fast w/ missile 1 */
 	"        @+++++++@        "
 	"        +       +        "
 	"       +         +       "
@@ -207,7 +207,7 @@ const char *vehicles0[] = {
 	" + ++               ++ + "
 	"+++                   +++"
 	"@                       @",
-	/* v02-airborne-3 */
+	/* v02-airborne-3 - slow w/ missile 2 */
 	"           +@+           "
 	"          +   +          "
 	"          +   +          "
@@ -233,7 +233,7 @@ const char *vehicles0[] = {
 	"        +       +        "
 	"         ++   ++         "
 	"           +@+           ",
-	/* v03-airborne-4 */
+	/* v03-airborne-4 - fast w/ missile 2 */
 	"           +@+           "
 	"           +++           "
 	"          + + +          "
@@ -259,7 +259,7 @@ const char *vehicles0[] = {
 	" +   ++           ++   + "
 	"+  ++               ++  +"
 	"@++                   ++@",
-	/* v04-airborne-5 */
+	/* v04-airborne-5 - slow w/ missile 3 */
 	"      @           @      "
 	"      +           +      "
 	"     +             +     "
@@ -285,7 +285,7 @@ const char *vehicles0[] = {
 	"         +     +         "
 	"          ++ ++          "
 	"            @            ",
-	/* v05-airborne-6 */
+	/* v05-airborne-6 - fast w/ missile 3 */
 	"            @            "
 	"            +            "
 	"           + +           "
@@ -381,6 +381,32 @@ const char *vehicles0[] = {
 	"          ++ ++          "
 	"           +@+           "
 	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         ",
+	/* v09-explosion-1 */
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"            @            "
+	"            +            "
+	"            +            "
+	"            +            "
+	"        @+++++++@        "
+	"            +            "
+	"            +            "
+	"            +            "
+	"            @            "
 	"                         "
 	"                         "
 	"                         "
@@ -856,7 +882,7 @@ static bool VehicleVerticesAreConnected(const char *vehicle, OFFSET *v1, OFFSET 
 	y2 = (v1->y + v2->y) / 2.0;
 	for (count = 0, y = -1; y <= 1; ++y) {
 		for (x = -1; x <= 1; ++x)
-			if (VehicleCharacterAt(vehicle, (int16_t)(x2 + x), (int16_t)(y2 + y)) == '+')
+			if (VehicleCharacterAt(vehicle, (int16_t)(x2 + x), (int16_t)(y2 + y)) != ' ')
 				++count;
 	}
 	if (count < 2)
@@ -867,7 +893,7 @@ static bool VehicleVerticesAreConnected(const char *vehicle, OFFSET *v1, OFFSET 
 	y1 = (v1->y + y2) / 2.0;
 	for (count = 0, y = -1; y <= 1; ++y) {
 		for (x = -1; x <= 1; ++x)
-			if (VehicleCharacterAt(vehicle, (int16_t)(x1 + x), (int16_t)(y1 + y)) == '+')
+			if (VehicleCharacterAt(vehicle, (int16_t)(x1 + x), (int16_t)(y1 + y)) != ' ')
 				++count;
 	}
 	if (count < 2)
@@ -878,7 +904,7 @@ static bool VehicleVerticesAreConnected(const char *vehicle, OFFSET *v1, OFFSET 
 	y3 = (y2 + v2->y) / 2.0;
 	for (count = 0, y = -1; y <= 1; ++y) {
 		for (x = -1; x <= 1; ++x)
-			if (VehicleCharacterAt(vehicle, (int16_t)(x3 + x), (int16_t)(y3 + y)) == '+')
+			if (VehicleCharacterAt(vehicle, (int16_t)(x3 + x), (int16_t)(y3 + y)) != ' ')
 				++count;
 	}
 	if (count < 2)
