@@ -16,22 +16,32 @@
 #define MAX_XYZ			16383
 #define MIN_XYZ			0
 
-#define VEHICLE_COUNT		4
+#define VEHICLE_COUNT		24
+#define PLAYER_COUNT		4
 #define PLAYER_INDEX		0
 
 /* How +/- close in height needed to be considered targetable */
 #define VEHICLE_Z_TOLERANCE	191
 
-enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
-
+/* Appearance */
 enum {APP_PRM, APP_AUX, APP_CNT};
 
+/* Explosions are last two "vehicles" */
+#define EXP_APP_PRM_OFFSET	2
+#define EXP_APP_AUX_OFFSET	1
+
+/* Frames between loading missiles */
+#define MSS_LOADING_COUNTER	5
+#define MSS_COUNTDOWN_COUNTER	30
+
 typedef struct {
-	bool airborne, fire_missile;
-	int8_t z_delta, angle_delta, gear;
+	bool active, airborne, exploding, fire;
+	int8_t z_delta, angle_delta, countdown, gear, loading;
 	int16_t x, y, z, angle, sin, cos;
 	XM_HANDLE appearance[APP_CNT];
 } VEHICLE;
+
+enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
 
 /******** Function declarations ********/
 
@@ -67,27 +77,29 @@ int16_t Cos(int16_t angle);
 
 /******** Variable declarations ********/
 extern XM_HANDLE
-	string_data,
-	trig_data,
-	arena_data,
-	*vehicle_data;
+	g_string_data,
+	g_trig_data,
+	g_arena_data,
+	g_exploding_prm,
+	g_exploding_aux,
+	*g_vehicle_data;
 
 extern VEHICLE
-	vehicles[VEHICLE_COUNT];
+	*g_vehicles;
 
 extern bool
-	exit_program;
+	g_exit_program;
 
 extern uint16_t
-	display_width,
-	display_height;
+	g_display_width,
+	g_display_height;
 
 extern int16_t
-	arena_index,
-	max_arena_segments,
-	max_arena_vertices,
-	vehicle_index,
-	max_vehicle_segments,
-	max_vehicle_vertices;
+	g_arena_index,
+	g_max_arena_segments,
+	g_max_arena_vertices,
+	g_vehicle_index,
+	g_max_vehicle_segments,
+	g_max_vehicle_vertices;
 
 #endif /* _EXPLORE_H */

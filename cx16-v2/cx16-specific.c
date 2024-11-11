@@ -36,7 +36,7 @@
 #define REQ_DIVE_OR_GEAR_REV	17	/* cursor down: dive or gear reverse */
 #define TURN_RIGHT		29	/* cursor right: turn right */
 #define TURN_LEFT		157	/* cursor left: turn left */
-#define FIRE_MISSILE		20	/* space: fire missile */
+#define FIRE_MISSILE		32	/* space: fire missile */
 #define CYCLE_PLAYER		49	/* 1: cycle player */
 #define QUIT_PROGRAM		81	/* Q: quit program */
 
@@ -49,13 +49,13 @@ static void DrawLine16(void);
 static void DefaultCallback(int waiting);
 
 static uint8_t
-	current_color;
+	f_current_color;
 
 static int16_t
-	x_from_point,
-	y_from_point,
-	x_to_point,
-	y_to_point;
+	f_x_from_point,
+	f_y_from_point,
+	f_x_to_point,
+	f_y_to_point;
 
 /* Initialize the hardware, etc. */
 void InitSpecific(void)
@@ -70,8 +70,8 @@ void InitSpecific(void)
 	tgi_clear();
 
 	/* Save the resolution */
-	display_width = VERA_HORZ_RES;
-	display_height = VERA_VERT_RES;
+	g_display_width = VERA_HORZ_RES;
+	g_display_height = VERA_VERT_RES;
 
 	/* Set the bitmap to 16-color mode */
 	VERA_L0_CONFIG = VERA_16_COLOR_MODE;
@@ -86,14 +86,14 @@ void InitSpecific(void)
 /* Switch to the other screen, clear the previous screen, and perform other functions */
 void UpdateDisplay(void)
 {
-	static clock_t frame_clock;
+	static clock_t s_frame_clock;
 	uint8_t base, address, i, j;
 	clock_t current_clock;
 	register volatile uint8_t *p;
 
 	/* Wait for the end of the frame based on clock cycles */
-	if (!frame_clock)
-		frame_clock = clock();
+	if (!s_frame_clock)
+		s_frame_clock = clock();
 	else {
 		do {
 			/* While waiting for the end of the frame, do some work */
@@ -101,11 +101,11 @@ void UpdateDisplay(void)
 			/* Check if the frame is done */
 			current_clock = clock();
 			/* Check for rollover - not likely to happen but JIC! */
-			if (current_clock < frame_clock)
+			if (current_clock < s_frame_clock)
 				break;
 		}
-		while (current_clock - frame_clock < (CLOCKS_PER_SEC / FRAMES_PER_SEC));
-		frame_clock = current_clock;
+		while (current_clock - s_frame_clock < (CLOCKS_PER_SEC / FRAMES_PER_SEC));
+		s_frame_clock = current_clock;
 	}
 
 	/* Wait for the end of the current screen based on scan lines */
@@ -166,21 +166,21 @@ static void DefaultCallback(int waiting)
 /* Drawing routines */
 void DrawLineFromTo16(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color)
 {
-	x_from_point = x1;
-	y_from_point = y1;
-	x_to_point = x2;
-	y_to_point = y2;
-	current_color = color;
+	f_x_from_point = x1;
+	f_y_from_point = y1;
+	f_x_to_point = x2;
+	f_y_to_point = y2;
+	f_current_color = color;
 	DrawLine16();
 }
 
 void DrawLineJustTo16(int16_t x, int16_t y, uint8_t color)
 {
-	x_from_point = x_to_point;
-	y_from_point = y_to_point;
-	x_to_point = x;
-	y_to_point = y;
-	current_color = color;
+	f_x_from_point = f_x_to_point;
+	f_y_from_point = f_y_to_point;
+	f_x_to_point = x;
+	f_y_to_point = y;
+	f_current_color = color;
 	DrawLine16();
 }
 
@@ -194,10 +194,10 @@ static void DrawLine16(void)
 	register int16_t i;
 
 	/* Copy because points may be changed and/or swapped after clipping */
-	x1 = x_from_point;
-	y1 = y_from_point;
-	x2 = x_to_point;
-	y2 = y_to_point;
+	x1 = f_x_from_point;
+	y1 = f_y_from_point;
+	x2 = f_x_to_point;
+	y2 = f_y_to_point;
 
 	/* Will need these */
 	ymax = Maximum(y1, y2);
@@ -324,7 +324,7 @@ static void DrawLine16(void)
 
 	/* Draw the line */
 	p = &VERA_DATA1;
-	c = (current_color << SHIFT_HEX_DGT) | current_color;
+	c = (f_current_color << SHIFT_HEX_DGT) | f_current_color;
 	while (i >= 8) {
 		*p = c;
 		*p = c;
@@ -369,8 +369,8 @@ void PlotPoint16(int16_t x, int16_t y, uint8_t color)
 	}
 
 	/* Set as the current "to-point" */
-	x_to_point = x;
-	y_to_point = y;
+	f_x_to_point = x;
+	f_y_to_point = y;
 }
 
 void ErasePoint16(int16_t x, int16_t y)
@@ -434,17 +434,18 @@ void GetPlayerInput(VEHICLE *vehicle)
 				break;
 
 			case FIRE_MISSILE:
-				vehicle->fire_missile = true;
+				if (!vehicle->loading)
+					vehicle->fire = true;
 				break;
 
 			case CYCLE_PLAYER:
-				if (++vehicle_index >= VEHICLE_COUNT)
-					vehicle_index = 0;
+				if (++g_vehicle_index >= PLAYER_COUNT)
+					g_vehicle_index = 0;
 				break;
 
 			case QUIT_PROGRAM:
 				tgi_done();
-				exit_program = true;
+				g_exit_program = true;
 				break;
 		}
 	}

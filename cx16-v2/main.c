@@ -16,17 +16,17 @@ void main()
 
 	InitProgram();
 	t = -clock();
-	while (!exit_program) {
+	while (!g_exit_program) {
 		ProcessVehicles();
 		ScanField();
 		RenderObjects();
 		UpdateDisplay();
 		++f;
 		if (!(f % DEMO_FRAMES_PER_ARENA)) {
-			if (!IndexExistsForXM(arena_data, ++arena_index))
-				exit_program = true; // arena_index = 0;
+			if (!IndexExistsForXM(g_arena_data, ++g_arena_index))
+				g_exit_program = true; // g_arena_index = 0;
 			else
-				vehicles[PLAYER_INDEX].appearance[APP_PRM] = vehicle_data[arena_index];
+				g_vehicles[PLAYER_INDEX].appearance[APP_PRM] = g_vehicle_data[g_arena_index];
 		}
 	}
 	t += clock();

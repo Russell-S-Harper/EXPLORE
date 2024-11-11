@@ -27,9 +27,9 @@ void InitXM(void)
 
 XM_HANDLE AllocXM(size_t limit, size_t size)
 {
-	static XM_HANDLE current_handle = ALLOC_XM_HANDLE + 1;
-	static uint8_t current_bank = ALLOC_XM_BANK + 1;
-	static size_t current_offset;
+	static XM_HANDLE s_current_handle = ALLOC_XM_HANDLE + 1;
+	static uint8_t s_current_bank = ALLOC_XM_BANK + 1;
+	static size_t s_current_offset;
 	ALLOC_XM working;
 	uint8_t shift;
 	size_t total;
@@ -44,24 +44,24 @@ XM_HANDLE AllocXM(size_t limit, size_t size)
 		ExitProgram(ERR_XM);
 
 	/* Get a new bank if required */
-	if (XM_SIZE - current_offset < total) {
-		++current_bank;
-		current_offset = 0;
+	if (XM_SIZE - s_current_offset < total) {
+		++s_current_bank;
+		s_current_offset = 0;
 	}
 
 	/* Set up a new allocation */
-	working.bank = current_bank;
-	working.offset = XM_ADDRESS + current_offset;
+	working.bank = s_current_bank;
+	working.offset = XM_ADDRESS + s_current_offset;
 	working.limit = limit;
 	working.size = size;
 	working.shift = shift;
-	SetXM(ALLOC_XM_HANDLE, current_handle, &working);
+	SetXM(ALLOC_XM_HANDLE, s_current_handle, &working);
 
 	/* Update the offset */
-	current_offset += total;
+	s_current_offset += total;
 
 	/* Return the allocation handle */
-	return current_handle++;
+	return s_current_handle++;
 }
 
 bool IndexExistsForXM(XM_HANDLE handle, int16_t index)

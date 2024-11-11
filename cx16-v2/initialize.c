@@ -11,28 +11,30 @@
 
 /* Global variables */
 XM_HANDLE
-	string_data,
-	trig_data,
-	arena_data,
-	*vehicle_data;
+	g_string_data,
+	g_trig_data,
+	g_arena_data,
+	g_exploding_prm,
+	g_exploding_aux,
+	*g_vehicle_data;
 
 VEHICLE
-	vehicles[VEHICLE_COUNT];
+	*g_vehicles;
 
 bool
-	exit_program;
+	g_exit_program;
 
 uint16_t
-	display_width,
-	display_height;
+	g_display_width,
+	g_display_height;
 
 int16_t
-	arena_index,
-	max_arena_segments,
-	max_arena_vertices,
-	vehicle_index,
-	max_vehicle_segments,
-	max_vehicle_vertices;
+	g_arena_index,
+	g_max_arena_segments,
+	g_max_arena_vertices,
+	g_vehicle_index,
+	g_max_vehicle_segments,
+	g_max_vehicle_vertices;
 
 /* Internal functions */
 
@@ -73,34 +75,36 @@ static void InitData(char *file)
 		switch (code) {
 			case CODE_EM:
 				GetData(&size, sizeof(int16_t), ifile);
-				string_data = AllocXM(ERR_NO, size * sizeof(char *));
+				g_string_data = AllocXM(ERR_NO, size * sizeof(char *));
 				for (t = 0; t < ERR_NO; ++t)
-					GetData(GetXMAddress(string_data, t), size, ifile);
+					GetData(GetXMAddress(g_string_data, t), size, ifile);
 				break;
 			case CODE_TD:
-				trig_data = AllocXM(SCALE_FC, sizeof(int16_t));
-				GetData(GetXMAddressInitial(trig_data), sizeof(int16_t) * SCALE_FC, ifile);
+				g_trig_data = AllocXM(SCALE_FC, sizeof(int16_t));
+				GetData(GetXMAddressInitial(g_trig_data), sizeof(int16_t) * SCALE_FC, ifile);
 				break;
 			case CODE_AD:
 				GetData(&count, sizeof(int16_t), ifile);
 				GetData(&size, sizeof(int16_t), ifile);
-				arena_data = AllocXM(count, size);
-				arena_index = 0;
-				GetData(&max_arena_vertices, sizeof(int16_t), ifile);
-				GetData(&max_arena_segments, sizeof(int16_t), ifile);
+				g_arena_data = AllocXM(count, size);
+				g_arena_index = 0;
+				GetData(&g_max_arena_vertices, sizeof(int16_t), ifile);
+				GetData(&g_max_arena_segments, sizeof(int16_t), ifile);
 				for (t = 0; t < count; ++t)
-					GetData(GetXMAddress(arena_data, t), size, ifile);
+					GetData(GetXMAddress(g_arena_data, t), size, ifile);
 				break;
 			case CODE_VD:
 				GetData(&count, sizeof(int16_t), ifile);
 				GetData(&size, sizeof(int16_t), ifile);
-				vehicle_data = malloc(sizeof(XM_HANDLE) * count);
+				g_vehicle_data = malloc(sizeof(XM_HANDLE) * count);
 				for (t = 0; t < count; ++t)
-					vehicle_data[t] = AllocXM(1, size);
-				GetData(&max_vehicle_vertices, sizeof(int16_t), ifile);
-				GetData(&max_vehicle_segments, sizeof(int16_t), ifile);
+					g_vehicle_data[t] = AllocXM(1, size);
+				g_exploding_prm = g_vehicle_data[count - EXP_APP_PRM_OFFSET];
+				g_exploding_aux = g_vehicle_data[count - EXP_APP_AUX_OFFSET];
+				GetData(&g_max_vehicle_vertices, sizeof(int16_t), ifile);
+				GetData(&g_max_vehicle_segments, sizeof(int16_t), ifile);
 				for (t = 0; t < count; ++t)
-					GetData(GetXMAddressInitial(vehicle_data[t]), size, ifile);
+					GetData(GetXMAddressInitial(g_vehicle_data[t]), size, ifile);
 				break;
 			case CODE_EF:
 				fclose(ifile);
@@ -120,29 +124,33 @@ static void GetData(void *buffer, size_t size, FILE *ifile)
 static void InitVehicles(void)
 {
 	int i;
+	VEHICLE *vehicle;
 
-	for (i = 0; i < VEHICLE_COUNT; ++i) {
-		vehicles[i].angle = (i << (SHIFT_FC - 2)) + (SCALE_FC / 8);
-		vehicles[i].sin = Sin(vehicles[i].angle);
-		vehicles[i].cos = Cos(vehicles[i].angle);
-		vehicles[i].x = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicles[i].sin);
-		vehicles[i].y = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicles[i].cos);
-		vehicles[i].z = MIN_XYZ;
-		vehicles[i].appearance[APP_PRM] = vehicle_data[0];
-		vehicles[i].appearance[APP_AUX] = 0;
-		vehicles[i].airborne = true;
+	g_vehicles = calloc(VEHICLE_COUNT, sizeof(VEHICLE));
+
+	for (i = 0, vehicle = g_vehicles; i < PLAYER_COUNT; ++i, ++vehicle) {
+		vehicle->active = true;
+		vehicle->angle = (i << (SHIFT_FC - 2)) + (SCALE_FC / 8);
+		vehicle->sin = Sin(vehicle->angle);
+		vehicle->cos = Cos(vehicle->angle);
+		vehicle->x = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicle->sin);
+		vehicle->y = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicle->cos);
+		vehicle->z = MIN_XYZ;
+		vehicle->appearance[APP_PRM] = g_vehicle_data[0];
+		vehicle->airborne = true;
+		vehicle->gear = 1;
 	}
 }
 
 /* Convenience methods to return Sin/Cos from lookup */
 int16_t Sin(int16_t angle)
 {
-	return GetXMDirectSigned(trig_data, angle & (SCALE_FC-1));
+	return GetXMDirectSigned(g_trig_data, angle & (SCALE_FC-1));
 }
 
 int16_t Cos(int16_t angle)
 {
-	return GetXMDirectSigned(trig_data, (angle + SCALE_FC/4) & (SCALE_FC-1));
+	return GetXMDirectSigned(g_trig_data, (angle + SCALE_FC/4) & (SCALE_FC-1));
 }
 
 /* Convenience method to output numbers for debugging purposes without linking in the entire stdio library! */
@@ -175,8 +183,8 @@ void OutputAsNumber(char prefix, int16_t value)
 void ExitProgram(int16_t stat)
 {
 	if (stat != ERR_NO) {
-		if (string_data)
-			fputs(GetXMAddress(string_data, stat), stdout);
+		if (g_string_data)
+			fputs(GetXMAddress(g_string_data, stat), stdout);
 		else
 			fputs("\nRun DATA.PRG!\n", stdout);
 		exit(stat);

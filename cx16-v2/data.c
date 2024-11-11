@@ -575,71 +575,71 @@ static void OutputArenaData(FILE *ofile)
 
 static void OutputArena16x16(const char *arena, FILE *ofile)
 {
-	static int16_t *working = NULL;
+	static int16_t *s_heights = NULL;
 	char focus;
 	int16_t x, y, xt, yt, height;
 
-	if (!working)
-		working = malloc(sizeof(int16_t) * ARENA_X_LIMIT * ARENA_Y_LIMIT);
+	if (!s_heights)
+		s_heights = malloc(sizeof(int16_t) * ARENA_X_LIMIT * ARENA_Y_LIMIT);
 	for (y = 0; y < ARENA_Y_LIMIT; ++y) {
 		for (x = 0; x < ARENA_X_LIMIT; ++x) {
 			focus = ArenaCharacterAt(arena, x, y);
 			if (strchr(arena_vertices0, focus)) {
 				height = ARENA_HEIGHT(focus);
-				working[y * ARENA_X_LIMIT + x] = height;
+				s_heights[y * ARENA_X_LIMIT + x] = height;
 				for (xt = x + 1; ArenaCharacterAt(arena, xt, y) == '-'; ++xt)
-					working[y * ARENA_X_LIMIT + xt] = height;
+					s_heights[y * ARENA_X_LIMIT + xt] = height;
 				for (yt = y + 1; ArenaCharacterAt(arena, x, yt) == '|'; ++yt)
-					working[yt * ARENA_X_LIMIT + x] = height;
+					s_heights[yt * ARENA_X_LIMIT + x] = height;
 			} else if (focus == ' ')
-				working[y * ARENA_X_LIMIT + x] = 0;
+				s_heights[y * ARENA_X_LIMIT + x] = 0;
 		}
 	}
-	fwrite(working, sizeof(int16_t), ARENA_X_LIMIT * ARENA_Y_LIMIT, ofile);
+	fwrite(s_heights, sizeof(int16_t), ARENA_X_LIMIT * ARENA_Y_LIMIT, ofile);
 }
 
 static VERTEX *OutputArenaVertices(const char *arena, int16_t limit, FILE *ofile)
 {
-	static VERTEX *vertices = NULL;
+	static VERTEX *s_vertices = NULL;
 	char focus;
 	int16_t i, x, y;
 
-	if (!vertices)
-		vertices = malloc(sizeof(VERTEX) * limit);
+	if (!s_vertices)
+		s_vertices = malloc(sizeof(VERTEX) * limit);
 	for (y = 0, i = 0; y < ARENA_Y_LIMIT; ++y) {
 		for (x = 0; x < ARENA_X_LIMIT; ++x) {
 			focus = ArenaCharacterAt(arena, x, y);
 			if (strchr(arena_vertices0, focus)) {
-				vertices[i].x = ARENA_X_OR_Y(x);
-				vertices[i].y = ARENA_X_OR_Y(y);
-				vertices[i].z = ARENA_HEIGHT(focus);
+				s_vertices[i].x = ARENA_X_OR_Y(x);
+				s_vertices[i].y = ARENA_X_OR_Y(y);
+				s_vertices[i].z = ARENA_HEIGHT(focus);
 				++i;
-				vertices[i].x = vertices[i - 1].x;
-				vertices[i].y = vertices[i - 1].y;
-				vertices[i].z = 0;
+				s_vertices[i].x = s_vertices[i - 1].x;
+				s_vertices[i].y = s_vertices[i - 1].y;
+				s_vertices[i].z = 0;
 				++i;
 			}
 		}
 	}
 	/* Sorting for easier searching later */
-	qsort(vertices, i, sizeof(VERTEX), CompareArenaVertices);
+	qsort(s_vertices, i, sizeof(VERTEX), CompareArenaVertices);
 	for (; i < limit; ++i)
-		vertices[i].z = vertices[i].y = vertices[i].x = -1;
-	fwrite(vertices, sizeof(VERTEX), limit, ofile);
+		s_vertices[i].z = s_vertices[i].y = s_vertices[i].x = -1;
+	fwrite(s_vertices, sizeof(VERTEX), limit, ofile);
 
 	/* Will need this in OutputArenaSegments */
-	return vertices;
+	return s_vertices;
 }
 
 static void OutputArenaSegments(const char *arena, VERTEX *vertices, int16_t limit, FILE *ofile)
 {
-	static SEGMENT *S = NULL;
+	static SEGMENT *s_segments = NULL;
 	char focus;
 	int16_t i, x, y, xt, yt, count;
 	VERTEX v1, v2, v3;
 
-	if (!S)
-		S = malloc(sizeof(SEGMENT) * limit);
+	if (!s_segments)
+		s_segments = malloc(sizeof(SEGMENT) * limit);
 	count = CountArenaVertices(arena);
 	for (y = 0, i = 0; y < ARENA_Y_LIMIT; ++y) {
 		for (x = 0; x < ARENA_X_LIMIT; ++x) {
@@ -649,20 +649,20 @@ static void OutputArenaSegments(const char *arena, VERTEX *vertices, int16_t lim
 				v1.y = v2.y = ARENA_X_OR_Y(y);
 				v1.z = 0;
 				v2.z = ARENA_HEIGHT(focus);
-				S[i].index_from = IndexOfArenaVertex(vertices, &v1, count);
-				S[i].index_to = IndexOfArenaVertex(vertices, &v2, count);
+				s_segments[i].index_from = IndexOfArenaVertex(vertices, &v1, count);
+				s_segments[i].index_to = IndexOfArenaVertex(vertices, &v2, count);
 				++i;
 				for (xt = x + 1; ArenaCharacterAt(arena, xt, y) == '-'; ++xt) ;
 				if (ArenaCharacterAt(arena, xt, y) == focus) {
 					v3.x = ARENA_X_OR_Y(xt);
 					v3.y = v2.y;
 					v3.z = v2.z;
-					S[i].index_from = IndexOfArenaVertex(vertices, &v2, count);
-					S[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
+					s_segments[i].index_from = IndexOfArenaVertex(vertices, &v2, count);
+					s_segments[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
 					++i;
 					v3.z = 0;
-					S[i].index_from = IndexOfArenaVertex(vertices, &v1, count);
-					S[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
+					s_segments[i].index_from = IndexOfArenaVertex(vertices, &v1, count);
+					s_segments[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
 					++i;
 				}
 				for (yt = y + 1; ArenaCharacterAt(arena, x, yt) == '|'; ++yt) ;
@@ -670,20 +670,20 @@ static void OutputArenaSegments(const char *arena, VERTEX *vertices, int16_t lim
 					v3.x = v2.x;
 					v3.y = ARENA_X_OR_Y(yt);
 					v3.z = v2.z;
-					S[i].index_from = IndexOfArenaVertex(vertices, &v2, count);
-					S[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
+					s_segments[i].index_from = IndexOfArenaVertex(vertices, &v2, count);
+					s_segments[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
 					++i;
 					v3.z = 0;
-					S[i].index_from = IndexOfArenaVertex(vertices, &v1, count);
-					S[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
+					s_segments[i].index_from = IndexOfArenaVertex(vertices, &v1, count);
+					s_segments[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
 					++i;
 				}
 			}
 		}
 	}
 	for (; i < limit; ++i)
-		S[i].index_from = S[i].index_to = -1;
-	fwrite(S, sizeof(SEGMENT), limit, ofile);
+		s_segments[i].index_from = s_segments[i].index_to = -1;
+	fwrite(s_segments, sizeof(SEGMENT), limit, ofile);
 }
 
 
@@ -756,7 +756,7 @@ static int CompareArenaVertices(const void *p, const void *q)
 
 static void OutputVehicleData(FILE *ofile)
 {
-	static char *ordinals[] = {
+	static const char *s_ordinals[] = {
 		"\n  1 ", "\n  2 ", "\n  3 ", "\n  4 ", "\n  5 ", "\n  6 ",
 		"\n  7 ", "\n  8 ", "\n  9 ", "\n 10 ", "\n 11 ", "\n 12 "
 	};
@@ -782,7 +782,7 @@ static void OutputVehicleData(FILE *ofile)
 	fputs(" *", stdout);
 	/* Output the vehicles */
 	for (t = 0; t < sizeof(vehicles0) / sizeof(char *); ++t) {
-		fputs(ordinals[t], stdout);
+		fputs(s_ordinals[t], stdout);
 		V = GetVehicleVertices(vehicles0[t], vertices + 1);
 		OutputVehicleSegments(vehicles0[t], V, segments + 1, ofile);
 		OutputVehicleVertices(vehicles0[t], V, vertices, ofile);
@@ -805,18 +805,18 @@ static int16_t CountVehicleVertices(const char *vehicle)
 
 static OFFSET *GetVehicleVertices(const char *vehicle, int16_t limit)
 {
-	static OFFSET *vertices = NULL;
+	static OFFSET *s_vertices = NULL;
 	char focus;
 	int16_t i, x, y;
 
-	if (!vertices)
-		vertices = malloc(sizeof(OFFSET) * limit);
+	if (!s_vertices)
+		s_vertices = malloc(sizeof(OFFSET) * limit);
 	for (y = 0, i = 0; y < VEH_Y_LIMIT; ++y) {
 		for (x = 0; x < VEH_X_LIMIT; ++x) {
 			focus = VehicleCharacterAt(vehicle, x, y);
 			if (strchr(vehicle_vertices0, focus)) {
-				vertices[i].x = x;
-				vertices[i].y = y;
+				s_vertices[i].x = x;
+				s_vertices[i].y = y;
 				++i;
 				if (i == limit) {
 					fputs("\nIncrease MAX_VEH_VERTICES!\n", stderr);
@@ -826,27 +826,27 @@ static OFFSET *GetVehicleVertices(const char *vehicle, int16_t limit)
 		}
 	}
 	/* Sorting for easier searching later */
-	qsort(vertices, i, sizeof(OFFSET), CompareVehicleVertices);
+	qsort(s_vertices, i, sizeof(OFFSET), CompareVehicleVertices);
 	for (; i < limit; ++i)
-		vertices[i].y = vertices[i].x = -1;
+		s_vertices[i].y = s_vertices[i].x = -1;
 
 	/* Will need this in lots of places! */
-	return vertices;
+	return s_vertices;
 }
 
 static void OutputVehicleSegments(const char *vehicle, OFFSET *vertices, int16_t limit, FILE *ofile)
 {
-	static SEGMENT *S = NULL;
+	static SEGMENT *s_segments = NULL;
 	int16_t i, j1, j2, count;
 
-	if (!S)
-		S = malloc(sizeof(SEGMENT) * limit);
+	if (!s_segments)
+		s_segments = malloc(sizeof(SEGMENT) * limit);
 	count = CountVehicleVertices(vehicle);
 	for (i = 0, j1 = 0; j1 < count; ++j1) {
 		for (j2 = j1 + 1; j2 < count; ++j2) {
 			if (VehicleVerticesAreConnected(vehicle, vertices + j1, vertices + j2)) {
-				S[i].index_from = j1;
-				S[i].index_to = j2;
+				s_segments[i].index_from = j1;
+				s_segments[i].index_to = j2;
 				++i;
 				if (i == limit) {
 					fputs("\nIncrease MAX_VEH_SEGMENTS!\n", stderr);
@@ -856,26 +856,26 @@ static void OutputVehicleSegments(const char *vehicle, OFFSET *vertices, int16_t
 		}
 	}
 	for (; i < limit; ++i)
-		S[i].index_from = S[i].index_to = -1;
-	fwrite(S, sizeof(SEGMENT), limit, ofile);
+		s_segments[i].index_from = s_segments[i].index_to = -1;
+	fwrite(s_segments, sizeof(SEGMENT), limit, ofile);
 }
 
 static void OutputVehicleVertices(const char *vehicle, OFFSET *vertices, int16_t limit, FILE *ofile)
 {
-	static OFFSET *offsets = NULL;
-	static double *sn, *cs;
+	static OFFSET *s_offsets = NULL;
+	static double *s_sn, *s_cs;
 	int16_t t, u, height, count;
 	double d, i, scale, x, y;
 
-	if (!offsets) {
-		offsets = malloc(sizeof(OFFSET) * limit);
-		sn = malloc(sizeof(double) * VEHICLE_DIRS);
-		cs = malloc(sizeof(double) * VEHICLE_DIRS);
+	if (!s_offsets) {
+		s_offsets = malloc(sizeof(OFFSET) * limit);
+		s_sn = malloc(sizeof(double) * VEHICLE_DIRS);
+		s_cs = malloc(sizeof(double) * VEHICLE_DIRS);
 		d = 0.0;
 		i = 2.0 * DCPI / VEHICLE_DIRS;
 		for (t = 0; t < VEHICLE_DIRS; ++t, d += i) {
-			sn[t] = sin(d);
-			cs[t] = cos(d);
+			s_sn[t] = sin(d);
+			s_cs[t] = cos(d);
 		}
 		fputc('*', stdout);
 	}
@@ -887,12 +887,12 @@ static void OutputVehicleVertices(const char *vehicle, OFFSET *vertices, int16_t
 			for (u = 0; u < count; ++u) {
 				x = vertices[u].x - VEH_XY_OFFSET;
 				y = vertices[u].y - VEH_XY_OFFSET;
-				offsets[u].x = (cs[t] * x - sn[t] * y) / scale;
-				offsets[u].y = (sn[t] * x + cs[t] * y) / scale;
+				s_offsets[u].x = (s_cs[t] * x - s_sn[t] * y) / scale;
+				s_offsets[u].y = (s_sn[t] * x + s_cs[t] * y) / scale;
 			}
 			for (; u < limit; ++u)
-				offsets[u].x = offsets[u].y = -1;
-			fwrite(offsets, sizeof(OFFSET), limit, ofile);
+				s_offsets[u].x = s_offsets[u].y = -1;
+			fwrite(s_offsets, sizeof(OFFSET), limit, ofile);
 		}
 		fputc('*', stdout);
 	}
