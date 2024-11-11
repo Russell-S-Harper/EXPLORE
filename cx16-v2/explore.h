@@ -30,10 +30,11 @@ enum {APP_PRM, APP_AUX, APP_CNT};
 #define EXP_APP_PRM_OFFSET	2
 #define EXP_APP_AUX_OFFSET	1
 
-/* Frames between loading missiles */
+/* Counters (in frames) for how long a missile takes to reload and missile lifespan */
 #define MSS_LOADING_COUNTER	5
 #define MSS_COUNTDOWN_COUNTER	30
 
+/* VEHICLE combines player, NPCs, and missiles */
 typedef struct {
 	bool active, airborne, exploding, fire;
 	int8_t z_delta, angle_delta, countdown, gear, loading;
@@ -41,6 +42,7 @@ typedef struct {
 	XM_HANDLE appearance[APP_CNT];
 } VEHICLE;
 
+/* Callback routine hint */
 enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
 
 /******** Function declarations ********/

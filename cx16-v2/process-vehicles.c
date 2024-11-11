@@ -196,6 +196,5 @@ void ProcessVehicles(void)
 			vehicle->appearance[APP_PRM] = g_exploding_prm;
 			vehicle->appearance[APP_AUX] = g_exploding_aux;
 		}
-
 	}
 }
