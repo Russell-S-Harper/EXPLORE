@@ -51,7 +51,7 @@ void InitProgram(void)
 	/* Set up extended memory */
 	InitXM();
 
-	/* Set up error messages, trigonometric data, arenas, etc. */
+	/* Set up error messages, trigonometric data, arenas, and vehicles */
 	InitData("explore.dat");
 
 	/* Initialize the hardware, etc. */
