@@ -97,14 +97,14 @@ Run the emulator, then load and run `data.prg` to generate the `explore.dat` dat
 
 The demo uses these keyboard controls, with joystick in planning:
 
-          escape: pause/unpause program
-       cursor up: climb or gear forward
-     cursor down: dive or gear reverse
-    cursor right: turn right
-     cursor left: turn left
-           space: fire missile
-               1: cycle player
-               Q: quit program
+- escape: pause, press again to resume
+- cursor up: climb
+- cursor down: dive
+- cursor right: turn right
+- cursor left: turn left
+- space: fire missile
+- 1: cycle player
+- Q: quit
 
 Depending on what I’m optimizing, it might print some timing statistics in `clock` units.
 
