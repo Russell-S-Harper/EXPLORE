@@ -4,6 +4,7 @@
      Contact: russell.s.harper@gmail.com
 */
 
+#include <string.h>
 #include "explore.h"
 
 #define ANGLE_DELTA_SHIFT	1
@@ -20,7 +21,7 @@
 /* Process every vehicle */
 void ProcessVehicles(void)
 {
-	VEHICLE *vehicle, *working;
+	VEHICLE *vehicle;
 	int8_t shift;
 	int16_t *arena, i, j, x, y, z;
 
@@ -107,20 +108,8 @@ void ProcessVehicles(void)
 		if (vehicle->fire) {
 			for (j = PLAYER_COUNT; j < VEHICLE_COUNT; ++j) {
 				if (!g_vehicles[j].active) {
-					working = g_vehicles + j;
-					working->active = true;
-					working->appearance[APP_PRM] = vehicle->missile;
-					working->appearance[APP_AUX] = 0;
-					working->x = vehicle->x;
-					working->y = vehicle->y;
-					working->z = vehicle->z;
-					working->angle = vehicle->angle;
-					working->sin = vehicle->sin;
-					working->cos = vehicle->cos;
-					working->delta = vehicle->delta;
-					working->damage = vehicle->damage;
-					working->countdown = MSS_COUNTDOWN_COUNTER;
-					working->exploding = false;
+					memcpy(g_vehicles + j, vehicle, sizeof(VEHICLE));
+					g_vehicles[j].appearance[APP_PRM] = vehicle->missile;
 					break;
 				}
 			}
