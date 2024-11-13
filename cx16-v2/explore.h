@@ -37,10 +37,16 @@ enum {APP_PRM, APP_AUX, APP_CNT};
 /* VEHICLE combines player, NPCs, and missiles */
 typedef struct {
 	bool active, airborne, exploding, fire;
-	int8_t z_delta, angle_delta, countdown, gear, loading;
+	int8_t z_delta, angle_delta, level, countdown, gear, delta, damage, loading;
 	int16_t x, y, z, angle, sin, cos;
-	XM_HANDLE appearance[APP_CNT];
+	XM_HANDLE appearance[APP_CNT], missile;
 } VEHICLE;
+
+typedef struct {
+	bool last, airborne;
+	int8_t arena, gear, delta, damage;
+	XM_HANDLE vehicle, missile;
+} LEVEL;
 
 /* Callback routine hint */
 enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
@@ -69,7 +75,10 @@ void PlotPoint16(int16_t x, int16_t y, uint8_t color);
 void ErasePoint16(int16_t x, int16_t y);
 
 /* Keyboard/joystick routine defined in cx16-specific.c and called by ProcessVehicle */
-void GetPlayerInput(VEHICLE *p);
+void GetPlayerInput(VEHICLE *vehicle);
+
+/* Routines defined in initialize.c and called by InitVehicles and other places */
+bool AdvanceVehicle(VEHICLE *vehicle);
 
 /* Other routines called throughout the program */
 int16_t Minimum(int16_t a, int16_t b);
@@ -88,6 +97,9 @@ extern XM_HANDLE
 
 extern VEHICLE
 	*g_vehicles;
+
+extern LEVEL
+	*g_levels;
 
 extern bool
 	g_exit_program;

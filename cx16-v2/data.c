@@ -443,10 +443,23 @@ const char *vehicles0[] = {
 	"                         "
 };
 
+#define PER_LEVEL	7
+
+const char levels0[] = {
+/*	Arena	Vehicle	Airbrn	Gear	Missile	Delta	Damage */
+	0,	0,	1,	1,	6,	0,	3,
+	1,	1,	1,	2,	6,	0,	3,
+	2,	2,	1,	1,	7,	1,	5,
+	3,	3,	1,	2,	7,	1,	5,
+	4,	4,	1,	1,	8,	2,	8,
+	5,	5,	1,	2,	8,	2,	8
+};
+
 static void OutputStrings(FILE *ofile);
 static void OutputTrigData(FILE *ofile);
 static void OutputArenaData(FILE *ofile);
 static void OutputVehicleData(FILE *ofile);
+static void OutputLevelData(FILE *ofile);
 
 static void OutputArena16x16(const char *arena, FILE *ofile);
 static VERTEX *OutputArenaVertices(const char *arena, int16_t limit, FILE *ofile);
@@ -486,6 +499,7 @@ int main(void)
 	/* The remaining data */
 	OutputArenaData(ofile);
 	OutputVehicleData(ofile);
+	OutputLevelData(ofile);
 
 	/* Indicate end-of-data */
 	fputc(CODE_EF, ofile);
@@ -959,4 +973,16 @@ static int CompareVehicleVertices(const void *p, const void *q)
 		result = a->y - b->y;
 
 	return (int)result;
+}
+
+static void OutputLevelData(FILE *ofile)
+{
+	int16_t tmp;
+
+	fputs("Level Data", stdout);
+	fputc(CODE_LD, ofile);
+	tmp = sizeof(levels0) / sizeof(char) / PER_LEVEL;
+	fwrite(&tmp, sizeof(int16_t), 1, ofile);
+	fwrite(levels0, sizeof(char), sizeof(levels0) / sizeof(char), ofile);
+	fputs(" done\n", stdout);
 }

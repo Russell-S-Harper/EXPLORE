@@ -109,16 +109,18 @@ void ProcessVehicles(void)
 				if (!g_vehicles[j].active) {
 					working = g_vehicles + j;
 					working->active = true;
-					working->exploding = false;
-					working->countdown = MSS_COUNTDOWN_COUNTER;
-					working->angle = vehicle->angle;
-					working->sin = vehicle->sin;
-					working->cos = vehicle->cos;
+					working->appearance[APP_PRM] = vehicle->missile;
+					working->appearance[APP_AUX] = 0;
 					working->x = vehicle->x;
 					working->y = vehicle->y;
 					working->z = vehicle->z;
-					working->appearance[APP_PRM] = g_vehicle_data[6];
-					working->appearance[APP_AUX] = 0;
+					working->angle = vehicle->angle;
+					working->sin = vehicle->sin;
+					working->cos = vehicle->cos;
+					working->delta = vehicle->delta;
+					working->damage = vehicle->damage;
+					working->countdown = MSS_COUNTDOWN_COUNTER;
+					working->exploding = false;
 					break;
 				}
 			}

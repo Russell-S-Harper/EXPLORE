@@ -21,6 +21,9 @@ XM_HANDLE
 VEHICLE
 	*g_vehicles;
 
+LEVEL
+	*g_levels;
+
 bool
 	g_exit_program;
 
@@ -64,6 +67,7 @@ void InitProgram(void)
 static void InitData(char *file)
 {
 	FILE *ifile;
+	int8_t tmp;
 	int16_t t, count, size;
 	char code = CODE_ID;
 
@@ -106,6 +110,27 @@ static void InitData(char *file)
 				for (t = 0; t < count; ++t)
 					GetData(GetXMAddressInitial(g_vehicle_data[t]), size, ifile);
 				break;
+			case CODE_LD:
+				GetData(&count, sizeof(int16_t), ifile);
+				g_levels = malloc(count * sizeof(LEVEL));
+				for (t = 0; t < count; ++t) {
+					GetData(&tmp, sizeof(int8_t), ifile);
+					g_levels[t].arena = tmp;
+					GetData(&tmp, sizeof(int8_t), ifile);
+					g_levels[t].vehicle = g_vehicle_data[tmp];
+					GetData(&tmp, sizeof(int8_t), ifile);
+					g_levels[t].airborne = !!tmp;
+					GetData(&tmp, sizeof(int8_t), ifile);
+					g_levels[t].gear = tmp;
+					GetData(&tmp, sizeof(int8_t), ifile);
+					g_levels[t].missile = g_vehicle_data[tmp];
+					GetData(&tmp, sizeof(int8_t), ifile);
+					g_levels[t].delta = tmp;
+					GetData(&tmp, sizeof(int8_t), ifile);
+					g_levels[t].damage = tmp;
+					g_levels[t].last = (t + 1 == count);
+				}
+				break;
 			case CODE_EF:
 				fclose(ifile);
 				break;
@@ -136,10 +161,28 @@ static void InitVehicles(void)
 		vehicle->x = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicle->sin);
 		vehicle->y = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicle->cos);
 		vehicle->z = MIN_XYZ;
-		vehicle->appearance[APP_PRM] = g_vehicle_data[0];
-		vehicle->airborne = true;
-		vehicle->gear = 1;
+		vehicle->level = -1;
+		AdvanceVehicle(vehicle);
 	}
+}
+
+bool AdvanceVehicle(VEHICLE *vehicle)
+{
+	LEVEL *level;
+
+	if (vehicle->level >= 0 && g_levels[vehicle->level].last)
+		return false;
+	++vehicle->level;
+	level = g_levels + vehicle->level;
+	if (g_arena_index < level->arena)
+		g_arena_index = level->arena;
+	vehicle->appearance[APP_PRM] = level->vehicle;
+	vehicle->airborne = level->airborne;
+	vehicle->gear = level->gear;
+	vehicle->missile = level->missile;
+	vehicle->delta = level->delta;
+	vehicle->damage = level->damage;
+	return true;
 }
 
 /* Convenience methods to return Sin/Cos from lookup */

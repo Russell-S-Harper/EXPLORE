@@ -7,7 +7,7 @@
 #include <time.h>
 #include "explore.h"
 
-#define DEMO_FRAMES_PER_ARENA	120
+#define DEMO_FRAMES_PER_LEVEL	120
 
 void main()
 {
@@ -22,12 +22,8 @@ void main()
 		RenderObjects();
 		UpdateDisplay();
 		++f;
-		if (!(f % DEMO_FRAMES_PER_ARENA)) {
-			if (!IndexExistsForXM(g_arena_data, ++g_arena_index))
-				g_exit_program = true; // g_arena_index = 0;
-			else
-				g_vehicles[PLAYER_INDEX].appearance[APP_PRM] = g_vehicle_data[g_arena_index];
-		}
+		if (!(f % DEMO_FRAMES_PER_LEVEL))
+			g_exit_program = !AdvanceVehicle(g_vehicles + PLAYER_INDEX);
 	}
 	t += clock();
 	OutputAsNumber('T', t);

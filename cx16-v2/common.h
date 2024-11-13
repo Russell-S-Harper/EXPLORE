@@ -48,9 +48,10 @@ enum {ERR_FO, ERR_FC, ERR_XM, ERR_GI, ERR_OB, ERR_DC, ERR_NO};
 	CODE_TD: trig data
 	CODE_AD: arena data
 	CODE_VD: vehicle data
+	CODE_LD: level data
 	CODE_EF: end-of-file
 */
-enum {CODE_ID, CODE_EM, CODE_TD, CODE_AD, CODE_VD, CODE_EF};
+enum {CODE_ID, CODE_EM, CODE_TD, CODE_AD, CODE_VD, CODE_LD, CODE_EF};
 
 /* Colors */
 enum {CLR16_BLACK, CLR16_WHITE, CLR16_RED, CLR16_CYAN,
