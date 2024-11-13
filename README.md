@@ -1,6 +1,6 @@
 # EXPLORE
 
-This is a 3-D demo written in 1992 for DOS x86 computers being ported to the Commander X16.
+This is a 3-D demo written in 1992 for DOS x86 computers being ported to the Commander X16. There is also mention of a game long lost to history, the only things left are a few hand-drawn sketches and flowcharts.
 
 ## History
 
@@ -95,7 +95,18 @@ Then edit the `«explore-repo»/cx16-v2/build-cc65-cx16` script to point `XCC`, 
 
 Run the emulator, then load and run `data.prg` to generate the `explore.dat` data file, and then load and run `explore.prg` to run the demo. Once `explore.dat` is created, you don’t need to run `data.prg` again, unless you change `«explore-repo»/cx16-v2/data.c`.
 
-The only controls are escape to pause and Q to quit. Depending on what I’m optimizing, it might print some timing statistics in `clock` units.
+The demo uses these keyboard controls, with joystick in planning:
+
+          escape: pause/unpause program
+       cursor up: climb or gear forward
+     cursor down: dive or gear reverse
+    cursor right: turn right
+     cursor left: turn left
+           space: fire missile
+               1: cycle player
+               Q: quit program
+
+Depending on what I’m optimizing, it might print some timing statistics in `clock` units.
 
 ## License
 
