@@ -160,8 +160,8 @@ static void InitVehicles(void)
 		vehicle->angle = (i << (SHIFT_FC - 2)) + (SCALE_FC / 8);
 		vehicle->sin = Sin(vehicle->angle);
 		vehicle->cos = Cos(vehicle->angle);
-		vehicle->x = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicle->sin);
-		vehicle->y = (MAX_XYZ >> 1) + SpecialMultiply(MAX_XYZ >> 2, vehicle->cos);
+		vehicle->x = (MAX_XYZ >> 1) - SpecialMultiply(MAX_XYZ >> 2, vehicle->sin);
+		vehicle->y = (MAX_XYZ >> 1) - SpecialMultiply(MAX_XYZ >> 2, vehicle->cos);
 		vehicle->z = MIN_XYZ;
 		/* To use for missiles */
 		vehicle->countdown = MSS_COUNTDOWN_COUNTER;
