@@ -7,12 +7,13 @@
 #include <string.h>
 #include "explore.h"
 
-#define ANGLE_DELTA_SHIFT	1
-#define XY_MISSILE_DELTA_SHIFT	3
-#define XY_AIR_DELTA_SHIFT	6
-#define XY_GND_DELTA_SHIFT	7
-#define Z_DELTA_SHIFT		6
+#define ANGLE_DELTA_SHIFT	2
+#define XY_MISSILE_DELTA_SHIFT	2
+#define XY_AIR_DELTA_SHIFT	5
+#define XY_GND_DELTA_SHIFT	6
+#define Z_DELTA_SHIFT		5
 
+/* For ground vehicles: < 0 reverse, 0 neutral, > 0 forward */
 #define MAX_GEAR		2
 #define MIN_GEAR		-1
 
@@ -109,7 +110,7 @@ void ProcessVehicles(void)
 			for (j = PLAYER_COUNT; j < VEHICLE_COUNT; ++j) {
 				if (!g_vehicles[j].active) {
 					memcpy(g_vehicles + j, vehicle, sizeof(VEHICLE));
-					g_vehicles[j].appearance[APP_PRM] = vehicle->missile;
+					g_vehicles[j].appearance[APP_PRM] = vehicle->appearance[APP_MSS];
 					break;
 				}
 			}

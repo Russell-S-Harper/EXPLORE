@@ -24,7 +24,7 @@
 #define VEHICLE_Z_TOLERANCE	191
 
 /* Appearance */
-enum {APP_PRM, APP_AUX, APP_CNT};
+enum {APP_PRM, APP_AUX, APP_MSS, APP_CNT};
 
 /* Explosions are last two "vehicles" */
 #define EXP_APP_PRM_OFFSET	2
@@ -34,12 +34,13 @@ enum {APP_PRM, APP_AUX, APP_CNT};
 #define MSS_LOADING_COUNTER	5
 #define MSS_COUNTDOWN_COUNTER	30
 
-/* VEHICLE combines player, NPCs, and missiles */
+/* VEHICLE combines player, NPCs, and missiles; appearance is set up as an array so we
+	can iterate through them in a loop */
 typedef struct {
 	bool active, airborne, exploding, fire;
-	int8_t z_delta, angle_delta, level, countdown, gear, delta, damage, loading;
+	int8_t z_delta, angle_delta, level, gear, delta, damage, loading, countdown;
 	int16_t x, y, z, angle, sin, cos;
-	XM_HANDLE appearance[APP_CNT], missile;
+	XM_HANDLE appearance[APP_CNT];
 } VEHICLE;
 
 typedef struct {

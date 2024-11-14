@@ -901,8 +901,8 @@ static void OutputVehicleVertices(const char *vehicle, OFFSET *vertices, int16_t
 			for (u = 0; u < count; ++u) {
 				x = vertices[u].x - VEH_XY_OFFSET;
 				y = vertices[u].y - VEH_XY_OFFSET;
-				s_offsets[u].x = (s_cs[t] * x - s_sn[t] * y) / scale;
-				s_offsets[u].y = (s_sn[t] * x + s_cs[t] * y) / scale;
+				s_offsets[u].x = round((s_cs[t] * x - s_sn[t] * y) / scale);
+				s_offsets[u].y = round((s_sn[t] * x + s_cs[t] * y) / scale);
 			}
 			for (; u < limit; ++u)
 				s_offsets[u].x = s_offsets[u].y = -1;

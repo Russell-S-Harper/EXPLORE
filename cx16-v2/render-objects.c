@@ -103,7 +103,7 @@ void RenderObjects(void)
 			screen_y = s_h + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
 		}
 		/* Render the vehicle */
-		for (j = 0; j < sizeof(vehicle->appearance) / sizeof(XM_HANDLE); ++j) {
+		for (j = APP_PRM; j < APP_MSS; ++j) {
 			if (vehicle->appearance[j]) {
 				xm = GetXMAddressInitial(vehicle->appearance[j]);
 				S = (SEGMENT *)xm;

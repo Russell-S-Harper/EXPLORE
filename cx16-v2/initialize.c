@@ -182,9 +182,9 @@ bool AdvanceVehicle(VEHICLE *vehicle)
 	if (g_arena_index < level->arena)
 		g_arena_index = level->arena;
 	vehicle->appearance[APP_PRM] = level->vehicle;
+	vehicle->appearance[APP_MSS] = level->missile;
 	vehicle->airborne = level->airborne;
 	vehicle->gear = level->gear;
-	vehicle->missile = level->missile;
 	vehicle->delta = level->delta;
 	vehicle->damage = level->damage;
 	return true;
@@ -193,12 +193,12 @@ bool AdvanceVehicle(VEHICLE *vehicle)
 /* Convenience methods to return Sin/Cos from lookup */
 int16_t Sin(int16_t angle)
 {
-	return GetXMDirectSigned(g_trig_data, angle & (SCALE_FC-1));
+	return GetXMDirectSigned(g_trig_data, angle & (SCALE_FC - 1));
 }
 
 int16_t Cos(int16_t angle)
 {
-	return GetXMDirectSigned(g_trig_data, (angle + SCALE_FC/4) & (SCALE_FC-1));
+	return GetXMDirectSigned(g_trig_data, (angle + SCALE_FC/4) & (SCALE_FC - 1));
 }
 
 /* Convenience method to output numbers for debugging purposes without linking in the entire stdio library! */
