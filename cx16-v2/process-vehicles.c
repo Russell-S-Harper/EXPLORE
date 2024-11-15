@@ -8,9 +8,9 @@
 #include "explore.h"
 
 #define ANGLE_DELTA_SHIFT	2
-#define XY_MISSILE_DELTA_SHIFT	2
-#define XY_AIR_DELTA_SHIFT	5
-#define XY_GND_DELTA_SHIFT	6
+#define XY_MISSILE_DELTA_SHIFT	3
+#define XY_AIR_DELTA_SHIFT	6
+#define XY_GND_DELTA_SHIFT	7
 #define Z_DELTA_SHIFT		5
 
 /* For ground vehicles: < 0 reverse, 0 neutral, > 0 forward */
