@@ -15,14 +15,14 @@
 #define VEHICLE_POINTS(dz, da)	((((((dz) + 16384) >> 7) & 0xE0) + (((da) >> 4) & 0x1F)) * sizeof(OFFSET) * g_max_vehicle_vertices)
 
 /* Optimized qsort */
-static void SortIndicesByVehicleHeight(unsigned char *indices, char lo, char hi);
+static void SortIndicesByVehicleHeight(uint8_t *indices, int8_t lo, int8_t hi);
 
 /* Render all the objects */
 void RenderObjects(void)
 {
 	static POINT *s_points = NULL;
 	static int16_t s_w, s_h;
-	static unsigned char *s_indices;
+	static uint8_t *s_indices;
 	char *xm;
 	uint8_t color;
 	int16_t i, j, count, dx, dy, dz, da, screen_x, screen_y, last_dz, scale;
@@ -34,7 +34,7 @@ void RenderObjects(void)
 
 	if (!s_points) {
 		s_points = malloc(sizeof(POINT) * (g_max_arena_vertices + 1));
-		s_indices = malloc(sizeof(unsigned char) * VEHICLE_COUNT);
+		s_indices = malloc(sizeof(uint8_t) * VEHICLE_COUNT);
 		s_w = g_display_width >> 1;
 		s_h = 3 * g_display_height >> 2;
 	}
@@ -119,10 +119,10 @@ void RenderObjects(void)
 }
 
 /* Optimized code from qsort.c for this specific case, otherwise qsort becomes a bottleneck! */
-static void SortIndicesByVehicleHeight(unsigned char *indices, char lo, char hi)
+static void SortIndicesByVehicleHeight(uint8_t *indices, int8_t lo, int8_t hi)
 {
-	unsigned char t;
-	char i, j;
+	uint8_t t;
+	int8_t i, j;
 	int16_t z;
 
 	/* Sort indices by vehicle height */

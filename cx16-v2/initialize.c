@@ -66,10 +66,10 @@ void InitProgram(void)
 
 static void InitData(char *file)
 {
-	FILE *ifile;
+	char code = CODE_ID;
 	int8_t tmp;
 	int16_t t, count, size;
-	char code = CODE_ID;
+	FILE *ifile;
 
 	if (!(ifile = fopen(file, "rb")))
 		ExitProgram(ERR_FO);
@@ -204,8 +204,8 @@ int16_t Cos(int16_t angle)
 /* Convenience method to output numbers for debugging purposes without linking in the entire stdio library! */
 void OutputAsNumber(char prefix, int16_t value)
 {
-	int16_t i;
 	char c;
+	int16_t i;
 
 	/* Output the prefix, can be anything */
 	fputc(prefix, stdout);

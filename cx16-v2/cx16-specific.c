@@ -10,6 +10,7 @@
 #include <time.h>
 #include <conio.h>
 #include <tgi.h>
+#include <joystick.h>
 #include "explore.h"
 #include "vera.h"
 
@@ -81,6 +82,9 @@ void InitSpecific(void)
 
 	/* Clear the remainder of screen 2 */
 	UpdateDisplay();
+
+	/* Set up the joystick */
+	joy_install(joy_static_stddrv);
 }
 
 /* Switch to the other screen, clear the previous screen, and perform other functions */
@@ -398,14 +402,14 @@ int16_t Minimum(int16_t a, int16_t b) { return a < b? a: b; }
 
 int16_t Maximum(int16_t a, int16_t b) { return a > b? a: b; }
 
-/* Processes keyboard/joystick (pending) input */
+/* Processes keyboard and joystick input */
 void GetPlayerInput(VEHICLE *vehicle)
 {
+	uint8_t joy;
+
 	/* Process keyboard input */
 	while (kbhit()) {
-
 		switch ((uint8_t)cgetc()) {
-
 			case PAUSE_PROGRAM:
 				/* Wait until it's pressed again */
 				while (cgetc() != PAUSE_PROGRAM);
@@ -447,6 +451,29 @@ void GetPlayerInput(VEHICLE *vehicle)
 				tgi_done();
 				g_exit_program = true;
 				break;
+		}
+	}
+
+	/* Process joystick input */
+	if (joy = joy_read(JOY_1)) {
+		if (JOY_UP(joy)) {
+			if (vehicle->airborne)
+				vehicle->z_delta -= 1;
+			else
+				vehicle->gear += 1;
+		} else if (JOY_DOWN(joy)) {
+			if (vehicle->airborne)
+				vehicle->z_delta += 1;
+			else
+				vehicle->gear -= 1;
+		}
+		if (JOY_RIGHT(joy))
+			vehicle->angle_delta += 1;
+		else if (JOY_LEFT(joy))
+			vehicle->angle_delta -= 1;
+		if (JOY_BTN_1(joy)) {
+			if (!vehicle->loading)
+				vehicle->fire = true;
 		}
 	}
 }
