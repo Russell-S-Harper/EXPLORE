@@ -406,6 +406,7 @@ int16_t Maximum(int16_t a, int16_t b) { return a > b? a: b; }
 void GetPlayerInput(VEHICLE *vehicle)
 {
 	uint8_t joy;
+	int16_t i, j;
 
 	/* Process keyboard input */
 	while (kbhit()) {
@@ -443,8 +444,14 @@ void GetPlayerInput(VEHICLE *vehicle)
 				break;
 
 			case CYCLE_PLAYER:
-				if (++g_vehicle_index >= PLAYER_COUNT)
-					g_vehicle_index = 0;
+				/* Find the next active player, if any */
+				for (i = 1; i < PLAYER_COUNT; ++i) {
+					j = (g_vehicle_index + i) % PLAYER_COUNT;
+					if (g_vehicles[j].active) {
+						g_vehicle_index = j;
+						break;
+					}
+				}
 				break;
 
 			case QUIT_PROGRAM:

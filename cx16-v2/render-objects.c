@@ -92,9 +92,9 @@ void RenderObjects(void)
 			if (last_dz != dz) {
 				last_dz = dz;
 				scale = MultiplyThenDivide(dz, ARENA_SCALE_M1, ARENA_SCALE_M2) + ARENA_SCALE_B;
-				if (dz < -VEHICLE_Z_TOLERANCE)
+				if (dz < -VEHICLE_Z_TOL)
 					color = CLR16_ORANGE;
-				else if (dz > VEHICLE_Z_TOLERANCE)
+				else if (dz > VEHICLE_Z_TOL)
 					color = CLR16_LIGHTBLUE;
 				else
 					color = CLR16_WHITE;

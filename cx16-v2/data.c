@@ -446,7 +446,7 @@ const char *vehicles0[] = {
 #define PER_LEVEL	7
 
 const int8_t levels0[] = {
-/*	Arena	Vehicle	Airbrn	Gear	Missile	Delta	Damage */
+/*	Arena	Player	Airbrn	Gear	Missile	Delta	Damage */
 	0,	0,	1,	1,	6,	0,	3,
 	1,	1,	1,	2,	6,	0,	3,
 	2,	2,	1,	1,	7,	1,	5,

@@ -7,11 +7,12 @@
 #include <string.h>
 #include "explore.h"
 
-#define ANGLE_DELTA_SHIFT	2
-#define XY_MISSILE_DELTA_SHIFT	3
-#define XY_AIR_DELTA_SHIFT	6
-#define XY_GND_DELTA_SHIFT	7
-#define Z_DELTA_SHIFT		5
+#define ANGLE_DELTA_SHIFT	2	/* shift left */
+#define XY_MISSILE_DELTA_SHIFT	3	/* shift right */
+#define XY_AIR_DELTA_SHIFT	6	/* shift right */
+#define XY_GND_DELTA_SHIFT	7	/* shift right */
+#define Z_DELTA_SHIFT		5	/* shift left */
+#define XY_COLLISION_SHIFT	2	/* shift right */
 
 /* For ground vehicles: < 0 reverse, 0 neutral, > 0 forward */
 #define MAX_GEAR		2
@@ -22,60 +23,60 @@
 /* Process every vehicle */
 void ProcessVehicles(void)
 {
-	VEHICLE *vehicle;
+	VEHICLE *player, *missile;
 	int8_t shift;
-	int16_t *arena, i, j, x, y, z;
+	int16_t *arena, i, j, x, y, z, dx, dy;
 
 	/* Will need this */
 	arena = GetXMAddress(g_arena_data, g_arena_index);
 
 	/* Process each player */
-	for (i = 0, vehicle = g_vehicles; i < PLAYER_COUNT; ++i, ++vehicle) {
+	for (i = 0, player = g_vehicles; i < PLAYER_COUNT; ++i, ++player) {
 		/* Ignore if not active */
-		if (!vehicle->active)
+		if (!player->active)
 			continue;
 
 		/* Get player input, NPCs will get inputs during idle times */
 		if (i == PLAYER_INDEX)
-			GetPlayerInput(vehicle);
+			GetPlayerInput(player);
 
 		/* Important: "bump" if a wall was created or removed underneath */
-		z = arena[ARENA_INDEX(vehicle->x, vehicle->y)];
-		if (vehicle->z < z || !vehicle->airborne)
-			vehicle->z = z;
+		z = arena[ARENA_INDEX(player->x, player->y)];
+		if (player->z < z || !player->airborne)
+			player->z = z;
 
 		/* Will need these */
-		x = vehicle->x;
-		y = vehicle->y;
-		z = vehicle->z;
+		x = player->x;
+		y = player->y;
+		z = player->z;
 
 		/* Process angle */
-		if (vehicle->angle_delta) {
-			vehicle->angle += vehicle->angle_delta << ANGLE_DELTA_SHIFT;
-			vehicle->sin = Sin(vehicle->angle);
-			vehicle->cos = Cos(vehicle->angle);
-			vehicle->angle_delta = 0;
+		if (player->angle_delta) {
+			player->angle += player->angle_delta << ANGLE_DELTA_SHIFT;
+			player->sin = Sin(player->angle);
+			player->cos = Cos(player->angle);
+			player->angle_delta = 0;
 		}
 
 		/* Process XY movement */
-		if (vehicle->airborne) {
-			shift = XY_AIR_DELTA_SHIFT - vehicle->gear;
-			x += vehicle->sin >> shift;
-			y += vehicle->cos >> shift;
+		if (player->airborne) {
+			shift = XY_AIR_DELTA_SHIFT - player->gear;
+			x += player->sin >> shift;
+			y += player->cos >> shift;
 		} else {
-			vehicle->gear = Minimum(Maximum(vehicle->gear, MIN_GEAR), MAX_GEAR);
-			switch (vehicle->gear) {
+			player->gear = Minimum(Maximum(player->gear, MIN_GEAR), MAX_GEAR);
+			switch (player->gear) {
 				case MIN_GEAR:
-					x -= vehicle->sin >> XY_GND_DELTA_SHIFT;
-					y -= vehicle->cos >> XY_GND_DELTA_SHIFT;
+					x -= player->sin >> XY_GND_DELTA_SHIFT;
+					y -= player->cos >> XY_GND_DELTA_SHIFT;
 					break;
 				case 0:
 					/* 0: neutral */
 					break;
 				default:
-					shift = XY_GND_DELTA_SHIFT - vehicle->gear;
-					x += vehicle->sin >> shift;
-					y += vehicle->cos >> shift;
+					shift = XY_GND_DELTA_SHIFT - player->gear;
+					x += player->sin >> shift;
+					y += player->cos >> shift;
 					break;
 			}
 		}
@@ -84,109 +85,127 @@ void ProcessVehicles(void)
 		y = Minimum(Maximum(y, MIN_XYZ), MAX_XYZ);
 
 		/* Process Z movement */
-		if (vehicle->z_delta) {
-			z += vehicle->z_delta << Z_DELTA_SHIFT;
+		if (player->z_delta) {
+			z += player->z_delta << Z_DELTA_SHIFT;
 			z = Minimum(Maximum(z, MIN_XYZ), MAX_XYZ);
-			vehicle->z_delta = 0;
+			player->z_delta = 0;
 		}
 
 		/* Try moving to new XY */
 		if (z >= arena[ARENA_INDEX(x, y)]) {
-			vehicle->x = x;
-			vehicle->y = y;
+			player->x = x;
+			player->y = y;
 		}
 		/* Can't move? Try sliding along the wall */
-		else if (z >= arena[ARENA_INDEX(vehicle->x, y)])
-			vehicle->y = y;
-		else if (z >= arena[ARENA_INDEX(x, vehicle->y)])
-			vehicle->x = x;
+		else if (z >= arena[ARENA_INDEX(player->x, y)])
+			player->y = y;
+		else if (z >= arena[ARENA_INDEX(x, player->y)])
+			player->x = x;
 
 		/* Finalize Z */
-		if (z >= arena[ARENA_INDEX(vehicle->x, vehicle->y)])
-			vehicle->z = z;
+		if (z >= arena[ARENA_INDEX(player->x, player->y)])
+			player->z = z;
 
 		/* Add any missiles */
-		if (vehicle->fire) {
+		if (player->fire) {
 			for (j = PLAYER_COUNT; j < VEHICLE_COUNT; ++j) {
 				if (!g_vehicles[j].active) {
-					memcpy(g_vehicles + j, vehicle, sizeof(VEHICLE));
-					g_vehicles[j].appearance[APP_PRM] = vehicle->appearance[APP_MSS];
+					memcpy(g_vehicles + j, player, sizeof(VEHICLE));
+					g_vehicles[j].appearance[APP_PRM] = player->appearance[APP_MSS];
 					break;
 				}
 			}
-			vehicle->fire = false;
-			vehicle->loading = MSS_LOADING_COUNTER;
-		} else if (vehicle->loading)
-			--vehicle->loading;
+			player->fire = false;
+			player->loading = MSS_LOADING_COUNTER;
+		} else if (player->loading)
+			--player->loading;
 	}
 	/* Process each missile */
-	for (; i < VEHICLE_COUNT; ++i, ++vehicle) {
+	for (missile = g_vehicles + i; i < VEHICLE_COUNT; ++i, ++missile) {
 		/* Deactivate if exploded */
-		if (vehicle->exploding)
-			vehicle->active = false;
+		if (missile->exploding)
+			missile->active = false;
 
 		/* Ignore if not active */
-		if (!vehicle->active)
+		if (!missile->active)
 			continue;
 
 		/* Explode if a wall was created underneath */
-		z = arena[ARENA_INDEX(vehicle->x, vehicle->y)];
-		if (vehicle->z < z)
-			vehicle->exploding = true;
+		z = arena[ARENA_INDEX(missile->x, missile->y)];
+		if (missile->z < z)
+			missile->exploding = true;
 
 		/* Countdown? */
-		if (vehicle->countdown && !--vehicle->countdown)
-			vehicle->exploding = true;
+		if (missile->countdown && !--missile->countdown)
+			missile->exploding = true;
 
 		/* Will need these */
-		x = vehicle->x;
-		y = vehicle->y;
-		z = vehicle->z;
+		x = missile->x;
+		y = missile->y;
+		z = missile->z;
 
 		/* Process angle */
-		if (vehicle->angle_delta) {
-			vehicle->angle += vehicle->angle_delta << ANGLE_DELTA_SHIFT;
-			vehicle->sin = Sin(vehicle->angle);
-			vehicle->cos = Cos(vehicle->angle);
-			vehicle->angle_delta = 0;
+		if (missile->angle_delta) {
+			missile->angle += missile->angle_delta << ANGLE_DELTA_SHIFT;
+			missile->sin = Sin(missile->angle);
+			missile->cos = Cos(missile->angle);
+			missile->angle_delta = 0;
 		}
 
 		/* Process XY movement */
-		x += vehicle->sin >> XY_MISSILE_DELTA_SHIFT;
-		y += vehicle->cos >> XY_MISSILE_DELTA_SHIFT;
+		x += missile->sin >> XY_MISSILE_DELTA_SHIFT;
+		y += missile->cos >> XY_MISSILE_DELTA_SHIFT;
 
 		/* Keep in bounds */
 		x = Minimum(Maximum(x, MIN_XYZ), MAX_XYZ);
 		y = Minimum(Maximum(y, MIN_XYZ), MAX_XYZ);
 
 		/* Process Z movement */
-		if (vehicle->z_delta) {
-			z += vehicle->z_delta << Z_DELTA_SHIFT;
+		if (missile->z_delta) {
+			z += missile->z_delta << Z_DELTA_SHIFT;
 			z = Minimum(Maximum(z, MIN_XYZ), MAX_XYZ);
-			vehicle->z_delta = 0;
+			missile->z_delta = 0;
 		}
 
 		/* Try moving to new XY */
 		if (z >= arena[ARENA_INDEX(x, y)]) {
-			vehicle->x = x;
-			vehicle->y = y;
+			missile->x = x;
+			missile->y = y;
 		}
 		/* Can't move? Try sliding along the wall */
-		else if (z >= arena[ARENA_INDEX(vehicle->x, y)])
-				vehicle->y = y;
-		else if (z >= arena[ARENA_INDEX(x, vehicle->y)])
-				vehicle->x = x;
+		else if (z >= arena[ARENA_INDEX(missile->x, y)])
+				missile->y = y;
+		else if (z >= arena[ARENA_INDEX(x, missile->y)])
+				missile->x = x;
 		/* Still can't move? Explode! */
 		else
-			vehicle->exploding = true;
+			missile->exploding = true;
 		/* Finalize Z */
-		if (z >= arena[ARENA_INDEX(vehicle->x, vehicle->y)])
-			vehicle->z = z;
+		if (z >= arena[ARENA_INDEX(missile->x, missile->y)])
+			missile->z = z;
+
+		/* Check for player collisions */
+		for (j = 0; j < PLAYER_COUNT; ++j) {
+			player = g_vehicles + j;
+			if (missile->identifier != player->identifier && player->active && abs(missile->z - player->z) <= VEHICLE_Z_TOL) {
+				dx = abs(missile->x - player->x) >> XY_COLLISION_SHIFT;
+				dy = abs(missile->y - player->y) >> XY_COLLISION_SHIFT;
+				if (dx <= MSS_XY_TOL && dy <= MSS_XY_TOL && g_squares[dx] + g_squares[dy] <= MSS_DST_TOL_SQR) {
+					missile->exploding = true;
+					player->health -= missile->damage;
+					if (player->health <= 0) {
+						AdvancePlayer(g_vehicles + missile->identifier);
+						if (!AdvancePlayer(player))
+							player->active = false;
+					}
+				}
+			}
+		}
 
 		/* Animate explosions */
-		if (vehicle->exploding) {
-			vehicle->appearance[APP_PRM] = g_exploding_prm;
-			vehicle->appearance[APP_AUX] = g_exploding_aux;
+		if (missile->exploding) {
+			missile->appearance[APP_PRM] = g_exploding_prm;
+			missile->appearance[APP_AUX] = g_exploding_aux;
 		}
 	}
 }

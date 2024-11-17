@@ -13,40 +13,49 @@
 #include "common.h"
 #include "xm.h"
 
+/* Overall arena dimensions */
 #define MAX_XYZ			16383
 #define MIN_XYZ			0
 
+/* How many participants */
 #define VEHICLE_COUNT		24
 #define PLAYER_COUNT		4
 #define PLAYER_INDEX		0
 
-/* How +/- close in height needed to be considered targetable */
-#define VEHICLE_Z_TOLERANCE	191
+/* Initial player health */
+#define PLAYER_HEALTH		60
 
-/* Appearance */
-enum {APP_PRM, APP_AUX, APP_MSS, APP_CNT};
+/* How +/- close in height to be considered targetable */
+#define VEHICLE_Z_TOL		191
 
-/* Explosions are last two "vehicles" */
-#define EXP_APP_PRM_OFFSET	2
-#define EXP_APP_AUX_OFFSET	1
+/* Exploadable distances - these are scaled */
+#define MSS_XY_TOL		114
+#define MSS_DST_TOL_SQR		13224
 
 /* Counters (in frames) for how long a missile takes to reload and missile lifespan */
 #define MSS_LOADING_COUNTER	5
 #define MSS_COUNTDOWN_COUNTER	30
 
+/* Explosions are last two "vehicles" */
+#define EXP_APP_PRM_OFFSET	2
+#define EXP_APP_AUX_OFFSET	1
+
+/* Appearance */
+enum {APP_PRM, APP_AUX, APP_MSS, APP_CNT};
+
 /* VEHICLE combines player, NPCs, and missiles; appearance is set up as an array so we
 	can iterate through them in a loop */
 typedef struct {
 	bool active, airborne, exploding, fire;
-	int8_t z_delta, angle_delta, level, gear, delta, damage, loading, countdown;
-	int16_t x, y, z, angle, sin, cos;
+	int8_t z_delta, angle_delta, level, gear, mss_delta, damage, loading, countdown;
+	int16_t identifier, health, x, y, z, angle, sin, cos;
 	XM_HANDLE appearance[APP_CNT];
 } VEHICLE;
 
 typedef struct {
 	bool last, airborne;
-	int8_t arena, gear, delta, damage;
-	XM_HANDLE vehicle, missile;
+	int8_t arena, gear, mss_delta, damage;
+	XM_HANDLE player, missile;
 } LEVEL;
 
 /* Callback routine hint */
@@ -78,8 +87,8 @@ void ErasePoint16(int16_t x, int16_t y);
 /* Keyboard/joystick routine defined in cx16-specific.c and called by ProcessVehicle */
 void GetPlayerInput(VEHICLE *vehicle);
 
-/* Routines defined in initialize.c and called by InitVehicles and other places */
-bool AdvanceVehicle(VEHICLE *vehicle);
+/* Routine defined in initialize.c and called by InitVehicles and other places */
+bool AdvancePlayer(VEHICLE *player);
 
 /* Other routines called throughout the program */
 int16_t Minimum(int16_t a, int16_t b);
@@ -107,7 +116,8 @@ extern bool
 
 extern uint16_t
 	g_display_width,
-	g_display_height;
+	g_display_height,
+	*g_squares;
 
 extern int16_t
 	g_arena_index,

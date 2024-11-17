@@ -7,8 +7,6 @@
 #include <time.h>
 #include "explore.h"
 
-#define DEMO_FRAMES_PER_LEVEL	120
-
 void main()
 {
 	clock_t t;
@@ -22,8 +20,6 @@ void main()
 		RenderObjects();
 		UpdateDisplay();
 		++f;
-		if (!(f % DEMO_FRAMES_PER_LEVEL))
-			g_exit_program = !AdvanceVehicle(g_vehicles + PLAYER_INDEX);
 	}
 	t += clock();
 	OutputAsNumber('T', t);

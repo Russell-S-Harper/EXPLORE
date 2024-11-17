@@ -29,7 +29,8 @@ bool
 
 uint16_t
 	g_display_width,
-	g_display_height;
+	g_display_height,
+	*g_squares;
 
 int16_t
 	g_arena_index,
@@ -42,9 +43,7 @@ int16_t
 /* Internal functions */
 
 static void InitData(char *file);
-static void InitBounds(void);
-static void InitHorizon(void);
-static void InitWalls(void);
+static void InitSquares(void);
 static void InitVehicles(void);
 
 static void GetData(void *buffer, size_t size, FILE *ifile);
@@ -59,6 +58,9 @@ void InitProgram(void)
 
 	/* Initialize the hardware, etc. */
 	InitSpecific();
+
+	/* Initialize the square */
+	InitSquares();
 
 	/* Initialize the vehicles */
 	InitVehicles();
@@ -117,7 +119,7 @@ static void InitData(char *file)
 					GetData(&tmp, sizeof(int8_t), ifile);
 					g_levels[t].arena = tmp;
 					GetData(&tmp, sizeof(int8_t), ifile);
-					g_levels[t].vehicle = g_vehicle_data[tmp];
+					g_levels[t].player = g_vehicle_data[tmp];
 					GetData(&tmp, sizeof(int8_t), ifile);
 					g_levels[t].airborne = !!tmp;
 					GetData(&tmp, sizeof(int8_t), ifile);
@@ -125,7 +127,7 @@ static void InitData(char *file)
 					GetData(&tmp, sizeof(int8_t), ifile);
 					g_levels[t].missile = g_vehicle_data[tmp];
 					GetData(&tmp, sizeof(int8_t), ifile);
-					g_levels[t].delta = tmp;
+					g_levels[t].mss_delta = tmp;
 					GetData(&tmp, sizeof(int8_t), ifile);
 					g_levels[t].damage = tmp;
 					g_levels[t].last = (t + 1 == count);
@@ -146,6 +148,19 @@ static void GetData(void *buffer, size_t size, FILE *ifile)
 		ExitProgram(ERR_FC);
 }
 
+static void InitSquares(void)
+{
+	uint16_t s, i, j;
+
+	g_squares = calloc(MSS_XY_TOL + 1, sizeof(uint16_t));
+
+	for (s = i = 0, j = 1; i <= MSS_XY_TOL; ++i) {
+		g_squares[i] = s;
+		s += j;
+		j += 2;
+	}
+}
+
 static void InitVehicles(void)
 {
 	int i;
@@ -154,6 +169,8 @@ static void InitVehicles(void)
 	g_vehicles = calloc(VEHICLE_COUNT, sizeof(VEHICLE));
 
 	for (i = 0, vehicle = g_vehicles; i < PLAYER_COUNT; ++i, ++vehicle) {
+		/* To prevent collisions with your own missiles! */
+		vehicle->identifier = i;
 		/* Starting as active */
 		vehicle->active = true;
 		/* Initialize direction and position */
@@ -167,26 +184,27 @@ static void InitVehicles(void)
 		vehicle->countdown = MSS_COUNTDOWN_COUNTER;
 		/* Will advance right away to level 0 */
 		vehicle->level = -1;
-		AdvanceVehicle(vehicle);
+		AdvancePlayer(vehicle);
 	}
 }
 
-bool AdvanceVehicle(VEHICLE *vehicle)
+bool AdvancePlayer(VEHICLE *player)
 {
 	LEVEL *level;
 
-	if (vehicle->level >= 0 && g_levels[vehicle->level].last)
+	if (player->level >= 0 && g_levels[player->level].last)
 		return false;
-	++vehicle->level;
-	level = g_levels + vehicle->level;
+	++player->level;
+	level = g_levels + player->level;
 	if (g_arena_index < level->arena)
 		g_arena_index = level->arena;
-	vehicle->appearance[APP_PRM] = level->vehicle;
-	vehicle->appearance[APP_MSS] = level->missile;
-	vehicle->airborne = level->airborne;
-	vehicle->gear = level->gear;
-	vehicle->delta = level->delta;
-	vehicle->damage = level->damage;
+	player->health = PLAYER_HEALTH;
+	player->appearance[APP_PRM] = level->player;
+	player->appearance[APP_MSS] = level->missile;
+	player->airborne = level->airborne;
+	player->gear = level->gear;
+	player->mss_delta = level->mss_delta;
+	player->damage = level->damage;
 	return true;
 }
 
