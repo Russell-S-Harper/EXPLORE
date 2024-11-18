@@ -14,7 +14,7 @@
 /* Revise if VEHICLE_HGTS or VEHICLE_DIRS is changed */
 #define VEHICLE_POINTS(dz, da)	((((((dz) + 16384) >> 7) & 0xE0) + (((da) >> 4) & 0x1F)) * sizeof(OFFSET) * g_max_vehicle_vertices)
 
-/* Color of progress bar based on health */
+/* Color of status line based on health */
 static uint8_t StatusLineColor(int16_t health);
 
 /* Optimized qsort */
