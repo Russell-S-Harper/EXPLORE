@@ -16,7 +16,6 @@ void main()
 	t = -clock();
 	while (!g_exit_program) {
 		ProcessVehicles();
-		ScanField();
 		RenderObjects();
 		UpdateDisplay();
 		++f;

@@ -14,6 +14,9 @@
 /* Revise if VEHICLE_HGTS or VEHICLE_DIRS is changed */
 #define VEHICLE_POINTS(dz, da)	((((((dz) + 16384) >> 7) & 0xE0) + (((da) >> 4) & 0x1F)) * sizeof(OFFSET) * g_max_vehicle_vertices)
 
+/* Color of progress bar based on health */
+static uint8_t StatusLineColor(int16_t health);
+
 /* Optimized qsort */
 static void SortIndicesByVehicleHeight(uint8_t *indices, int8_t lo, int8_t hi);
 
@@ -21,7 +24,7 @@ static void SortIndicesByVehicleHeight(uint8_t *indices, int8_t lo, int8_t hi);
 void RenderObjects(void)
 {
 	static POINT *s_points = NULL;
-	static int16_t s_w, s_h;
+	static int16_t s_focus_x, s_focus_y, s_health_x, s_health_y;
 	static uint8_t *s_indices;
 	char *xm;
 	uint8_t color;
@@ -35,8 +38,10 @@ void RenderObjects(void)
 	if (!s_points) {
 		s_points = malloc(sizeof(POINT) * (g_max_arena_vertices + 1));
 		s_indices = malloc(sizeof(uint8_t) * VEHICLE_COUNT);
-		s_w = g_display_width >> 1;
-		s_h = 3 * g_display_height >> 2;
+		s_focus_x = g_display_width >> 1;
+		s_focus_y = 3 * g_display_height >> 2;
+		s_health_x = s_focus_x - (PLAYER_HEALTH >> 1);
+		s_health_y = 7 * g_display_height >> 3;
 	}
 
 	/* Get the focus vehicle */
@@ -54,8 +59,8 @@ void RenderObjects(void)
 			last_dz = dz;
 			scale = MultiplyThenDivide(dz, ARENA_SCALE_M1, ARENA_SCALE_M2) + ARENA_SCALE_B;
 		}
-		P->x = s_w + ((MultiplyThenDivide(dx, focus->cos, scale) - MultiplyThenDivide(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
-		P->y = s_h + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
+		P->x = s_focus_x + ((MultiplyThenDivide(dx, focus->cos, scale) - MultiplyThenDivide(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
+		P->y = s_focus_y + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
 	}
 	for (; S->index_from != S->index_to; ++S) {
 		p1 = s_points + S->index_from;
@@ -81,8 +86,10 @@ void RenderObjects(void)
 			last_dz = dz = da = 0;
 			scale = ARENA_SCALE_B;
 			color = CLR16_WHITE;
-			screen_x = s_w;
-			screen_y = s_h;
+			screen_x = s_focus_x;
+			screen_y = s_focus_y;
+			/* Status line */
+			DrawLineFromTo16(s_health_x, s_health_y, s_health_x + vehicle->health, s_health_y, StatusLineColor(vehicle->health));
 		/* Else regular vehicle */
 		} else {
 			dx = vehicle->x - focus->x;
@@ -99,8 +106,8 @@ void RenderObjects(void)
 				else
 					color = CLR16_WHITE;
 			}
-			screen_x = s_w + ((MultiplyThenDivide(dx, focus->cos, scale) - MultiplyThenDivide(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
-			screen_y = s_h + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
+			screen_x = s_focus_x + ((MultiplyThenDivide(dx, focus->cos, scale) - MultiplyThenDivide(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
+			screen_y = s_focus_y + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
 		}
 		/* Render the vehicle */
 		for (j = APP_PRM; j < APP_MSS; ++j) {
@@ -116,6 +123,16 @@ void RenderObjects(void)
 			}
 		}
 	}
+}
+
+static uint8_t StatusLineColor(int16_t health)
+{
+	if (health < PLAYER_HEALTH >> 2)
+		return CLR16_RED;
+	if (health < PLAYER_HEALTH >> 1)
+		return CLR16_YELLOW;
+	else
+		return CLR16_GREEN;
 }
 
 /* Optimized code from qsort.c for this specific case, otherwise qsort becomes a bottleneck! */

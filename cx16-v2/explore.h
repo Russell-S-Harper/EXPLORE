@@ -66,7 +66,6 @@ enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
 /* Routines called by main */
 void InitProgram(void);			/* Defined in initialize.c */
 void ProcessVehicles(void);		/* Defined in process-vehicles.c */
-void ScanField(void);			/* Defined in scan-field.c */
 void RenderObjects(void);		/* Defined in render-objects.c */
 void UpdateDisplay(void);		/* Defined in cx16-specific.c */
 
