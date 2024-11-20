@@ -166,17 +166,17 @@ void AddSound(int8_t type) {
 
 	switch (type) {
 		case MSS_FIRING:
-			vpoke(0x6B, a++);			/* 0x116B => G-sharp 6 */
-			vpoke(0x11, a++);
-			vpoke(VERA_PSG_VOLUME_FULL, a++);	/* Both sides full volume */
-			vpoke(VERA_PSG_NOISE_WAVEFORM, a);	/* Noise waveform */
+			vpoke(0x6B, a);				/* 0x116B => G-sharp 6 */
+			vpoke(0x11, ++a);
+			vpoke(VERA_PSG_VOLUME_FULL, ++a);	/* Both sides full volume */
+			vpoke(VERA_PSG_NOISE_WAVEFORM, ++a);	/* Noise waveform */
 			break;
 
 		case MSS_EXPLODING:
-			vpoke(0xBA, a++);			/* 0x01BA => E 3 */
-			vpoke(0x01, a++);
-			vpoke(VERA_PSG_VOLUME_FULL, a++);	/* Both sides full volume */
-			vpoke(VERA_PSG_NOISE_WAVEFORM, a);	/* Noise waveform */
+			vpoke(0xBA, a);			/* 0x01BA => E 3 */
+			vpoke(0x01, ++a);
+			vpoke(VERA_PSG_VOLUME_FULL, ++a);	/* Both sides full volume */
+			vpoke(VERA_PSG_NOISE_WAVEFORM, ++a);	/* Noise waveform */
 			break;
 	}
 }
