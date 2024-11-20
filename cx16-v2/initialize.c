@@ -30,6 +30,7 @@ bool
 uint16_t
 	g_display_width,
 	g_display_height,
+	g_frame_counter,
 	*g_squares;
 
 int16_t

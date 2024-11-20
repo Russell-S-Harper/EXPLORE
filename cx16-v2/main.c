@@ -10,7 +10,6 @@
 void main()
 {
 	clock_t t;
-	uint16_t f = 0;
 
 	InitProgram();
 	t = -clock();
@@ -18,11 +17,11 @@ void main()
 		ProcessVehicles();
 		RenderObjects();
 		UpdateDisplay();
-		++f;
+		++g_frame_counter;
 	}
 	t += clock();
 	OutputAsNumber('T', t);
-	OutputAsNumber('/', f);
+	OutputAsNumber('/', g_frame_counter);
 	OutputAsNumber('/', CLOCKS_PER_SEC);
 	ExitProgram(ERR_NO);
 }

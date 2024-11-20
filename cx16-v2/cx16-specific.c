@@ -47,7 +47,8 @@
 #define SHIFT_HEX_DGT	4
 
 static void DrawLine16(void);
-static void DefaultCallback(int waiting);
+static void DefaultCallback(int8_t waiting);
+static void StopSounds(void);
 
 static uint8_t
 	f_current_color;
@@ -155,12 +156,65 @@ void UpdateDisplay(void)
 	}
 }
 
-/* Default callback to do useful work while waiting */
-static void DefaultCallback(int waiting)
+void AddSound(int8_t type) {
+	static uint8_t s_index;
+	uint32_t a;
+
+	a = VERA_PSG_BASE + (s_index << VERA_PSG_BLOCK_SHIFT);
+	if (++s_index >= VERA_PSG_VOICES)
+		s_index = 0;
+
+	switch (type) {
+		case MSS_FIRING:
+			vpoke(0x6B, a++);			/* 0x116B => G-sharp 6 */
+			vpoke(0x11, a++);
+			vpoke(VERA_PSG_VOLUME_FULL, a++);	/* Both sides full volume */
+			vpoke(VERA_PSG_NOISE_WAVEFORM, a);	/* Noise waveform */
+			break;
+
+		case MSS_EXPLODING:
+			vpoke(0xBA, a++);			/* 0x01BA => E 3 */
+			vpoke(0x01, a++);
+			vpoke(VERA_PSG_VOLUME_FULL, a++);	/* Both sides full volume */
+			vpoke(VERA_PSG_NOISE_WAVEFORM, a);	/* Noise waveform */
+			break;
+	}
+}
+
+static void StopSounds(void)
 {
+	int16_t i;
+	uint32_t a;
+
+	for (i = 0, a = VERA_PSG_BASE + VERA_PSG_RLV_OFFSET; i < VERA_PSG_VOICES; ++i, a += VERA_PSG_BLOCK_SIZE)
+		vpoke(VERA_PSG_VOLUME_OFF, a);	/* No volume */
+}
+
+/* Default callback to do useful work while waiting */
+static void DefaultCallback(int8_t waiting)
+{
+	static uint16_t s_frame_counter;
+	uint8_t b, v;
+	int16_t i;
+	uint32_t a;
+
 	/* Perform tasks dependent on what we're waiting for */
 	switch (waiting) {
 		case FRAME_TO_FINISH:
+			/* Once a frame, process any active sounds */
+			if (s_frame_counter != g_frame_counter) {
+				s_frame_counter = g_frame_counter;
+				for (i = 0, a = VERA_PSG_BASE + VERA_PSG_RLV_OFFSET; i < VERA_PSG_VOICES; ++i, a += VERA_PSG_BLOCK_SIZE) {
+					b = vpeek(a);
+					v = b & VERA_PSG_VOLUME_MASK;
+					if (v) {
+						/* For each frame, decrease the volume by 25% */
+						v = (v + v + v) >> 2;
+						b = (b & VERA_PSG_RL_MASK) | v;
+						vpoke(b, a);
+					}
+				}
+			}
 			break;
 		case SCREEN_TO_FINISH:
 			break;
@@ -455,6 +509,7 @@ void GetPlayerInput(VEHICLE *vehicle)
 				break;
 
 			case QUIT_PROGRAM:
+				StopSounds();
 				tgi_done();
 				g_exit_program = true;
 				break;

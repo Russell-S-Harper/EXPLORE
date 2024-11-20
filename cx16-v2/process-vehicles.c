@@ -112,6 +112,7 @@ void ProcessVehicles(void)
 				if (!g_vehicles[j].active) {
 					memcpy(g_vehicles + j, player, sizeof(VEHICLE));
 					g_vehicles[j].appearance[APP_PRM] = player->appearance[APP_MSS];
+					AddSound(MSS_FIRING);
 					break;
 				}
 			}
@@ -119,6 +120,10 @@ void ProcessVehicles(void)
 			player->loading = MSS_LOADING_COUNTER;
 		} else if (player->loading)
 			--player->loading;
+
+		/* Hit counter */
+		if (player->hit)
+			--player->hit;
 	}
 	/* Process each missile */
 	for (missile = g_vehicles + i; i < VEHICLE_COUNT; ++i, ++missile) {
@@ -193,6 +198,7 @@ void ProcessVehicles(void)
 				if (dx <= MSS_XY_TOL && dy <= MSS_XY_TOL && g_squares[dx] + g_squares[dy] <= MSS_DST_TOL_SQR) {
 					missile->exploding = true;
 					player->health -= missile->damage;
+					player->hit = MSS_HIT_COUNTER;
 					if (player->health <= 0) {
 						AdvancePlayer(g_vehicles + missile->identifier);
 						if (!AdvancePlayer(player))
@@ -206,6 +212,7 @@ void ProcessVehicles(void)
 		if (missile->exploding) {
 			missile->appearance[APP_PRM] = g_exploding_prm;
 			missile->appearance[APP_AUX] = g_exploding_aux;
+			AddSound(MSS_EXPLODING);
 		}
 	}
 }
