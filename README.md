@@ -65,7 +65,7 @@ Suppose the complexity of the image is tripled, i.e. three horizon lines and six
 - ` 50 ms` – rotating the points
 - ` 50 ms` – baseline, unchanged
 
-To achieve 5 frames/s, that corresponds to a budget of 0.20 s/frame or 200 ms/frame. However note that just the *callback call overhead* + *rotating the points* + *baseline* already adds up to 200 ms! All of these have been significantly optimized, so even if everything was written in 6502 assembly, there would not be enough improvement expected.
+To achieve 5 frames/s, that corresponds to a budget of 0.20 s/frame or 200 ms/frame. However note that just the *callback call overhead* + *rotating the points* + *baseline* already add up to 200 ms! All of these have been significantly optimized, so even if everything was written in 6502 assembly, there would not be enough improvement expected.
 
 ### In summary, while rendering polygons using masking is an elegant solution and provides a lot of flexibility, it isn’t appropriate for this platform!
 
@@ -85,7 +85,7 @@ Here’s a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) 
 
 VERA is a display co-processor used in the CX16. It has a new feature, "FX", which provides helpers to improve line drawing, polygon filling, and other functions. Using the line drawing helper, I was able to implement 16-color line drawing routines such that, even written in C and implementing clipping, they still run in about 80% of the time required by the 256-color line drawing routines in TGI. As an aside, the line drawing routines in `cx16-v1` using Bresenham’s algorithm took 3× the time to run than the TGI drawing routines, so a huge improvement gain using VERA.
 
-V2 takes a different perspective looking overhead into an arena setting with walls and vehicles. There’s no masking, just lines. Here’s a [video](https://youtube.com/watch?v=oLeCD9HJrhM) of the current progress. By using the multiplier in VERA, the frame rate is currently at 6.0 frames/s. Given that 5.0 frames/s is acceptable, there’s lots of room to add more details, and the code is only minimally optimized. I’m getting closer to a game in mind, a recreation of something I wrote a long time ago – unfortunately the original is lost to history…
+V2 takes a different perspective looking overhead into an arena setting with walls and vehicles. There’s no masking, just lines. Here’s a [video](https://youtube.com/watch?v=nCTF3v2hGFo) of the current progress. The rotations and scaling require a lot of multiplications and divisions such that they end up being bottlenecks. The multiplier in VERA is a major factor in getting the frame rate to 6.0 frames/s. Given that 5.0 frames/s is acceptable, there’s lots of room to add more details, and the code is only minimally optimized. I’m getting closer to a game in mind, a recreation of something I wrote a long time ago – unfortunately the original is lost to history…
 
 As in `cx16-v1`, should you want to build the demo, you’ll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
@@ -95,14 +95,14 @@ Then edit the `«explore-repo»/cx16-v2/build-cc65-cx16` script to point `XCC`, 
 
 Run the emulator, then load and run `data.prg` to generate the `explore.dat` data file, and then load and run `explore.prg` to run the demo. Once `explore.dat` is created, you don’t need to run `data.prg` again, unless you change `«explore-repo»/cx16-v2/data.c`.
 
-The demo uses these keyboard controls, with joystick in planning:
+The demo uses these keyboard and joystick controls:
 
 - escape: pause, press again to resume
-- cursor up: climb
-- cursor down: dive
-- cursor right: turn right
-- cursor left: turn left
-- space: fire missile
+- cursor up or joystick back: climb
+- cursor down or joystick forward: dive
+- cursor right or joystick right: turn right
+- cursor left or joystick left: turn left
+- space or joystick button: fire missile
 - 1: cycle player
 - Q: quit
 
