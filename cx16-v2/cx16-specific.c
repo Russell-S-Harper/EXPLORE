@@ -172,7 +172,7 @@ void AddSound(int8_t type) {
 			break;
 
 		case MSS_EXPLODING:
-			vpoke(0xBA, a);			/* 0x01BA => E 3 */
+			vpoke(0xBA, a);				/* 0x01BA => E 3 */
 			vpoke(0x01, ++a);
 			vpoke(VERA_PSG_VOLUME_FULL, ++a);	/* Both sides full volume */
 			vpoke(VERA_PSG_NOISE_WAVEFORM, ++a);	/* Noise waveform */
@@ -192,7 +192,7 @@ void StopSounds(void)
 /* Default callback to do useful work while waiting */
 static void DefaultCallback(int8_t waiting)
 {
-	static uint16_t s_frame_counter;
+	static uint16_t s_frame_counter, s_player_counter;
 	uint8_t b, v;
 	int16_t i, z;
 	uint32_t a;
@@ -215,22 +215,23 @@ static void DefaultCallback(int8_t waiting)
 					}
 				}
 			}
-			/* Dummy routine for players */
-			for (i = 0, player = g_vehicles; i < PLAYER_COUNT; ++i, ++player) {
-				if (!i)
-					z = player->z;
-				else if (player->active) {
-					player->angle_delta = 1;
-					if (player->z < z)
-						player->z_delta = 1;
-					else if (player->z > z)
-						player->z_delta = -1;
-					if (!player->loading)
-						player->fire = true;
-				}
+			/* Dummy routine for NPCs - TODO add "AI" logic */
+			if (++s_player_counter >= PLAYER_COUNT)
+				s_player_counter = PLAYER_INDEX + 1;
+			player = g_vehicles + s_player_counter;
+			if (player->active) {
+				z = g_vehicles[PLAYER_INDEX].z;
+				player->angle_delta = 1;
+				if (player->z < z)
+					player->z_delta = 1;
+				else if (player->z > z)
+					player->z_delta = -1;
+				if (!player->loading)
+					player->fire = true;
 			}
 			break;
 		case SCREEN_TO_FINISH:
+			/* TODO - add missile guidance here */
 			break;
 	}
 }
