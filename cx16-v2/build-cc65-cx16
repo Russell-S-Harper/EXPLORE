@@ -10,7 +10,7 @@ FLT=~/Documents/development/FLT
 EMU=~/Documents/development/x16emu_linux-x86_64-r48
 
 # Build DATA.PRG
-php $FLT/flt/flt.php -i data.c -o data-flt.c -x "-DSTRICT_2D -I $XCC/include -I $FLT/flt"
+php $FLT/flt/flt.php -i data.c -o data-flt.c -x "-DABSTRACT_2D -I $XCC/include -I $FLT/flt"
 $XCC/bin/cc65 -t cx16 -I $XCC/include data-flt.c
 $XCC/bin/ca65 -t cx16 data-flt.s
 $XCC/bin/ld65 -o DATA.PRG -t cx16 data-flt.o -L $FLT/flt flt.lib -L $XCC/lib cx16.lib
@@ -18,7 +18,7 @@ $XCC/bin/ld65 -o DATA.PRG -t cx16 data-flt.o -L $FLT/flt flt.lib -L $XCC/lib cx1
 # Build EXPLORE.PRG
 for C in main initialize xm cx16-specific process-vehicles render-objects
 do
-	$XCC/bin/cc65 -t cx16 -DSTRICT_2D -Cl -Oir -I $XCC/include $C.c
+	$XCC/bin/cc65 -t cx16 -DABSTRACT_2D -Cl -Oir -I $XCC/include $C.c
 	$XCC/bin/ca65 -t cx16 $C.s
 done
 $XCC/bin/ld65 -o EXPLORE.PRG -t cx16 main.o initialize.o xm.o cx16-specific.o process-vehicles.o render-objects.o -L $XCC/lib cx16.lib

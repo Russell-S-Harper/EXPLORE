@@ -628,7 +628,7 @@ static VERTEX *OutputArenaVertices(const char *arena, int16_t limit, FILE *ofile
 				s_vertices[i].y = ARENA_X_OR_Y(y);
 				s_vertices[i].z = ARENA_HEIGHT(focus);
 				++i;
-#ifndef STRICT_2D
+#ifndef ABSTRACT_2D
 				s_vertices[i].x = s_vertices[i - 1].x;
 				s_vertices[i].y = s_vertices[i - 1].y;
 				s_vertices[i].z = 0;
@@ -652,7 +652,7 @@ static void OutputArenaSegments(const char *arena, VERTEX *vertices, int16_t lim
 	static SEGMENT *s_segments = NULL;
 	char focus;
 	int16_t i, x, y, xt, yt, count;
-#ifndef STRICT_2D
+#ifndef ABSTRACT_2D
 	VERTEX v1;
 #endif
 	VERTEX v2, v3;
@@ -667,7 +667,7 @@ static void OutputArenaSegments(const char *arena, VERTEX *vertices, int16_t lim
 				v2.x = ARENA_X_OR_Y(x);
 				v2.y = ARENA_X_OR_Y(y);
 				v2.z = ARENA_HEIGHT(focus);
-#ifndef STRICT_2D
+#ifndef ABSTRACT_2D
 				v1.x = v2.x;
 				v1.y = v2.y;
 				v1.z = 0;
@@ -683,7 +683,7 @@ static void OutputArenaSegments(const char *arena, VERTEX *vertices, int16_t lim
 					s_segments[i].index_from = IndexOfArenaVertex(vertices, &v2, count);
 					s_segments[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
 					++i;
-#ifndef STRICT_2D
+#ifndef ABSTRACT_2D
 					v3.z = 0;
 					s_segments[i].index_from = IndexOfArenaVertex(vertices, &v1, count);
 					s_segments[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
@@ -698,7 +698,7 @@ static void OutputArenaSegments(const char *arena, VERTEX *vertices, int16_t lim
 					s_segments[i].index_from = IndexOfArenaVertex(vertices, &v2, count);
 					s_segments[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
 					++i;
-#ifndef STRICT_2D
+#ifndef ABSTRACT_2D
 					v3.z = 0;
 					s_segments[i].index_from = IndexOfArenaVertex(vertices, &v1, count);
 					s_segments[i].index_to = IndexOfArenaVertex(vertices, &v3, count);

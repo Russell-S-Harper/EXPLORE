@@ -52,7 +52,7 @@ void RenderObjects(void)
 	xm = GetXMAddress(g_arena_data, g_arena_index);
 	V = (VERTEX *)(xm + ARENA_X_LIMIT * ARENA_Y_LIMIT * sizeof(int16_t));
 	S = (SEGMENT *)(xm + ARENA_X_LIMIT * ARENA_Y_LIMIT * sizeof(int16_t) + sizeof(VERTEX) * (g_max_arena_vertices + 1));
-#ifdef STRICT_2D
+#ifdef ABSTRACT_2D
 	for (P = s_points, scale = ARENA_SCALE_B; V->z >= 0; ++V, ++P) {
 		dx = V->x - focus->x;
 		dy = V->y - focus->y;
