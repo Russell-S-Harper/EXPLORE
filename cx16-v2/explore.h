@@ -33,7 +33,7 @@
 #define MSS_DST_TOL_SQR		13224
 
 /* Counters (in frames) for how long a missile takes to reload, missile lifespan, and hit animation */
-#define MSS_LOADING_COUNTER	5
+#define MSS_LOADING_COUNTER	6
 #define MSS_COUNTDOWN_COUNTER	30
 #define MSS_HIT_COUNTER		3
 
@@ -90,6 +90,7 @@ void ErasePoint16(int16_t x, int16_t y);
 /* Routines defined in cx16-specific.c and called by ProcessVehicle */
 void GetPlayerInput(VEHICLE *vehicle);
 void AddSound(int8_t type);
+void StopSounds(void);
 
 /* Routine defined in initialize.c and called by InitVehicles and other places */
 bool AdvancePlayer(VEHICLE *player);

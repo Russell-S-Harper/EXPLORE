@@ -32,13 +32,14 @@ void ProcessVehicles(void)
 
 	/* Process each player */
 	for (i = 0, player = g_vehicles; i < PLAYER_COUNT; ++i, ++player) {
+
+		/* Get player input even if inactive, NPCs will get inputs during idle times */
+		if (i == PLAYER_INDEX)
+			GetPlayerInput(player);
+
 		/* Ignore if not active */
 		if (!player->active)
 			continue;
-
-		/* Get player input, NPCs will get inputs during idle times */
-		if (i == PLAYER_INDEX)
-			GetPlayerInput(player);
 
 		/* Important: "bump" if a wall was created or removed underneath */
 		z = arena[ARENA_INDEX(player->x, player->y)];
@@ -108,10 +109,12 @@ void ProcessVehicles(void)
 
 		/* Add any missiles */
 		if (player->fire) {
-			for (j = PLAYER_COUNT; j < VEHICLE_COUNT; ++j) {
-				if (!g_vehicles[j].active) {
-					memcpy(g_vehicles + j, player, sizeof(VEHICLE));
-					g_vehicles[j].appearance[APP_PRM] = player->appearance[APP_MSS];
+			for (j = PLAYER_COUNT, missile = g_vehicles + PLAYER_COUNT; j < VEHICLE_COUNT; ++j, ++missile) {
+				if (!missile->active) {
+					/* Set up the missile as a clone of the player */
+					memcpy(missile, player, sizeof(VEHICLE));
+					missile->appearance[APP_PRM] = player->appearance[APP_MSS];
+					missile->hit = 0;
 					AddSound(MSS_FIRING);
 					break;
 				}
@@ -190,8 +193,7 @@ void ProcessVehicles(void)
 			missile->z = z;
 
 		/* Check for player collisions */
-		for (j = 0; j < PLAYER_COUNT; ++j) {
-			player = g_vehicles + j;
+		for (j = 0, player = g_vehicles; j < PLAYER_COUNT; ++j, ++player) {
 			if (missile->identifier != player->identifier && player->active && abs(missile->z - player->z) <= VEHICLE_Z_TOL) {
 				dx = abs(missile->x - player->x) >> XY_COLLISION_SHIFT;
 				dy = abs(missile->y - player->y) >> XY_COLLISION_SHIFT;

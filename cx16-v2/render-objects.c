@@ -14,7 +14,8 @@
 /* Revise if VEHICLE_HGTS or VEHICLE_DIRS is changed */
 #define VEHICLE_POINTS(dz, da)	((((((dz) + 16384) >> 7) & 0xE0) + (((da) >> 4) & 0x1F)) * sizeof(OFFSET) * g_max_vehicle_vertices)
 
-/* Color of status line based on health */
+/* Color based on delta-z or health */
+static uint8_t DeltaZColor(int16_t dz);
 static uint8_t StatusLineColor(int16_t health);
 
 /* Optimized qsort */
@@ -23,20 +24,20 @@ static void SortIndicesByVehicleHeight(uint8_t *indices, int8_t lo, int8_t hi);
 /* Render all the objects */
 void RenderObjects(void)
 {
-	static POINT *s_points = NULL;
+	static VERTEX *s_points = NULL;
 	static int16_t s_focus_x, s_focus_y, s_health_x, s_health_y;
 	static uint8_t *s_indices;
 	char *xm;
 	uint8_t color;
 	int16_t i, j, count, dx, dy, dz, da, screen_x, screen_y, last_dz, scale;
-	POINT *P, *p1, *p2;
+	VERTEX *P, *p1, *p2;
 	OFFSET *O, *o1, *o2;
 	VERTEX *V;
 	SEGMENT *S;
 	VEHICLE *focus, *vehicle;
 
 	if (!s_points) {
-		s_points = malloc(sizeof(POINT) * (g_max_arena_vertices + 1));
+		s_points = malloc(sizeof(VERTEX) * (g_max_arena_vertices + 1));
 		s_indices = malloc(sizeof(uint8_t) * VEHICLE_COUNT);
 		s_focus_x = g_display_width >> 1;
 		s_focus_y = 3 * g_display_height >> 2;
@@ -51,6 +52,21 @@ void RenderObjects(void)
 	xm = GetXMAddress(g_arena_data, g_arena_index);
 	V = (VERTEX *)(xm + ARENA_X_LIMIT * ARENA_Y_LIMIT * sizeof(int16_t));
 	S = (SEGMENT *)(xm + ARENA_X_LIMIT * ARENA_Y_LIMIT * sizeof(int16_t) + sizeof(VERTEX) * (g_max_arena_vertices + 1));
+#ifdef STRICT_2D
+	for (P = s_points, scale = ARENA_SCALE_B; V->z >= 0; ++V, ++P) {
+		dx = V->x - focus->x;
+		dy = V->y - focus->y;
+		dz = V->z - focus->z;
+		P->x = s_focus_x + ((MultiplyThenDivide(dx, focus->cos, scale) - MultiplyThenDivide(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
+		P->y = s_focus_y + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
+		P->z = dz >> 1;
+	}
+	for (; S->index_from != S->index_to; ++S) {
+		p1 = s_points + S->index_from;
+		p2 = s_points + S->index_to;
+		DrawLineFromTo16(p1->x, p1->y, p2->x, p2->y, DeltaZColor(p1->z + p2->z));
+	}
+#else
 	for (P = s_points, last_dz = INT16_MIN; V->z >= 0; ++V, ++P) {
 		dx = V->x - focus->x;
 		dy = V->y - focus->y;
@@ -67,7 +83,7 @@ void RenderObjects(void)
 		p2 = s_points + S->index_to;
 		DrawLineFromTo16(p1->x, p1->y, p2->x, p2->y, CLR16_DARKGRAY);
 	}
-
+#endif
 	/* Pull out the active vehicles and sort to render from the bottom up */
 	for (i = count = 0; i < VEHICLE_COUNT; ++i) {
 		if (g_vehicles[i].active) {
@@ -99,12 +115,7 @@ void RenderObjects(void)
 			if (last_dz != dz) {
 				last_dz = dz;
 				scale = MultiplyThenDivide(dz, ARENA_SCALE_M1, ARENA_SCALE_M2) + ARENA_SCALE_B;
-				if (dz < -VEHICLE_Z_TOL)
-					color = CLR16_ORANGE;
-				else if (dz > VEHICLE_Z_TOL)
-					color = CLR16_LIGHTBLUE;
-				else
-					color = CLR16_WHITE;
+				color = DeltaZColor(dz);
 			}
 			screen_x = s_focus_x + ((MultiplyThenDivide(dx, focus->cos, scale) - MultiplyThenDivide(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
 			screen_y = s_focus_y + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
@@ -118,11 +129,22 @@ void RenderObjects(void)
 				for (; S->index_from != S->index_to; ++S) {
 					o1 = O + S->index_from;
 					o2 = O + S->index_to;
-					DrawLineFromTo16(screen_x + o1->x, screen_y + o1->y, screen_x + o2->x, screen_y + o2->y, vehicle->hit? CLR16_YELLOW: color);
+					DrawLineFromTo16(screen_x + o1->x, screen_y + o1->y, screen_x + o2->x, screen_y + o2->y,
+						vehicle->identifier < PLAYER_COUNT && vehicle->hit? CLR16_YELLOW: color);
 				}
 			}
 		}
 	}
+}
+
+static uint8_t DeltaZColor(int16_t dz)
+{
+	if (dz < -VEHICLE_Z_TOL)
+		return CLR16_ORANGE;
+	else if (dz > VEHICLE_Z_TOL)
+		return CLR16_LIGHTBLUE;
+	else
+		return CLR16_WHITE;
 }
 
 static uint8_t StatusLineColor(int16_t health)

@@ -628,10 +628,12 @@ static VERTEX *OutputArenaVertices(const char *arena, int16_t limit, FILE *ofile
 				s_vertices[i].y = ARENA_X_OR_Y(y);
 				s_vertices[i].z = ARENA_HEIGHT(focus);
 				++i;
+#ifndef STRICT_2D
 				s_vertices[i].x = s_vertices[i - 1].x;
 				s_vertices[i].y = s_vertices[i - 1].y;
 				s_vertices[i].z = 0;
 				++i;
+#endif
 			}
 		}
 	}
@@ -650,7 +652,10 @@ static void OutputArenaSegments(const char *arena, VERTEX *vertices, int16_t lim
 	static SEGMENT *s_segments = NULL;
 	char focus;
 	int16_t i, x, y, xt, yt, count;
-	VERTEX v1, v2, v3;
+#ifndef STRICT_2D
+	VERTEX v1;
+#endif
+	VERTEX v2, v3;
 
 	if (!s_segments)
 		s_segments = malloc(sizeof(SEGMENT) * limit);
@@ -659,13 +664,17 @@ static void OutputArenaSegments(const char *arena, VERTEX *vertices, int16_t lim
 		for (x = 0; x < ARENA_X_LIMIT; ++x) {
 			focus = ArenaCharacterAt(arena, x, y);
 			if (strchr(arena_vertices0, focus)) {
-				v1.x = v2.x = ARENA_X_OR_Y(x);
-				v1.y = v2.y = ARENA_X_OR_Y(y);
-				v1.z = 0;
+				v2.x = ARENA_X_OR_Y(x);
+				v2.y = ARENA_X_OR_Y(y);
 				v2.z = ARENA_HEIGHT(focus);
+#ifndef STRICT_2D
+				v1.x = v2.x;
+				v1.y = v2.y;
+				v1.z = 0;
 				s_segments[i].index_from = IndexOfArenaVertex(vertices, &v1, count);
 				s_segments[i].index_to = IndexOfArenaVertex(vertices, &v2, count);
 				++i;
+#endif
 				for (xt = x + 1; ArenaCharacterAt(arena, xt, y) == '-'; ++xt) ;
 				if (ArenaCharacterAt(arena, xt, y) == focus) {
 					v3.x = ARENA_X_OR_Y(xt);
@@ -674,10 +683,12 @@ static void OutputArenaSegments(const char *arena, VERTEX *vertices, int16_t lim
 					s_segments[i].index_from = IndexOfArenaVertex(vertices, &v2, count);
 					s_segments[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
 					++i;
+#ifndef STRICT_2D
 					v3.z = 0;
 					s_segments[i].index_from = IndexOfArenaVertex(vertices, &v1, count);
 					s_segments[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
 					++i;
+#endif
 				}
 				for (yt = y + 1; ArenaCharacterAt(arena, x, yt) == '|'; ++yt) ;
 				if (ArenaCharacterAt(arena, x, yt) == focus) {
@@ -687,10 +698,12 @@ static void OutputArenaSegments(const char *arena, VERTEX *vertices, int16_t lim
 					s_segments[i].index_from = IndexOfArenaVertex(vertices, &v2, count);
 					s_segments[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
 					++i;
+#ifndef STRICT_2D
 					v3.z = 0;
 					s_segments[i].index_from = IndexOfArenaVertex(vertices, &v1, count);
 					s_segments[i].index_to = IndexOfArenaVertex(vertices, &v3, count);
 					++i;
+#endif
 				}
 			}
 		}

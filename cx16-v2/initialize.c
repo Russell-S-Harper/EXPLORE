@@ -45,7 +45,7 @@ int16_t
 
 static void InitData(char *file);
 static void InitSquares(void);
-static void InitVehicles(void);
+static void InitPlayers(void);
 
 static void GetData(void *buffer, size_t size, FILE *ifile);
 
@@ -54,17 +54,17 @@ void InitProgram(void)
 	/* Set up extended memory */
 	InitXM();
 
-	/* Set up error messages, trigonometric data, arenas, and vehicles */
+	/* Set up error messages, trigonometric data, arenas, vehicles, and levels */
 	InitData("explore.dat");
 
 	/* Initialize the hardware, etc. */
 	InitSpecific();
 
-	/* Initialize the square */
+	/* Initialize the squares */
 	InitSquares();
 
-	/* Initialize the vehicles */
-	InitVehicles();
+	/* Initialize the players */
+	InitPlayers();
 }
 
 static void InitData(char *file)
@@ -162,30 +162,31 @@ static void InitSquares(void)
 	}
 }
 
-static void InitVehicles(void)
+static void InitPlayers(void)
 {
 	int i;
-	VEHICLE *vehicle;
+	VEHICLE *player;
 
 	g_vehicles = calloc(VEHICLE_COUNT, sizeof(VEHICLE));
 
-	for (i = 0, vehicle = g_vehicles; i < PLAYER_COUNT; ++i, ++vehicle) {
+	for (i = 0, player = g_vehicles; i < PLAYER_COUNT; ++i, ++player) {
 		/* To prevent collisions with your own missiles! */
-		vehicle->identifier = i;
+		player->identifier = i;
+		player->loading = 2 * i;
 		/* Starting as active */
-		vehicle->active = true;
+		player->active = true;
 		/* Initialize direction and position */
-		vehicle->angle = (i << (SHIFT_FC - 2)) + (SCALE_FC / 8);
-		vehicle->sin = Sin(vehicle->angle);
-		vehicle->cos = Cos(vehicle->angle);
-		vehicle->x = (MAX_XYZ >> 1) - SpecialMultiply(MAX_XYZ >> 2, vehicle->sin);
-		vehicle->y = (MAX_XYZ >> 1) - SpecialMultiply(MAX_XYZ >> 2, vehicle->cos);
-		vehicle->z = MIN_XYZ;
+		player->angle = (i << (SHIFT_FC - 2)) + (SCALE_FC / 8);
+		player->sin = Sin(player->angle);
+		player->cos = Cos(player->angle);
+		player->x = (MAX_XYZ >> 1) - SpecialMultiply(MAX_XYZ >> 2, player->sin);
+		player->y = (MAX_XYZ >> 1) - SpecialMultiply(MAX_XYZ >> 2, player->cos);
+		player->z = MIN_XYZ;
 		/* To use for missiles */
-		vehicle->countdown = MSS_COUNTDOWN_COUNTER;
+		player->countdown = MSS_COUNTDOWN_COUNTER;
 		/* Will advance right away to level 0 */
-		vehicle->level = -1;
-		AdvancePlayer(vehicle);
+		player->level = -1;
+		AdvancePlayer(player);
 	}
 }
 
@@ -249,6 +250,7 @@ void OutputAsNumber(char prefix, int16_t value)
 
 void ExitProgram(int16_t stat)
 {
+	StopSounds();
 	if (stat != ERR_NO) {
 		if (g_string_data)
 			fputs(GetXMAddress(g_string_data, stat), stdout);

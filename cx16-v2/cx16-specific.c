@@ -29,7 +29,7 @@
 	21 - 30        | 30
 	31 - 60        | 60
 */
-#define FRAMES_PER_SEC	6
+#define FRAMES_PER_SEC	8
 
 /* Keyboard defines used in GetPlayerInput */
 #define PAUSE_PROGRAM		27	/* escape: pause/unpause program */
@@ -48,7 +48,6 @@
 
 static void DrawLine16(void);
 static void DefaultCallback(int8_t waiting);
-static void StopSounds(void);
 
 static uint8_t
 	f_current_color;
@@ -181,7 +180,7 @@ void AddSound(int8_t type) {
 	}
 }
 
-static void StopSounds(void)
+void StopSounds(void)
 {
 	int16_t i;
 	uint32_t a;
@@ -195,8 +194,9 @@ static void DefaultCallback(int8_t waiting)
 {
 	static uint16_t s_frame_counter;
 	uint8_t b, v;
-	int16_t i;
+	int16_t i, z;
 	uint32_t a;
+	VEHICLE *player;
 
 	/* Perform tasks dependent on what we're waiting for */
 	switch (waiting) {
@@ -213,6 +213,20 @@ static void DefaultCallback(int8_t waiting)
 						b = (b & VERA_PSG_RL_MASK) | v;
 						vpoke(b, a);
 					}
+				}
+			}
+			/* Dummy routine for players */
+			for (i = 0, player = g_vehicles; i < PLAYER_COUNT; ++i, ++player) {
+				if (!i)
+					z = player->z;
+				else if (player->active) {
+					player->angle_delta = 1;
+					if (player->z < z)
+						player->z_delta = 1;
+					else if (player->z > z)
+						player->z_delta = -1;
+					if (!player->loading)
+						player->fire = true;
 				}
 			}
 			break;
@@ -509,7 +523,6 @@ void GetPlayerInput(VEHICLE *vehicle)
 				break;
 
 			case QUIT_PROGRAM:
-				StopSounds();
 				tgi_done();
 				g_exit_program = true;
 				break;

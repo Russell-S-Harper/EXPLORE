@@ -25,7 +25,6 @@
 
 /* Common structures */
 typedef struct {int16_t x, y, z;} VERTEX;
-typedef struct {int16_t x, y;} POINT;
 typedef struct {int16_t index_from, index_to;} SEGMENT;
 typedef struct {int8_t x, y;} OFFSET;
 
