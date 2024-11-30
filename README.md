@@ -73,9 +73,9 @@ Should you want to build the demo, you’ll need [cc65](https://github.com/cc65/
 
 Edit the `«flt-repo»/flt/build-cc65` script to point `XCC` to where the ***cc65*** repo is located, and run the script to build the `flt.lib` library.
 
-Then edit the `«explore-repo»/cx16-v1/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `explore.prg` and `data.prg`.
+Then edit the `«explore-repo»/cx16-v1/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `EXPLORE.PRG` and `DATA.PRG`.
 
-Run the emulator, then load and run `data.prg` to generate the `explore.dat` data file, and then load and run `explore.prg` to run the demo. A word of warning, you’ll likely be underwhelmed! Once `explore.dat` is created, you don’t need to run `data.prg` again, unless you change `«explore-repo»/cx16-v1/data.c`.
+Run the emulator, then load and run `DATA.PRG` to generate the `EXPLORE.DAT` data file, and then load and run `EXPLORE.PRG` to run the demo. A word of warning, you’ll likely be underwhelmed! Once `EXPLORE.DAT` is created, you don’t need to run `DATA.PRG` again, unless you change `«explore-repo»/cx16-v1/data.c`.
 
 The only controls are escape to pause (!) and Q to quit, or you can just wait an eternity for 100 frames to finish. Depending on what I’m optimizing, it might print some timing statistics in `clock` units.
 
@@ -91,9 +91,9 @@ As in `cx16-v1`, should you want to build the demo, you’ll need [cc65](https:/
 
 Edit the `«flt-repo»/flt/build-cc65` script to point `XCC` to where the ***cc65*** repo is located, and run the script to build the `flt.lib` library.
 
-Then edit the `«explore-repo»/cx16-v2/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `explore.prg` and `data.prg`.
+Then edit the `«explore-repo»/cx16-v2/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `EXPLORE.PRG` and `DATA.PRG`.
 
-Run the emulator, then load and run `data.prg` to generate the `explore.dat` data file, and then load and run `explore.prg` to run the demo. Once `explore.dat` is created, you don’t need to run `data.prg` again, unless you change `«explore-repo»/cx16-v2/data.c`.
+Run the emulator, then load and run `DATA.PRG` to generate the `EXPLORE.DAT` data file, and then load and run `EXPLORE.PRG` to run the demo. Once `EXPLORE.DAT` is created, you don’t need to run `DATA.PRG` again, unless you change `«explore-repo»/cx16-v2/data.c`.
 
 The demo uses these keyboard and joystick controls:
 
