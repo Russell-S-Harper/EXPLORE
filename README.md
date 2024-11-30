@@ -54,7 +54,7 @@ As compared to the original demo running in DOSBox, even a very simplified demo 
 - `282 ms` – callback logic, for every point, a callback is made so it can check against the mask whether to plot the point; also polygons keep track of the left and right sides; the mask is very large, so it has to be maintained in extended memory, a lot of effort went into optimizing this
 - ` 33 ms` – callback call overhead, this is the time spent just making the calls
 - `282 ms` – drawing lines, these are the loops to draw lines using Bresenham’s Line Generation algorithm; I couldn’t use the built-ins because: 16-color & 2 pixels/byte, and need to invoke a callback for each point
-- ` 17 ms` – rotating the points, sin and cos are pre-calculated, so this saves a lot
+- ` 17 ms` – rotating the points, sines and cosines are pre-calculated, so this saves a lot
 - ` 50 ms` – baseline, these are routines to manage the dual screens: swapping and clearing, and clearing some of the mask
 
 Suppose the complexity of the image is tripled, i.e. three horizon lines and six polygons, you can probably make a decent game with that. The estimated timing would be:
