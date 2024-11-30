@@ -346,12 +346,12 @@ static void DrawLine16(void)
 
 	/* Add 1 to i because we want to render all points up to and including the endpoints */
 	if (abs(dy) > abs(dx)) {
-		slope = abs(SpecialDivide(dx, dy)) >> 3;
+		slope = abs(((int32_t)dx << 9) / dy);
 		d0 = VERA_ADV_BY_0_5 | (dx < 0? VERA_DECR: VERA_INCR);
 		d1 = VERA_ADV_BY_160 | (dy < 0? VERA_DECR: VERA_INCR);
 		i = abs(dy) + 1;
 	} else {
-		slope = abs(SpecialDivide(dy, dx)) >> 3;
+		slope = abs(((int32_t)dy << 9) / dx);
 		d0 = VERA_ADV_BY_160 | (dy < 0? VERA_DECR: VERA_INCR);
 		d1 = VERA_ADV_BY_0_5 | (dx < 0? VERA_DECR: VERA_INCR);
 		i = abs(dx) + 1;
@@ -481,6 +481,7 @@ void GetPlayerInput(VEHICLE *vehicle)
 	while (kbhit()) {
 		switch ((uint8_t)cgetc()) {
 			case PAUSE_PROGRAM:
+				StopSounds();
 				/* Wait until it's pressed again */
 				while (cgetc() != PAUSE_PROGRAM);
 				break;
@@ -532,12 +533,12 @@ void GetPlayerInput(VEHICLE *vehicle)
 
 	/* Process joystick input */
 	if (joy = joy_read(JOY_1)) {
-		if (JOY_UP(joy)) {
+		if (JOY_UP(joy)) {		/* Joystick forward */
 			if (vehicle->airborne)
 				vehicle->z_delta -= 1;
 			else
 				vehicle->gear += 1;
-		} else if (JOY_DOWN(joy)) {
+		} else if (JOY_DOWN(joy)) {	/* Joystick back */
 			if (vehicle->airborne)
 				vehicle->z_delta += 1;
 			else

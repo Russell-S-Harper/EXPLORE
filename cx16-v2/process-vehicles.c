@@ -202,7 +202,8 @@ void ProcessVehicles(void)
 					player->health -= missile->damage;
 					player->hit = MSS_HIT_COUNTER;
 					if (player->health <= 0) {
-						AdvancePlayer(g_vehicles + missile->identifier);
+						if (!AdvancePlayer(g_vehicles + missile->identifier))
+							g_vehicles[missile->identifier].health = PLAYER_HEALTH;
 						if (!AdvancePlayer(player))
 							player->active = false;
 					}
