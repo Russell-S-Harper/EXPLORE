@@ -18,8 +18,8 @@
 static uint8_t DeltaZColor(int16_t dz);
 static uint8_t StatusLineColor(int16_t health);
 
-/* Optimized qsort */
-static void SortIndicesByVehicleHeight(uint8_t *indices, int8_t lo, int8_t hi);
+/* Classify by below, targetable, and above */
+static void ClassifyIndicesByVehicleHeight(uint8_t *indices, int16_t count);
 
 /* Render all the objects */
 void RenderObjects(void)
@@ -91,7 +91,7 @@ void RenderObjects(void)
 			++count;
 		}
 	}
-	SortIndicesByVehicleHeight(s_indices, 0, count - 1);
+	ClassifyIndicesByVehicleHeight(s_indices, count);
 
 	/* Render the vehicles */
 	for (i = 0, last_dz = INT16_MIN; i < count; ++i) {
@@ -156,43 +156,34 @@ static uint8_t StatusLineColor(int16_t health)
 		return CLR16_GREEN;
 }
 
-/* Optimized code from qsort.c for this specific case, otherwise qsort becomes a bottleneck! */
-static void SortIndicesByVehicleHeight(uint8_t *indices, int8_t lo, int8_t hi)
+static void ClassifyIndicesByVehicleHeight(uint8_t *indices, int16_t count)
 {
-	uint8_t t;
-	int8_t i, j;
-	int16_t z;
+	static uint8_t *s_indices_l, *s_indices_m, *s_indices_h;
+	uint8_t j, t, l, m, h;
+	int16_t i, z, dz;
 
-	/* Sort indices by vehicle height */
-	while (hi > lo) {
-		i = lo + 1;
-		j = hi;
-		while (i <= j) {
-			z = g_vehicles[indices[lo]].z;
-			while (i <= j && z >= g_vehicles[indices[i]].z)
-				++i;
-			while (i <= j && z < g_vehicles[indices[j]].z)
-				--j;
-			if (i <= j) {
-				t = indices[i];
-				indices[i] = indices[j];
-				indices[j] = t;
-				++i;
-				--j;
-			}
-		}
-		if (j != lo) {
-			t = indices[j];
-			indices[j] = indices[lo];
-			indices[lo] = t;
-		}
-		/* More commonly expressed as j > (hi + lo) / 2, meaning is j past the midpoint? */
-		if (j - lo > hi - j) {
-			SortIndicesByVehicleHeight(indices, j + 1, hi);
-			hi = j - 1;
-		} else {
-			SortIndicesByVehicleHeight(indices, lo, j - 1);
-			lo = j + 1;
-		}
+	if (!s_indices_l) {
+		s_indices_l = malloc(sizeof(uint8_t) * VEHICLE_COUNT);
+		s_indices_m = malloc(sizeof(uint8_t) * VEHICLE_COUNT);
+		s_indices_h = malloc(sizeof(uint8_t) * VEHICLE_COUNT);
 	}
+	l = m = h = 0;
+	z = g_vehicles[g_vehicle_index].z;
+	for (i = 0; i < count; ++i) {
+		t = indices[i];
+		dz = g_vehicles[t].z - z;
+		if (dz < -VEHICLE_Z_TOL)
+			s_indices_l[l++] = t;
+		else if (dz > VEHICLE_Z_TOL)
+			s_indices_h[h++] = t;
+		else
+			s_indices_m[m++] = t;
+	}
+	j = 0;
+	for (i = 0; i < l; ++i, ++j)
+		indices[j] = s_indices_l[i];
+	for (i = 0; i < m; ++i, ++j)
+		indices[j] = s_indices_m[i];
+	for (i = 0; i < h; ++i, ++j)
+		indices[j] = s_indices_h[i];
 }

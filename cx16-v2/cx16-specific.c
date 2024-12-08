@@ -29,7 +29,7 @@
 	21 - 30        | 30
 	31 - 60        | 60
 */
-#define FRAMES_PER_SEC	6
+#define FRAMES_PER_SEC	7
 
 /* Keyboard defines used in GetPlayerInput */
 #define PAUSE_PROGRAM		27	/* escape: pause/unpause program */
@@ -45,9 +45,10 @@
 #define HEX_DGT_HI	0xF0
 #define HEX_DGT_LO	0x0F
 #define SHIFT_HEX_DGT	4
+#define CLEAR_BYTE	((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK)
 
 static void DrawLine16(void);
-static void DefaultCallback(int8_t waiting);
+static void DefaultCallback(uint8_t waiting);
 
 static uint8_t
 	f_current_color;
@@ -143,19 +144,19 @@ void UpdateDisplay(void)
 	/* Clear the previous screen */
 	for (p = &VERA_DATA0, i = 0; i < VERA_VERT_RES; ++i) {
 		for (j = 0; j < VERA_HORZ_RES / VERA_PX_PER_BYTE / 8; ++j) {
-			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
-			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
-			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
-			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
-			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
-			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
-			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
-			*p = ((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK);
+			*p = CLEAR_BYTE;
+			*p = CLEAR_BYTE;
+			*p = CLEAR_BYTE;
+			*p = CLEAR_BYTE;
+			*p = CLEAR_BYTE;
+			*p = CLEAR_BYTE;
+			*p = CLEAR_BYTE;
+			*p = CLEAR_BYTE;
 		}
 	}
 }
 
-void AddSound(int8_t type) {
+void AddSound(uint8_t type) {
 	static uint8_t s_index;
 	uint32_t a;
 
@@ -190,7 +191,7 @@ void StopSounds(void)
 }
 
 /* Default callback to do useful work while waiting */
-static void DefaultCallback(int8_t waiting)
+static void DefaultCallback(uint8_t waiting)
 {
 	static uint16_t s_frame_counter, s_player_counter;
 	uint8_t b, v;
@@ -472,7 +473,7 @@ int16_t Minimum(int16_t a, int16_t b) { return a < b? a: b; }
 int16_t Maximum(int16_t a, int16_t b) { return a > b? a: b; }
 
 /* Processes keyboard and joystick input */
-void GetPlayerInput(VEHICLE *vehicle)
+void GetPlayerInput(VEHICLE *player)
 {
 	uint8_t joy;
 	int16_t i, j;
@@ -487,34 +488,34 @@ void GetPlayerInput(VEHICLE *vehicle)
 				break;
 
 			case REQ_CLIMB_OR_GEAR_FWD:
-				if (vehicle->airborne)
-					vehicle->z_delta += 1;
+				if (player->airborne)
+					player->z_delta += 1;
 				else
-					vehicle->gear += 1;
+					player->gear += 1;
 				break;
 
 			case REQ_DIVE_OR_GEAR_REV:
-				if (vehicle->airborne)
-					vehicle->z_delta -= 1;
+				if (player->airborne)
+					player->z_delta -= 1;
 				else
-					vehicle->gear -= 1;
+					player->gear -= 1;
 				break;
 
 			case TURN_RIGHT:
-				vehicle->angle_delta += 1;
+				player->angle_delta += 1;
 				break;
 
 			case TURN_LEFT:
-				vehicle->angle_delta -= 1;
+				player->angle_delta -= 1;
 				break;
 
 			case FIRE_MISSILE:
-				if (!vehicle->loading)
-					vehicle->fire = true;
+				if (!player->loading)
+					player->fire = true;
 				break;
 
 			case CYCLE_PLAYER:
-				/* Find the next active player, if any */
+				/* Find the next active player or NPC, if any */
 				for (i = 1; i < PLAYER_COUNT; ++i) {
 					j = (g_vehicle_index + i) % PLAYER_COUNT;
 					if (g_vehicles[j].active) {
@@ -531,28 +532,30 @@ void GetPlayerInput(VEHICLE *vehicle)
 		}
 	}
 
-	/* Process joystick input */
-	if (joy = joy_read(JOY_1)) {
+	/* Process joystick input - JOY_2 is the first physical joystick */
+	if (joy = joy_read(JOY_2)) {
 		if (JOY_UP(joy)) {		/* Joystick forward */
-			if (vehicle->airborne)
-				vehicle->z_delta -= 1;
+			if (player->airborne)
+				player->z_delta -= JOY_UP(player->joy)? 2: 1;
 			else
-				vehicle->gear += 1;
+				player->gear += 1;
 		} else if (JOY_DOWN(joy)) {	/* Joystick back */
-			if (vehicle->airborne)
-				vehicle->z_delta += 1;
+			if (player->airborne)
+				player->z_delta += JOY_DOWN(player->joy)? 2: 1;
 			else
-				vehicle->gear -= 1;
+				player->gear -= 1;
 		}
 		if (JOY_RIGHT(joy))
-			vehicle->angle_delta += 1;
+			player->angle_delta += JOY_RIGHT(player->joy)? 2: 1;
 		else if (JOY_LEFT(joy))
-			vehicle->angle_delta -= 1;
+			player->angle_delta -= JOY_LEFT(player->joy)? 2: 1;
 		if (JOY_BTN_1(joy)) {
-			if (!vehicle->loading)
-				vehicle->fire = true;
+			if (!player->loading)
+				player->fire = true;
 		}
 	}
+	/* Save */
+	player->joy = joy;
 }
 
 /* The program insures that the values passed to and returned

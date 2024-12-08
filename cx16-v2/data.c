@@ -445,7 +445,7 @@ const char *vehicles0[] = {
 
 #define PER_LEVEL	7
 
-const int8_t levels0[] = {
+const uint8_t levels0[] = {
 /*	Arena	Player	Airbrn	Gear	Missile	Delta	Damage */
 	0,	0,	1,	1,	6,	0,	3,
 	1,	1,	1,	2,	6,	0,	3,
@@ -994,8 +994,8 @@ static void OutputLevelData(FILE *ofile)
 
 	fputs("Level Data", stdout);
 	fputc(CODE_LD, ofile);
-	tmp = sizeof(levels0) / sizeof(int8_t) / PER_LEVEL;
+	tmp = sizeof(levels0) / sizeof(uint8_t) / PER_LEVEL;
 	fwrite(&tmp, sizeof(int16_t), 1, ofile);
-	fwrite(levels0, sizeof(int8_t), sizeof(levels0) / sizeof(int8_t), ofile);
+	fwrite(levels0, sizeof(uint8_t), sizeof(levels0) / sizeof(uint8_t), ofile);
 	fputs(" done\n", stdout);
 }

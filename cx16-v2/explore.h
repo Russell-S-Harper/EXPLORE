@@ -48,14 +48,15 @@ enum {APP_PRM, APP_AUX, APP_MSS, APP_CNT};
 	can iterate through them in a loop */
 typedef struct {
 	bool active, airborne, exploding, fire;
-	int8_t z_delta, angle_delta, level, gear, hit, mss_delta, damage, loading, countdown;
-	int16_t identifier, health, x, y, z, angle, sin, cos;
+	int8_t health, z_delta, angle_delta, level, gear, hit, loading, countdown;
+	uint8_t identifier, joy, mss_delta, damage;
+	int16_t x, y, z, angle, sin, cos;
 	XM_HANDLE appearance[APP_CNT];
 } VEHICLE;
 
 typedef struct {
 	bool last, airborne;
-	int8_t arena, gear, mss_delta, damage;
+	uint8_t arena, gear, mss_delta, damage;
 	XM_HANDLE player, missile;
 } LEVEL;
 
@@ -88,8 +89,8 @@ void PlotPoint16(int16_t x, int16_t y, uint8_t color);
 void ErasePoint16(int16_t x, int16_t y);
 
 /* Routines defined in cx16-specific.c and called by ProcessVehicle */
-void GetPlayerInput(VEHICLE *vehicle);
-void AddSound(int8_t type);
+void GetPlayerInput(VEHICLE *player);
+void AddSound(uint8_t type);
 void StopSounds(void);
 
 /* Routine defined in initialize.c and called by InitVehicles and other places */

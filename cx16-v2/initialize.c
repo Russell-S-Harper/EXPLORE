@@ -70,7 +70,7 @@ void InitProgram(void)
 static void InitData(char *file)
 {
 	char code = CODE_ID;
-	int8_t tmp;
+	uint8_t tmp;
 	int16_t t, count, size;
 	FILE *ifile;
 
@@ -117,19 +117,19 @@ static void InitData(char *file)
 				GetData(&count, sizeof(int16_t), ifile);
 				g_levels = malloc(count * sizeof(LEVEL));
 				for (t = 0; t < count; ++t) {
-					GetData(&tmp, sizeof(int8_t), ifile);
+					GetData(&tmp, sizeof(uint8_t), ifile);
 					g_levels[t].arena = tmp;
-					GetData(&tmp, sizeof(int8_t), ifile);
+					GetData(&tmp, sizeof(uint8_t), ifile);
 					g_levels[t].player = g_vehicle_data[tmp];
-					GetData(&tmp, sizeof(int8_t), ifile);
+					GetData(&tmp, sizeof(uint8_t), ifile);
 					g_levels[t].airborne = !!tmp;
-					GetData(&tmp, sizeof(int8_t), ifile);
+					GetData(&tmp, sizeof(uint8_t), ifile);
 					g_levels[t].gear = tmp;
-					GetData(&tmp, sizeof(int8_t), ifile);
+					GetData(&tmp, sizeof(uint8_t), ifile);
 					g_levels[t].missile = g_vehicle_data[tmp];
-					GetData(&tmp, sizeof(int8_t), ifile);
+					GetData(&tmp, sizeof(uint8_t), ifile);
 					g_levels[t].mss_delta = tmp;
-					GetData(&tmp, sizeof(int8_t), ifile);
+					GetData(&tmp, sizeof(uint8_t), ifile);
 					g_levels[t].damage = tmp;
 					g_levels[t].last = (t + 1 == count);
 				}
@@ -164,7 +164,7 @@ static void InitSquares(void)
 
 static void InitPlayers(void)
 {
-	int i;
+	int16_t i;
 	VEHICLE *player;
 
 	g_vehicles = calloc(VEHICLE_COUNT, sizeof(VEHICLE));
@@ -172,7 +172,6 @@ static void InitPlayers(void)
 	for (i = 0, player = g_vehicles; i < PLAYER_COUNT; ++i, ++player) {
 		/* To prevent collisions with your own missiles! */
 		player->identifier = i;
-		player->loading = 2 * i;
 		/* Starting as active */
 		player->active = true;
 		/* Initialize direction and position */
