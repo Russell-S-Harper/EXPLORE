@@ -447,12 +447,12 @@ const char *vehicles0[] = {
 
 const uint8_t levels0[] = {
 /*	Arena	Player	Airbrn	Gear	Missile	Delta	Damage */
-	0,	0,	1,	1,	6,	0,	3,
-	1,	1,	1,	2,	6,	0,	3,
-	2,	2,	1,	1,	7,	1,	5,
-	3,	3,	1,	2,	7,	1,	5,
-	4,	4,	1,	1,	8,	2,	8,
-	5,	5,	1,	2,	8,	2,	8
+	0,	0,	1,	1,	6,	1,	3,
+	1,	1,	1,	2,	6,	1,	3,
+	2,	2,	1,	1,	7,	2,	5,
+	3,	3,	1,	2,	7,	2,	5,
+	4,	4,	1,	1,	8,	3,	8,
+	5,	5,	1,	2,	8,	3,	8
 };
 
 static void OutputStrings(FILE *ofile);

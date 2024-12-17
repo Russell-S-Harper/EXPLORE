@@ -113,6 +113,10 @@
 #define VERA_ADDR_FX(x, y)	(((uint32_t)(y) << 8) + ((y) << 6) + (x) \
 					+ ((uint32_t)(VERA_L0_TILEBASE? VERA_SCR_1_ADDR: VERA_SCR_2_ADDR) << 9))
 
+/* Scan line macros */
+#define CURRENT_SCAN_LINE	(((VERA_IEN & VERA_SCANLINE_H)? 256: 0) + VERA_IRQLINE_L)
+#define MAXIMUM_SCAN_LINE	(VERA_VERT_RES * 2 + 1)
+
 /* VERA PSG */
 #define VERA_PSG_BASE		0x1F9C0
 #define VERA_PSG_RLV_OFFSET	2

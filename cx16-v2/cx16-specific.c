@@ -47,6 +47,9 @@
 #define SHIFT_HEX_DGT	4
 #define CLEAR_BYTE	((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK)
 
+/* Missile allowance in scan lines */
+#define MSS_ALLOWANCE	40
+
 static void DrawLine16(void);
 static void DefaultCallback(uint8_t waiting);
 
@@ -117,7 +120,7 @@ void UpdateDisplay(void)
 	do
 		/* While waiting for the end of the current screen, do some work */
 		DefaultCallback(SCREEN_TO_FINISH);
-	while (((VERA_IEN & VERA_SCANLINE_H)? 256: 0) + VERA_IRQLINE_L < (VERA_VERT_RES * 2 - 1));
+	while (CURRENT_SCAN_LINE < MAXIMUM_SCAN_LINE);
 
 	/* Set up the next screen */
 	switch (VERA_L0_TILEBASE) {
@@ -193,11 +196,11 @@ void StopSounds(void)
 /* Default callback to do useful work while waiting */
 static void DefaultCallback(uint8_t waiting)
 {
-	static uint16_t s_frame_counter, s_player_counter;
+	static uint16_t s_frame_counter, s_player_counter = PLAYER_INDEX + 1, s_missile_counter = PLAYER_COUNT;
 	uint8_t b, v;
-	int16_t i, z;
+	int16_t i, z, delta;
 	uint32_t a;
-	VEHICLE *player;
+	VEHICLE *player, *missile;
 
 	/* Perform tasks dependent on what we're waiting for */
 	switch (waiting) {
@@ -215,24 +218,45 @@ static void DefaultCallback(uint8_t waiting)
 						vpoke(b, a);
 					}
 				}
-			}
-			/* Dummy routine for NPCs - TODO add "AI" logic */
-			if (++s_player_counter >= PLAYER_COUNT)
-				s_player_counter = PLAYER_INDEX + 1;
-			player = g_vehicles + s_player_counter;
-			if (player->active) {
-				z = g_vehicles[PLAYER_INDEX].z;
-				player->angle_delta = 1;
-				if (player->z < z)
-					player->z_delta = 1;
-				else if (player->z > z)
-					player->z_delta = -1;
-				if (!player->loading)
-					player->fire = true;
+			} else {
+				/* Dummy routine for NPCs - TODO add "AI" logic */
+				player = g_vehicles + s_player_counter;
+				if (player->active) {
+					z = g_vehicles[PLAYER_INDEX].z;
+					player->angle_delta = 1;
+					if (player->z < z)
+						player->z_delta = 1;
+					else if (player->z > z)
+						player->z_delta = -1;
+					if (!player->loading)
+						player->fire = true;
+				}
+				if (++s_player_counter >= PLAYER_COUNT)
+					s_player_counter = PLAYER_INDEX + 1;
 			}
 			break;
 		case SCREEN_TO_FINISH:
-			/* TODO - add missile guidance here */
+			/* While there's enough time left, do some missile guidance */
+			while (MAXIMUM_SCAN_LINE - CURRENT_SCAN_LINE >= MSS_ALLOWANCE) {
+				missile = g_vehicles + s_missile_counter;
+				if (missile->active && missile->target < PLAYER_COUNT) {
+					player = g_vehicles + missile->target;
+					if (player->active) {
+						delta = SpecialMultiply(player->x - missile->x, missile->cos) - SpecialMultiply(player->y - missile->y, missile->sin);
+						if (delta < -MSS_XY_TOL)
+							missile->angle_delta = -missile->mss_delta;
+						else if (delta > MSS_XY_TOL)
+							missile->angle_delta = missile->mss_delta;
+						delta = missile->z - player->z;
+						if (delta < -VEHICLE_Z_TOL)
+							missile->z_delta = missile->mss_delta;
+						else if (delta > VEHICLE_Z_TOL)
+							missile->z_delta = -missile->mss_delta;
+					}
+				}
+				if (++s_missile_counter >= VEHICLE_COUNT)
+					s_missile_counter = PLAYER_COUNT;
+			}
 			break;
 	}
 }

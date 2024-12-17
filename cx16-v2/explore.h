@@ -20,7 +20,7 @@
 /* How many participants */
 #define VEHICLE_COUNT		24
 #define PLAYER_COUNT		4
-#define PLAYER_INDEX		0
+#define PLAYER_INDEX		0	/* Human */
 
 /* Initial player health */
 #define PLAYER_HEALTH		60
@@ -49,7 +49,7 @@ enum {APP_PRM, APP_AUX, APP_MSS, APP_CNT};
 typedef struct {
 	bool active, airborne, exploding, fire;
 	int8_t health, z_delta, angle_delta, level, gear, hit, loading, countdown;
-	uint8_t identifier, joy, mss_delta, damage;
+	uint8_t identifier, target, joy, mss_delta, damage;
 	int16_t x, y, z, angle, sin, cos;
 	XM_HANDLE appearance[APP_CNT];
 } VEHICLE;

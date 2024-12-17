@@ -174,6 +174,8 @@ static void InitPlayers(void)
 		player->identifier = i;
 		/* Starting as active */
 		player->active = true;
+		/* Default to player as the target, except for the player */
+		player->target = i? PLAYER_INDEX: PLAYER_COUNT;
 		/* Initialize direction and position */
 		player->angle = (i << (SHIFT_FC - 2)) + (SCALE_FC / 8);
 		player->sin = Sin(player->angle);
