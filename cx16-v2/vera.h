@@ -115,7 +115,7 @@
 
 /* Scan line macros */
 #define CURRENT_SCAN_LINE	(((VERA_IEN & VERA_SCANLINE_H)? 256: 0) + VERA_IRQLINE_L)
-#define MAXIMUM_SCAN_LINE	(VERA_VERT_RES * 2 + 1)
+#define MAXIMUM_SCAN_LINE	(VERA_VERT_RES * 2 - 1)
 
 /* VERA PSG */
 #define VERA_PSG_BASE		0x1F9C0
