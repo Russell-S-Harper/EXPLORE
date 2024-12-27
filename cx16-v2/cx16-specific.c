@@ -50,8 +50,15 @@
 /* Missile allowance in scan lines */
 #define MSS_ALLOWANCE	40
 
+/* To check if we're running in the emulator */
+#define EMULATOR_LO	(*(char *)(0x9FBE))
+#define EMULATOR_HI	(*(char *)(0x9FBF))
+
 static void DrawLine16(void);
 static void DefaultCallback(uint8_t waiting);
+
+static bool
+	f_use_workaround;
 
 static uint8_t
 	f_current_color;
@@ -83,6 +90,9 @@ void InitSpecific(void)
 
 	/* Set the offset */
 	VERA_L0_TILEBASE = VERA_SCR_2_BASE;
+
+	/* Use VERA FX Line Helper 4bpp workaround? */
+	f_use_workaround = !(EMULATOR_LO == '1' && EMULATOR_HI == '6');
 
 	/* Clear the remainder of screen 2 */
 	UpdateDisplay();
@@ -375,6 +385,9 @@ static void DrawLine16(void)
 		d0 = VERA_ADV_BY_0_5 | (dx < 0? VERA_DECR: VERA_INCR);
 		d1 = VERA_ADV_BY_160 | (dy < 0? VERA_DECR: VERA_INCR);
 		i = abs(dy) + 1;
+		/* Use VERA FX Line Helper 4bpp workaround? */
+		if (f_use_workaround)
+			slope <<= 1;
 	} else {
 		slope = abs(((int32_t)dy << 9) / dx);
 		d0 = VERA_ADV_BY_160 | (dy < 0? VERA_DECR: VERA_INCR);
