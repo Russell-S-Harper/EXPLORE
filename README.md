@@ -103,7 +103,7 @@ The demo uses these keyboard and joystick controls:
 - cursor right or joystick right: turn right
 - cursor left or joystick left: turn left
 - space or joystick button: fire missile
-- 1: cycle player
+- C: cycle player
 - Q: quit
 
 Depending on what I’m optimizing, it might print some timing statistics in `clock` units.

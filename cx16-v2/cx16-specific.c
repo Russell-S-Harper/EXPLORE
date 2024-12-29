@@ -38,7 +38,7 @@
 #define TURN_RIGHT		29	/* cursor right: turn right */
 #define TURN_LEFT		157	/* cursor left: turn left */
 #define FIRE_MISSILE		32	/* space: fire missile */
-#define CYCLE_PLAYER		49	/* 1: cycle player */
+#define CYCLE_PLAYER		67	/* C: cycle player */
 #define QUIT_PROGRAM		81	/* Q: quit program */
 
 /* Hex digit defines */
