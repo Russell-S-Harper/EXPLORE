@@ -29,7 +29,8 @@
 	21 - 30        | 30
 	31 - 60        | 60
 */
-#define FRAMES_PER_SEC	7
+#define FRAMES_PER_SEC_LO	4	/* If HW VERA FX Line Helper 4bpp workaround is required */
+#define FRAMES_PER_SEC_HI	7	/* No restrictions */
 
 /* Keyboard defines used in GetPlayerInput */
 #define PAUSE_PROGRAM		27	/* escape: pause/unpause program */
@@ -44,14 +45,25 @@
 /* Hex digit defines */
 #define HEX_DGT_HI	0xF0
 #define HEX_DGT_LO	0x0F
-#define SHIFT_HEX_DGT	4
-#define CLEAR_BYTE	((CLR16_BLACK << SHIFT_HEX_DGT) | CLR16_BLACK)
+#define HEX_DGT_SHIFT	4
+#define CLEAR_BYTE	((CLR16_BLACK << HEX_DGT_SHIFT) | CLR16_BLACK)
 
 /* Missile allowance in scan lines */
 #define MSS_ALLOWANCE	40
 
+/* Rendering shift defines */
+#define VERA_SLOPE_SHIFT	9
+#define WORKAROUND_SHIFT	3
+
+/* To check if we're running in the emulator */
+#define EMULATOR_LO	(*(char *)(0x9FBE))
+#define EMULATOR_HI	(*(char *)(0x9FBF))
+
 static void DrawLine16(void);
 static void DefaultCallback(uint8_t waiting);
+
+static bool
+	f_use_workaround;
 
 static uint8_t
 	f_current_color;
@@ -84,6 +96,9 @@ void InitSpecific(void)
 	/* Set the offset */
 	VERA_L0_TILEBASE = VERA_SCR_2_BASE;
 
+	/* Use HW VERA FX Line Helper 4bpp workaround? */
+	f_use_workaround = (EMULATOR_LO != '1' || EMULATOR_HI != '6');
+
 	/* Clear the remainder of screen 2 */
 	UpdateDisplay();
 
@@ -94,15 +109,16 @@ void InitSpecific(void)
 /* Switch to the other screen, clear the previous screen, and perform other functions */
 void UpdateDisplay(void)
 {
-	static clock_t s_frame_clock;
+	static clock_t s_frame_clock, s_clocks_per_frame;
 	uint8_t base, address, i, j;
 	clock_t current_clock;
 	register volatile uint8_t *p;
 
 	/* Wait for the end of the frame based on clock cycles */
-	if (!s_frame_clock)
+	if (!s_frame_clock) {
 		s_frame_clock = clock();
-	else {
+		s_clocks_per_frame = CLOCKS_PER_SEC / (f_use_workaround? FRAMES_PER_SEC_LO: FRAMES_PER_SEC_HI);
+	} else {
 		do {
 			/* While waiting for the end of the frame, do some work */
 			DefaultCallback(FRAME_TO_FINISH);
@@ -112,7 +128,7 @@ void UpdateDisplay(void)
 			if (current_clock < s_frame_clock)
 				break;
 		}
-		while (current_clock - s_frame_clock < (CLOCKS_PER_SEC / FRAMES_PER_SEC));
+		while (current_clock - s_frame_clock < s_clocks_per_frame);
 		s_frame_clock = current_clock;
 	}
 
@@ -169,10 +185,10 @@ void AddSound(uint8_t type) {
 
 	switch (type) {
 		case MSS_FIRING:
-			vpoke(0x6B, a);				/* 0x116B => G-sharp 6 */
-			vpoke(0x11, ++a);
+			vpoke(0x53, a);				/* 0x0053 => B 0 */
+			vpoke(0x00, ++a);
 			vpoke(VERA_PSG_VOLUME_FULL, ++a);	/* Both sides full volume */
-			vpoke(VERA_PSG_NOISE_WAVEFORM, ++a);	/* Noise waveform */
+			vpoke(VERA_PSG_BUZZ_WAVEFORM, ++a);	/* Buzz waveform */
 			break;
 
 		case MSS_EXPLODING:
@@ -284,8 +300,10 @@ void DrawLineJustTo16(int16_t x, int16_t y, uint8_t color)
 
 static void DrawLine16(void)
 {
+	bool use_workaround;
 	uint8_t d0, d1;
 	int16_t x1, y1, x2, y2, xmin, xmax, ymin, ymax, xt, yt, dx, dy, slope;
+	int32_t l;
 	uint32_t address;
 	register volatile uint8_t *p;
 	register uint8_t c;
@@ -365,83 +383,94 @@ static void DrawLine16(void)
 		y2 = yt;
 	}
 
+	/* Flag to indicate if HW VERA FX Line Helper 4bpp workaround is required */
+	use_workaround = false;
+
 	/* Will need these */
 	dx = x2 - x1;
 	dy = y2 - y1;
 
 	/* Add 1 to i because we want to render all points up to and including the endpoints */
 	if (abs(dy) > abs(dx)) {
-		slope = abs(((int32_t)dx << 9) / dy);
+		slope = abs(((int32_t)dx << VERA_SLOPE_SHIFT) / dy);
 		d0 = VERA_ADV_BY_0_5 | (dx < 0? VERA_DECR: VERA_INCR);
 		d1 = VERA_ADV_BY_160 | (dy < 0? VERA_DECR: VERA_INCR);
 		i = abs(dy) + 1;
+		use_workaround = f_use_workaround;
 	} else {
-		slope = abs(((int32_t)dy << 9) / dx);
+		slope = abs(((int32_t)dy << VERA_SLOPE_SHIFT) / dx);
 		d0 = VERA_ADV_BY_160 | (dy < 0? VERA_DECR: VERA_INCR);
 		d1 = VERA_ADV_BY_0_5 | (dx < 0? VERA_DECR: VERA_INCR);
 		i = abs(dx) + 1;
 	}
 
-	/* Get the address */
-	address = VERA_ADDR_FX(x1, y1);
+	if (use_workaround) {
+		dx = (dx > 0? slope: -slope) << WORKAROUND_SHIFT;
+		dy = dy > 0? 1: -1;
+		for (yt = y1, l = ((int32_t)x1 << SHIFT_1_0) + (SCALE_1_0 >> 1); i > 0; --i, yt += dy, l += dx)
+			PlotPoint16(l >> SHIFT_1_0, yt, f_current_color);
+	} else {
+		/* Get the address */
+		address = VERA_ADDR_FX(x1, y1);
 
-	/* DCSEL = 2 */
-	VERA_CTRL = VERA_DCSEL_2;
+		/* DCSEL = 2 */
+		VERA_CTRL = VERA_DCSEL_2;
 
-	/* Turn on FX 4-bit mode and line helper */
-	VERA_FX_CTRL = VERA_FX_4_BIT_MODE | VERA_FX_LINE_HELPER;
+		/* Turn on FX 4-bit mode and line helper */
+		VERA_FX_CTRL = VERA_FX_4_BIT_MODE | VERA_FX_LINE_HELPER;
 
-	/* Select ADDR1 */
-	VERA_CTRL = VERA_DCSEL_2 | VERA_ADDR_1;
+		/* Select ADDR1 */
+		VERA_CTRL = VERA_DCSEL_2 | VERA_ADDR_1;
 
-	/* Always increment setting */
-	VERA_ADDRx_H = d1;
+		/* Always increment setting */
+		VERA_ADDRx_H = d1;
 
-	/* Set ADDR1 - address format is a bit wonky, just deal with it! */
-	VERA_ADDRx_H |= (address & 0x01) << 1;
-	address >>= 1;
-	VERA_ADDRx_L = address & UINT8_MAX;
-	address >>= CHAR_BIT;
-	VERA_ADDRx_M = address & UINT8_MAX;
-	address >>= CHAR_BIT;
-	VERA_ADDRx_H |= address & 0x01;
+		/* Set ADDR1 - address format is a bit wonky, just deal with it! */
+		VERA_ADDRx_H |= (address & 0x01) << 1;
+		address >>= 1;
+		VERA_ADDRx_L = address & UINT8_MAX;
+		address >>= CHAR_BIT;
+		VERA_ADDRx_M = address & UINT8_MAX;
+		address >>= CHAR_BIT;
+		VERA_ADDRx_H |= address & 0x01;
 
-	/* Select ADDR0 */
-	VERA_CTRL = VERA_DCSEL_2 | VERA_ADDR_0;
+		/* Select ADDR0 */
+		VERA_CTRL = VERA_DCSEL_2 | VERA_ADDR_0;
 
-	/* Occasionally increment setting */
-	VERA_ADDRx_H = d0;
+		/* Occasionally increment setting */
+		VERA_ADDRx_H = d0;
 
-	/* DCSEL = 3 */
-	VERA_CTRL = VERA_DCSEL_3;
+		/* DCSEL = 3 */
+		VERA_CTRL = VERA_DCSEL_3;
 
-	/* Set slope */
-	VERA_FX_X_INCR_L = slope & UINT8_MAX;
-	slope >>= CHAR_BIT;
-	VERA_FX_X_INCR_H = slope & 0x03;
+		/* Set slope */
+		VERA_FX_X_INCR_L = slope & UINT8_MAX;
+		slope >>= CHAR_BIT;
+		VERA_FX_X_INCR_H = slope & 0x03;
 
-	/* Draw the line */
-	p = &VERA_DATA1;
-	c = (f_current_color << SHIFT_HEX_DGT) | f_current_color;
-	while (i >= 8) {
-		*p = c;
-		*p = c;
-		*p = c;
-		*p = c;
-		*p = c;
-		*p = c;
-		*p = c;
-		*p = c;
-		i -= 8;
+		/* Draw the line */
+		p = &VERA_DATA1;
+		c = (f_current_color << HEX_DGT_SHIFT) | f_current_color;
+		while (i >= 8) {
+			*p = c;
+			*p = c;
+			*p = c;
+			*p = c;
+			*p = c;
+			*p = c;
+			*p = c;
+			*p = c;
+			i -= 8;
+		}
+		for (; i > 0; --i)
+			*p = c;
+
+		/* DCSEL = 2 */
+		VERA_CTRL = VERA_DCSEL_2;
+
+		/* Turn off 4-bit and line helper mode */
+		VERA_FX_CTRL = VERA_TRADITIONAL;
 	}
-	for (; i > 0; --i)
-		*p = c;
-
-	/* DCSEL = 2 */
-	VERA_CTRL = VERA_DCSEL_2;
-
-	/* Turn off 4-bit and line helper mode */
-	VERA_FX_CTRL = VERA_TRADITIONAL;
 }
 
 /* Pixel routines */
@@ -462,7 +491,7 @@ void PlotPoint16(int16_t x, int16_t y, uint8_t color)
 			VERA_DATA0 |= (color & HEX_DGT_LO);
 		} else {
 			VERA_DATA0 &= HEX_DGT_LO;
-			VERA_DATA0 |= (color << SHIFT_HEX_DGT);
+			VERA_DATA0 |= (color << HEX_DGT_SHIFT);
 		}
 	}
 
