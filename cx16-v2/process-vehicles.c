@@ -144,7 +144,7 @@ void ProcessVehicles(void)
 			missile->exploding = true;
 
 		/* Countdown? */
-		if (missile->countdown && !--missile->countdown)
+		if (missile->mss_countdown && !--missile->mss_countdown)
 			missile->exploding = true;
 
 		/* Will need these */

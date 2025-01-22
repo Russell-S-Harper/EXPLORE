@@ -48,7 +48,7 @@ enum {APP_PRM, APP_AUX, APP_MSS, APP_CNT};
 	can iterate through them in a loop */
 typedef struct {
 	bool active, airborne, exploding, fire;
-	int8_t health, z_delta, angle_delta, level, gear, hit, loading, countdown;
+	int8_t health, z_delta, angle_delta, level, gear, hit, loading, mss_countdown;
 	uint8_t identifier, target, joy, mss_delta, damage;
 	int16_t x, y, z, angle, sin, cos;
 	XM_HANDLE appearance[APP_CNT];
