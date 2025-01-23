@@ -129,7 +129,7 @@ void RenderObjects(void)
 				for (; S->index_from != S->index_to; ++S) {
 					o1 = O + S->index_from;
 					o2 = O + S->index_to;
-					DrawLineFromTo16(screen_x + o1->x, screen_y + o1->y, screen_x + o2->x, screen_y + o2->y, vehicle->hit? CLR16_YELLOW: color);
+					DrawLineFromTo16(screen_x + o1->x, screen_y + o1->y, screen_x + o2->x, screen_y + o2->y, vehicle->hit_cd? CLR16_YELLOW: color);
 				}
 			}
 		}

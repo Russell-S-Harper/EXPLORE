@@ -244,7 +244,7 @@ static void DefaultCallback(uint8_t waiting)
 						player->z_delta = 1;
 					else if (player->z > z)
 						player->z_delta = -1;
-					if (!player->loading)
+					if (!player->loading_cd)
 						player->fire = true;
 				}
 				if (++s_player_counter >= PLAYER_COUNT)
@@ -563,7 +563,7 @@ void GetPlayerInput(VEHICLE *player)
 				break;
 
 			case FIRE_MISSILE:
-				if (!player->loading)
+				if (!player->loading_cd)
 					player->fire = true;
 				break;
 
@@ -603,7 +603,7 @@ void GetPlayerInput(VEHICLE *player)
 		else if (JOY_LEFT(joy))
 			player->angle_delta -= JOY_LEFT(player->joy)? 2: 1;
 		if (JOY_BTN_1(joy)) {
-			if (!player->loading)
+			if (!player->loading_cd)
 				player->fire = true;
 		}
 	}

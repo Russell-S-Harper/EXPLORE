@@ -33,9 +33,9 @@
 #define MSS_DST_TOL_SQR		13224
 
 /* Counters (in frames) for how long a missile takes to reload, missile lifespan, and hit animation */
-#define MSS_LOADING_COUNTER	6
-#define MSS_COUNTDOWN_COUNTER	30
-#define MSS_HIT_COUNTER		3
+#define MSS_LOADING	6
+#define MSS_LIVE	30
+#define MSS_HIT		3
 
 /* Explosions are last two "vehicles" */
 #define EXP_APP_PRM_OFFSET	2
@@ -48,7 +48,7 @@ enum {APP_PRM, APP_AUX, APP_MSS, APP_CNT};
 	can iterate through them in a loop */
 typedef struct {
 	bool active, airborne, exploding, fire;
-	int8_t health, z_delta, angle_delta, level, gear, hit, loading, mss_countdown;
+	int8_t health, z_delta, angle_delta, level, gear, hit_cd, loading_cd, live_cd;
 	uint8_t identifier, target, joy, mss_delta, damage;
 	int16_t x, y, z, angle, sin, cos;
 	XM_HANDLE appearance[APP_CNT];

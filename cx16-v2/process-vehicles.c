@@ -114,19 +114,19 @@ void ProcessVehicles(void)
 					/* Set up the missile as a clone of the player */
 					memcpy(missile, player, sizeof(VEHICLE));
 					missile->appearance[APP_PRM] = player->appearance[APP_MSS];
-					missile->hit = 0;
+					missile->hit_cd = 0;
 					AddSound(MSS_FIRING);
 					break;
 				}
 			}
 			player->fire = false;
-			player->loading = MSS_LOADING_COUNTER;
-		} else if (player->loading)
-			--player->loading;
+			player->loading_cd = MSS_LOADING;
+		} else if (player->loading_cd)
+			--player->loading_cd;
 
 		/* Hit counter */
-		if (player->hit)
-			--player->hit;
+		if (player->hit_cd)
+			--player->hit_cd;
 	}
 	/* Process each missile */
 	for (missile = g_vehicles + i; i < VEHICLE_COUNT; ++i, ++missile) {
@@ -144,7 +144,7 @@ void ProcessVehicles(void)
 			missile->exploding = true;
 
 		/* Countdown? */
-		if (missile->mss_countdown && !--missile->mss_countdown)
+		if (missile->live_cd && !--missile->live_cd)
 			missile->exploding = true;
 
 		/* Will need these */
@@ -200,7 +200,7 @@ void ProcessVehicles(void)
 				if (dx <= MSS_XY_TOL && dy <= MSS_XY_TOL && g_squares[dx] + g_squares[dy] <= MSS_DST_TOL_SQR) {
 					missile->exploding = true;
 					player->health -= missile->damage;
-					player->hit = MSS_HIT_COUNTER;
+					player->hit_cd = MSS_HIT;
 					if (player->health <= 0) {
 						if (!AdvancePlayer(g_vehicles + missile->identifier))
 							g_vehicles[missile->identifier].health = PLAYER_HEALTH;

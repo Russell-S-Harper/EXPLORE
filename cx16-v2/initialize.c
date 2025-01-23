@@ -184,7 +184,7 @@ static void InitPlayers(void)
 		player->y = (MAX_XYZ >> 1) - SpecialMultiply(MAX_XYZ >> 2, player->cos);
 		player->z = MIN_XYZ;
 		/* To use for missiles */
-		player->mss_countdown = MSS_COUNTDOWN_COUNTER;
+		player->live_cd = MSS_LIVE;
 		/* Will advance right away to level 0 */
 		player->level = -1;
 		AdvancePlayer(player);
