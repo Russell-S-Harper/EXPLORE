@@ -108,7 +108,7 @@ void ProcessVehicles(void)
 			player->z = z;
 
 		/* Add any missiles */
-		if (player->fire) {
+		if (player->firing) {
 			for (j = PLAYER_COUNT, missile = g_vehicles + PLAYER_COUNT; j < VEHICLE_COUNT; ++j, ++missile) {
 				if (!missile->active) {
 					/* Set up the missile as a clone of the player */
@@ -119,7 +119,7 @@ void ProcessVehicles(void)
 					break;
 				}
 			}
-			player->fire = false;
+			player->firing = false;
 			player->loading_cd = MSS_LOADING;
 		} else if (player->loading_cd)
 			--player->loading_cd;

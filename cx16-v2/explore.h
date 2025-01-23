@@ -47,9 +47,9 @@ enum {APP_PRM, APP_AUX, APP_MSS, APP_CNT};
 /* VEHICLE combines player, NPCs, and missiles; appearance is set up as an array so we
 	can iterate through them in a loop */
 typedef struct {
-	bool active, airborne, exploding, fire;
-	int8_t health, z_delta, angle_delta, level, gear, hit_cd, loading_cd, live_cd;
-	uint8_t identifier, target, joy, mss_delta, damage;
+	bool active, airborne, exploding, firing;
+	int8_t health, z_delta, angle_delta, level, gear;
+	uint8_t identifier, target, joy, mss_delta, damage, hit_cd, loading_cd, live_cd;
 	int16_t x, y, z, angle, sin, cos;
 	XM_HANDLE appearance[APP_CNT];
 } VEHICLE;
