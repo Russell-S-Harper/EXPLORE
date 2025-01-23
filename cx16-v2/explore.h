@@ -33,9 +33,9 @@
 #define MSS_DST_TOL_SQR		13224
 
 /* Counters (in frames) for how long a missile takes to reload, missile lifespan, and hit animation */
-#define MSS_LOADING	6
-#define MSS_LIVE	30
-#define MSS_HIT		3
+#define MSS_LOADING		6
+#define MSS_LIVE		30
+#define MSS_HIT			3
 
 /* Explosions are last two "vehicles" */
 #define EXP_APP_PRM_OFFSET	2
