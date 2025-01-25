@@ -239,7 +239,7 @@ static void DefaultCallback(uint8_t waiting)
 				player = g_vehicles + s_player_counter;
 				if (player->active) {
 					z = g_vehicles[PLAYER_INDEX].z;
-					player->angle_delta = 1;
+					player->a_delta = 1;
 					if (player->z < z)
 						player->z_delta = 1;
 					else if (player->z > z)
@@ -260,9 +260,9 @@ static void DefaultCallback(uint8_t waiting)
 					if (player->active) {
 						delta = SpecialMultiply(player->x - missile->x, missile->cos) - SpecialMultiply(player->y - missile->y, missile->sin);
 						if (delta < -MSS_XY_TOL)
-							missile->angle_delta = -missile->mss_delta;
+							missile->a_delta = -missile->mss_delta;
 						else if (delta > MSS_XY_TOL)
-							missile->angle_delta = missile->mss_delta;
+							missile->a_delta = missile->mss_delta;
 						delta = missile->z - player->z;
 						if (delta < -VEHICLE_Z_TOL)
 							missile->z_delta = missile->mss_delta;
@@ -555,11 +555,11 @@ void GetPlayerInput(VEHICLE *player)
 				break;
 
 			case TURN_RIGHT:
-				player->angle_delta += 1;
+				player->a_delta += 1;
 				break;
 
 			case TURN_LEFT:
-				player->angle_delta -= 1;
+				player->a_delta -= 1;
 				break;
 
 			case FIRE_MISSILE:
@@ -599,9 +599,9 @@ void GetPlayerInput(VEHICLE *player)
 				player->gear -= 1;
 		}
 		if (JOY_RIGHT(joy))
-			player->angle_delta += JOY_RIGHT(player->joy)? 2: 1;
+			player->a_delta += JOY_RIGHT(player->joy)? 2: 1;
 		else if (JOY_LEFT(joy))
-			player->angle_delta -= JOY_LEFT(player->joy)? 2: 1;
+			player->a_delta -= JOY_LEFT(player->joy)? 2: 1;
 		if (JOY_BTN_1(joy)) {
 			if (!player->loading_cd)
 				player->firing = true;

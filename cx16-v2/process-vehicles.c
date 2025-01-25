@@ -52,11 +52,11 @@ void ProcessVehicles(void)
 		z = player->z;
 
 		/* Process angle */
-		if (player->angle_delta) {
-			player->angle += player->angle_delta << ANGLE_DELTA_SHIFT;
+		if (player->a_delta) {
+			player->angle += player->a_delta << ANGLE_DELTA_SHIFT;
 			player->sin = Sin(player->angle);
 			player->cos = Cos(player->angle);
-			player->angle_delta = 0;
+			player->a_delta = 0;
 		}
 
 		/* Process XY movement */
@@ -153,11 +153,11 @@ void ProcessVehicles(void)
 		z = missile->z;
 
 		/* Process angle */
-		if (missile->angle_delta) {
-			missile->angle += missile->angle_delta << ANGLE_DELTA_SHIFT;
+		if (missile->a_delta) {
+			missile->angle += missile->a_delta << ANGLE_DELTA_SHIFT;
 			missile->sin = Sin(missile->angle);
 			missile->cos = Cos(missile->angle);
-			missile->angle_delta = 0;
+			missile->a_delta = 0;
 		}
 
 		/* Process XY movement */
