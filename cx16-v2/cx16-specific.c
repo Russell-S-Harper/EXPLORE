@@ -183,19 +183,27 @@ void AddSound(uint8_t type) {
 	if (++s_index >= VERA_PSG_VOICES)
 		s_index = 0;
 
+								/* value = frequency in Hz x 2.68435456 */
 	switch (type) {
 		case MSS_FIRING:
-			vpoke(0x53, a);				/* 0x0053 => B 0 */
-			vpoke(0x00, ++a);
-			vpoke(VERA_PSG_VOLUME_FULL, ++a);	/* Both sides full volume */
-			vpoke(VERA_PSG_BUZZ_WAVEFORM, ++a);	/* Buzz waveform */
+			vpoke(0x75, a);				/* E 4 => 329.63 Hz => 0x0375 */
+			vpoke(0x03, ++a);
+			vpoke(VERA_PSG_RL_OUTPUT | type, ++a);	/* The type is also the initial value */
+			vpoke(VERA_PSG_NOISE_WAVEFORM, ++a);	/* Noise waveform */
 			break;
 
 		case MSS_EXPLODING:
-			vpoke(0xBA, a);				/* 0x01BA => E 3 */
+			vpoke(0xBA, a);				/* E 3 => 164.81 Hz => 0x01BA*/
 			vpoke(0x01, ++a);
-			vpoke(VERA_PSG_VOLUME_FULL, ++a);	/* Both sides full volume */
+			vpoke(VERA_PSG_RL_OUTPUT | type, ++a);	/* The type is also the initial value */
 			vpoke(VERA_PSG_NOISE_WAVEFORM, ++a);	/* Noise waveform */
+			break;
+
+		case BELL_RINGING:
+			vpoke(0xEA, a);				/* E 5 => 659.26 Hz => 0x06EA*/
+			vpoke(0x06, ++a);
+			vpoke(VERA_PSG_RL_OUTPUT | type, ++a);	/* The type is also the initial value */
+			vpoke(VERA_PSG_CLEAR_WAVEFORM, ++a);	/* Clear waveform */
 			break;
 	}
 }
@@ -212,6 +220,24 @@ void StopSounds(void)
 /* Default callback to do useful work while waiting */
 static void DefaultCallback(uint8_t waiting)
 {
+	/* Waveforms are intertwined to follow specific sequences.
+
+		Missiles start at index 40 and follow: 40, 42, 44, 46, 48, 24, 12, 6, 3, 2, 1, 0
+		Explosions start at index 63 and follow: 63, 47, 35, 26, 19, 14, 10, 7, 5, 3, 2, 1, 0
+		Bells start at index 47 and reuse explosion waveforms: 47, 35, 26, 19, 14, 10, 7, 5, 3, 2, 1, 0
+
+		These indices can be used for other sounds:
+
+			4, 8, 9, 11, 13, 15, 16, 17, 18, 20, 21, 22, 23, 25, 27,
+			28, 29, 30, 31, 32, 33, 34, 36, 37, 38, 39, 41, 43, 45, 49, 50,
+			51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62
+	*/
+	static uint8_t s_waveforms[] = {
+		0, 0, 1, 2, 0, 3, 3, 5, 0, 0, 7, 0, 6, 0, 10, 0,
+		0, 0, 0, 14, 0, 0, 0, 0, 12, 0, 19, 0, 0, 0, 0, 0,
+		0, 0, 0, 26, 0, 0, 0, 0, 42, 0, 44, 0, 46, 0, 48, 35,
+		24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47
+	};
 	static uint16_t s_frame_counter, s_player_counter = PLAYER_INDEX + 1, s_missile_counter = PLAYER_COUNT;
 	uint8_t b, v;
 	int16_t i, z, delta;
@@ -228,9 +254,8 @@ static void DefaultCallback(uint8_t waiting)
 					b = vpeek(a);
 					v = b & VERA_PSG_VOLUME_MASK;
 					if (v) {
-						/* For each frame, decrease the volume by 25% */
-						v = (v + v + v) >> 2;
-						b = (b & VERA_PSG_RL_MASK) | v;
+						/* Follow the sequence for each frame */
+						b = (b & VERA_PSG_RL_MASK) | s_waveforms[v];
 						vpoke(b, a);
 					}
 				}

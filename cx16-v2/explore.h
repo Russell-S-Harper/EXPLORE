@@ -61,7 +61,9 @@ typedef struct {
 } LEVEL;
 
 /* Sound effects */
-enum {MSS_FIRING, MSS_EXPLODING};
+#define MSS_FIRING		40
+#define MSS_EXPLODING		63
+#define BELL_RINGING		47
 
 /* Callback routine hint */
 enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
