@@ -30,7 +30,7 @@ bool
 
 uint8_t
 	*g_psg_settings,
-	*g_psg_sounds;
+	*g_psg_volumes;
 
 uint16_t
 	g_display_width,
@@ -123,8 +123,8 @@ static void InitData(char *file)
 				g_psg_settings = malloc(size);
 				GetData(g_psg_settings, size, ifile);
 				size = VERA_PSG_VOLUMES * sizeof(uint8_t);
-				g_psg_sounds = malloc(size);
-				GetData(g_psg_sounds, size, ifile);
+				g_psg_volumes = malloc(size);
+				GetData(g_psg_volumes, size, ifile);
 				break;
 			case CODE_LD:
 				GetData(&count, sizeof(int16_t), ifile);

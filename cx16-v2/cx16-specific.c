@@ -221,7 +221,7 @@ static void DefaultCallback(uint8_t waiting)
 					v = b & VERA_PSG_VOLUME_MASK;
 					if (v) {
 						/* Follow the sequence for each frame */
-						b = (b & VERA_PSG_RL_MASK) | g_psg_sounds[v];
+						b = (b & VERA_PSG_RL_MASK) | g_psg_volumes[v];
 						vpoke(b, a);
 					}
 				}

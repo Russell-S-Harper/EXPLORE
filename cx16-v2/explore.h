@@ -119,7 +119,7 @@ extern bool
 
 extern uint8_t
 	*g_psg_settings,
-	*g_psg_sounds;
+	*g_psg_volumes;
 
 extern uint16_t
 	g_display_width,

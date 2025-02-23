@@ -1004,14 +1004,14 @@ static int CompareVehicleVertices(const void *p, const void *q)
 }
 
 static void OutputSoundData(FILE *ofile) {
-	uint8_t i, j, key, value, initializers[SOUNDS_CNT], sounds[VERA_PSG_VOLUMES];
+	uint8_t i, j, key, value, initializers[SOUNDS_CNT], volumes[VERA_PSG_VOLUMES];
 	uint16_t psg;
 
 	fputs("Sound Data", stdout);
 	fputc(CODE_SD, ofile);
 	/* Initialize */
 	for (i = 0; i < VERA_PSG_VOLUMES; ++i)
-		sounds[i] = 0;
+		volumes[i] = 0;
 	/* Merge the envelopes */
 	for (i = j = 0; i < sizeof(envelopes0) / sizeof(uint8_t) - 1; ++i) {
 		key = envelopes0[i];
@@ -1021,9 +1021,9 @@ static void OutputSoundData(FILE *ofile) {
 		if (!key)
 			initializers[j++] = value;
 		else {
-			if (!sounds[key])
-				sounds[key] = value;
-			else if (sounds[key] != value)
+			if (!volumes[key])
+				volumes[key] = value;
+			else if (volumes[key] != value)
 				fputs("\nEnvelope conflict!\n", stdout);
 		}
 	}
@@ -1036,8 +1036,8 @@ static void OutputSoundData(FILE *ofile) {
 		fwrite(initializers + i, sizeof(uint8_t), 1, ofile);
 		fwrite(waveforms0 + i, sizeof(uint8_t), 1, ofile);
 	}
-	/* Output the merged envelopes */
-	fwrite(sounds, sizeof(uint8_t), VERA_PSG_VOLUMES, ofile);
+	/* Output the merged envelopes as volumes */
+	fwrite(volumes, sizeof(uint8_t), VERA_PSG_VOLUMES, ofile);
 	fputs(" done\n", stdout);
 }
 
