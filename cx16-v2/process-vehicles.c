@@ -206,6 +206,7 @@ void ProcessVehicles(void)
 							g_vehicles[missile->identifier].health = PLAYER_HEALTH;
 						if (!AdvancePlayer(player))
 							player->active = false;
+						AddSound(BELL_RINGING);
 					}
 				}
 			}

@@ -47,10 +47,11 @@ enum {ERR_FO, ERR_FC, ERR_XM, ERR_GI, ERR_OB, ERR_DC, ERR_NO};
 	CODE_TD: trig data
 	CODE_AD: arena data
 	CODE_VD: vehicle data
+	CODE_SD: sound data
 	CODE_LD: level data
 	CODE_EF: end-of-file
 */
-enum {CODE_ID, CODE_EM, CODE_TD, CODE_AD, CODE_VD, CODE_LD, CODE_EF};
+enum {CODE_ID, CODE_EM, CODE_TD, CODE_AD, CODE_VD, CODE_SD, CODE_LD, CODE_EF};
 
 /* Colors */
 enum {CLR16_BLACK, CLR16_WHITE, CLR16_RED, CLR16_CYAN,
@@ -58,6 +59,9 @@ enum {CLR16_BLACK, CLR16_WHITE, CLR16_RED, CLR16_CYAN,
 	CLR16_ORANGE, CLR16_BROWN, CLR16_LIGHTRED, CLR16_DARKGRAY,
 	CLR16_MEDIUMGRAY, CLR16_LIGHTGREEN, CLR16_LIGHTBLUE, CLR16_LIGHTGRAY,
 	CLR16_COUNT};
+
+/* Sounds */
+enum {MSS_FIRING, MSS_EXPLODING, BELL_RINGING, SOUNDS_CNT};
 
 /* Defined in initialize.c, to use for debugging */
 void OutputAsNumber(char prefix, int16_t value);

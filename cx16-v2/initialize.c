@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include "explore.h"
+#include "vera.h"
 
 /* Defines used by InitData */
 
@@ -26,6 +27,10 @@ LEVEL
 
 bool
 	g_exit_program;
+
+uint8_t
+	*g_psg_settings,
+	*g_psg_sounds;
 
 uint16_t
 	g_display_width,
@@ -112,6 +117,14 @@ static void InitData(char *file)
 				GetData(&g_max_vehicle_segments, sizeof(int16_t), ifile);
 				for (t = 0; t < count; ++t)
 					GetData(GetXMAddressInitial(g_vehicle_data[t]), size, ifile);
+				break;
+			case CODE_SD:
+				size = VERA_PSG_BLOCK_SIZE * SOUNDS_CNT * sizeof(uint8_t);
+				g_psg_settings = malloc(size);
+				GetData(g_psg_settings, size, ifile);
+				size = VERA_PSG_VOLUMES * sizeof(uint8_t);
+				g_psg_sounds = malloc(size);
+				GetData(g_psg_sounds, size, ifile);
 				break;
 			case CODE_LD:
 				GetData(&count, sizeof(int16_t), ifile);

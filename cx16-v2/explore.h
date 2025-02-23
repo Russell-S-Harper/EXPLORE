@@ -60,11 +60,6 @@ typedef struct {
 	XM_HANDLE player, missile;
 } LEVEL;
 
-/* Sound effects */
-#define MSS_FIRING		40
-#define MSS_EXPLODING		63
-#define BELL_RINGING		47
-
 /* Callback routine hint */
 enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
 
@@ -121,6 +116,10 @@ extern LEVEL
 
 extern bool
 	g_exit_program;
+
+extern uint8_t
+	*g_psg_settings,
+	*g_psg_sounds;
 
 extern uint16_t
 	g_display_width,

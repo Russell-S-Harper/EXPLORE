@@ -9,6 +9,7 @@
 #include <string.h>
 #include <math.h>
 #include "common.h"
+#include "vera.h"
 
 #define DCPI			3.141592653589793
 
@@ -443,6 +444,18 @@ const char *vehicles0[] = {
 	"                         "
 };
 
+/* Order of the sounds is missile firing, missile exploding, and bell ringing */
+
+const uint8_t waveforms0[] = {VERA_PSG_BUZZ_WAVEFORM, VERA_PSG_NOISE_WAVEFORM, VERA_PSG_CLEAR_WAVEFORM};
+
+const float frequencies0[] = {233.08f /* A♯3 */, 164.81f /* E3 */, 466.16f /* A♯4 */};
+
+const uint8_t envelopes0[] = {
+	32, 48, 42, 36, 24, 18, 12, 6, 3, 2, 1, 0,
+	63, 47, 35, 26, 19, 14, 10, 7, 5, 3, 2, 1, 0,
+	4, 8, 13, 49, 62, 37, 28, 21, 16, 11, 9, 63, 47, 35, 26, 19, 14, 10, 7, 5, 3, 2, 1, 0
+};
+
 #define PER_LEVEL	7
 
 const uint8_t levels0[] = {
@@ -459,6 +472,7 @@ static void OutputStrings(FILE *ofile);
 static void OutputTrigData(FILE *ofile);
 static void OutputArenaData(FILE *ofile);
 static void OutputVehicleData(FILE *ofile);
+static void OutputSoundData(FILE *ofile);
 static void OutputLevelData(FILE *ofile);
 
 static void OutputArena16x16(const char *arena, FILE *ofile);
@@ -499,6 +513,7 @@ int main(void)
 	/* The remaining data */
 	OutputArenaData(ofile);
 	OutputVehicleData(ofile);
+	OutputSoundData(ofile);
 	OutputLevelData(ofile);
 
 	/* Indicate end-of-data */
@@ -986,6 +1001,44 @@ static int CompareVehicleVertices(const void *p, const void *q)
 		result = a->y - b->y;
 
 	return (int)result;
+}
+
+static void OutputSoundData(FILE *ofile) {
+	uint8_t i, j, key, value, initializers[SOUNDS_CNT], sounds[VERA_PSG_VOLUMES];
+	uint16_t psg;
+
+	fputs("Sound Data", stdout);
+	fputc(CODE_SD, ofile);
+	/* Initialize */
+	for (i = 0; i < VERA_PSG_VOLUMES; ++i)
+		sounds[i] = 0;
+	/* Merge the envelopes */
+	for (i = j = 0; i < sizeof(envelopes0) / sizeof(uint8_t) - 1; ++i) {
+		key = envelopes0[i];
+		value = envelopes0[i + 1];
+		if (!i)
+			initializers[j++] = key;
+		if (!key)
+			initializers[j++] = value;
+		else {
+			if (!sounds[key])
+				sounds[key] = value;
+			else if (sounds[key] != value)
+				fputs("\nEnvelope conflict!\n", stdout);
+		}
+	}
+	/* Output the settings */
+	for (i = 0; i < SOUNDS_CNT; ++i) {
+		/* Convert from frequency to PSG value */
+		psg = roundf(frequencies0[i] * 2.68435456f);
+		fwrite(&psg, sizeof(int16_t), 1, ofile);
+		initializers[i] |= VERA_PSG_RL_OUTPUT;
+		fwrite(initializers + i, sizeof(uint8_t), 1, ofile);
+		fwrite(waveforms0 + i, sizeof(uint8_t), 1, ofile);
+	}
+	/* Output the merged envelopes */
+	fwrite(sounds, sizeof(uint8_t), VERA_PSG_VOLUMES, ofile);
+	fputs(" done\n", stdout);
 }
 
 static void OutputLevelData(FILE *ofile)
