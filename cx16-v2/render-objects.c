@@ -24,9 +24,10 @@ static void ClassifyIndicesByVehicleHeight(uint8_t *indices, int16_t count);
 /* Render all the objects */
 void RenderObjects(void)
 {
-	static VERTEX *s_points = NULL;
+	static VERTEX *s_points;
 	static int16_t s_focus_x, s_focus_y, s_health_x, s_health_y;
 	static uint8_t *s_indices;
+	static bool s_initialized;
 	char *xm;
 	uint8_t color;
 	int16_t i, j, count, dx, dy, dz, da, screen_x, screen_y, last_dz, scale;
@@ -36,13 +37,14 @@ void RenderObjects(void)
 	SEGMENT *S;
 	VEHICLE *focus, *vehicle;
 
-	if (!s_points) {
+	if (!s_initialized) {
 		s_points = malloc(sizeof(VERTEX) * (g_max_arena_vertices + 1));
 		s_indices = malloc(sizeof(uint8_t) * VEHICLE_COUNT);
 		s_focus_x = g_display_width >> 1;
 		s_focus_y = 3 * g_display_height >> 2;
 		s_health_x = s_focus_x - (PLAYER_HEALTH >> 1);
 		s_health_y = 7 * g_display_height >> 3;
+		s_initialized = true;
 	}
 
 	/* Get the focus vehicle */
@@ -159,13 +161,15 @@ static uint8_t StatusLineColor(int16_t health)
 static void ClassifyIndicesByVehicleHeight(uint8_t *indices, int16_t count)
 {
 	static uint8_t *s_indices_l, *s_indices_m, *s_indices_h;
+	static bool s_initialized;
 	uint8_t j, t, l, m, h;
 	int16_t i, z, dz;
 
-	if (!s_indices_l) {
+	if (!s_initialized) {
 		s_indices_l = malloc(sizeof(uint8_t) * VEHICLE_COUNT);
 		s_indices_m = malloc(sizeof(uint8_t) * VEHICLE_COUNT);
 		s_indices_h = malloc(sizeof(uint8_t) * VEHICLE_COUNT);
+		s_initialized = true;
 	}
 	l = m = h = 0;
 	z = g_vehicles[g_vehicle_index].z;
