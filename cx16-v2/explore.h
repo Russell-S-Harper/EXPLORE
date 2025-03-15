@@ -93,6 +93,10 @@ void StopSounds(void);
 /* Routine defined in initialize.c and called by InitVehicles and other places */
 bool AdvancePlayer(VEHICLE *player);
 
+/* AI Routines */
+void NPCAI(VEHICLE *player);
+void MissileAI(VEHICLE *missile);
+
 /* Other routines called throughout the program */
 int16_t Minimum(int16_t a, int16_t b);
 int16_t Maximum(int16_t a, int16_t b);

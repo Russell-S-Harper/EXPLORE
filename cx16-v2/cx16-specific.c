@@ -42,6 +42,10 @@
 #define CYCLE_PLAYER		67	/* C: cycle player */
 #define QUIT_PROGRAM		81	/* Q: quit program */
 
+/* To prevent cheating! */
+#define Z_DELTA_LMT		2
+#define A_DELTA_LMT		2
+
 /* Hex digit defines */
 #define HEX_DGT_HI	0xF0
 #define HEX_DGT_LO	0x0F
@@ -206,9 +210,8 @@ static void DefaultCallback(uint8_t waiting)
 {
 	static uint16_t s_frame_counter, s_player_counter = PLAYER_INDEX + 1, s_missile_counter = PLAYER_COUNT;
 	uint8_t b, v;
-	int16_t i, z, delta;
+	int16_t i;
 	uint32_t a;
-	VEHICLE *player, *missile;
 
 	/* Perform tasks dependent on what we're waiting for */
 	switch (waiting) {
@@ -226,18 +229,8 @@ static void DefaultCallback(uint8_t waiting)
 					}
 				}
 			} else {
-				/* Dummy routine for NPCs - TODO add "AI" logic */
-				player = g_vehicles + s_player_counter;
-				if (player->active) {
-					z = g_vehicles[PLAYER_INDEX].z;
-					player->a_delta = 1;
-					if (player->z < z)
-						player->z_delta = 1;
-					else if (player->z > z)
-						player->z_delta = -1;
-					if (!player->loading_cd)
-						player->firing = true;
-				}
+				/* Do some NPC AI */
+				NPCAI(g_vehicles + s_player_counter);
 				if (++s_player_counter >= PLAYER_COUNT)
 					s_player_counter = PLAYER_INDEX + 1;
 			}
@@ -245,22 +238,7 @@ static void DefaultCallback(uint8_t waiting)
 		case SCREEN_TO_FINISH:
 			/* While there's enough time left, do some missile guidance */
 			while (MAXIMUM_SCAN_LINE - CURRENT_SCAN_LINE >= MSS_ALLOWANCE) {
-				missile = g_vehicles + s_missile_counter;
-				if (missile->active && missile->target < PLAYER_COUNT) {
-					player = g_vehicles + missile->target;
-					if (player->active) {
-						delta = SpecialMultiply(player->x - missile->x, missile->cos) - SpecialMultiply(player->y - missile->y, missile->sin);
-						if (delta < -MSS_XY_TOL)
-							missile->a_delta = -missile->mss_delta;
-						else if (delta > MSS_XY_TOL)
-							missile->a_delta = missile->mss_delta;
-						delta = missile->z - player->z;
-						if (delta < -VEHICLE_Z_TOL)
-							missile->z_delta = missile->mss_delta;
-						else if (delta > VEHICLE_Z_TOL)
-							missile->z_delta = -missile->mss_delta;
-					}
-				}
+				MissileAI(g_vehicles + s_missile_counter);
 				if (++s_missile_counter >= VEHICLE_COUNT)
 					s_missile_counter = PLAYER_COUNT;
 			}
@@ -600,6 +578,10 @@ void GetPlayerInput(VEHICLE *player)
 	}
 	/* Save */
 	player->joy = joy;
+
+	/* Keep deltas within limits! */
+	player->z_delta = Minimum(Z_DELTA_LMT, Maximum(-Z_DELTA_LMT, player->z_delta));
+	player->a_delta = Minimum(A_DELTA_LMT, Maximum(-A_DELTA_LMT, player->a_delta));
 }
 
 /* The program insures that the values passed to and returned

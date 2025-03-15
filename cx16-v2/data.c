@@ -16,8 +16,8 @@
 #define ARENA_X_OR_Y(i)		(int16_t)(((i) + 0.5) * 1024.0)
 #define ARENA_HEIGHT(c)		(int16_t)(16384.0 * (0.075 * (c) - 2.225))
 
-#define VEH_X_LIMIT		25
-#define VEH_Y_LIMIT		25
+#define VEH_X_LMT		25
+#define VEH_Y_LMT		25
 #define MAX_VEH_VERTICES	6	/* Maximum V = 15 */
 #define MAX_VEH_SEGMENTS	6	/* Maximum S = V(V - 1)/2 */
 
@@ -585,7 +585,7 @@ static void OutputArenaData(FILE *ofile)
 		if (segments < tmp) segments = tmp;
 	}
 	/* Size of an arena data structure */
-	tmp = ARENA_X_LIMIT * ARENA_Y_LIMIT * sizeof(int16_t) + (vertices + 1) * sizeof(VERTEX) + (segments + 1) * sizeof(SEGMENT);
+	tmp = ARENA_X_LMT * ARENA_Y_LMT * sizeof(int16_t) + (vertices + 1) * sizeof(VERTEX) + (segments + 1) * sizeof(SEGMENT);
 	fwrite(&tmp, sizeof(int16_t), 1, ofile);
 	/* Max number of vertices */
 	fwrite(&vertices, sizeof(int16_t), 1, ofile);
@@ -609,22 +609,22 @@ static void OutputArena16x16(const char *arena, FILE *ofile)
 	int16_t x, y, xt, yt, height;
 
 	if (!s_heights)
-		s_heights = malloc(sizeof(int16_t) * ARENA_X_LIMIT * ARENA_Y_LIMIT);
-	for (y = 0; y < ARENA_Y_LIMIT; ++y) {
-		for (x = 0; x < ARENA_X_LIMIT; ++x) {
+		s_heights = malloc(sizeof(int16_t) * ARENA_X_LMT * ARENA_Y_LMT);
+	for (y = 0; y < ARENA_Y_LMT; ++y) {
+		for (x = 0; x < ARENA_X_LMT; ++x) {
 			focus = ArenaCharacterAt(arena, x, y);
 			if (strchr(arena_vertices0, focus)) {
 				height = ARENA_HEIGHT(focus);
-				s_heights[y * ARENA_X_LIMIT + x] = height;
+				s_heights[y * ARENA_X_LMT + x] = height;
 				for (xt = x + 1; ArenaCharacterAt(arena, xt, y) == '-'; ++xt)
-					s_heights[y * ARENA_X_LIMIT + xt] = height;
+					s_heights[y * ARENA_X_LMT + xt] = height;
 				for (yt = y + 1; ArenaCharacterAt(arena, x, yt) == '|'; ++yt)
-					s_heights[yt * ARENA_X_LIMIT + x] = height;
+					s_heights[yt * ARENA_X_LMT + x] = height;
 			} else if (focus == ' ')
-				s_heights[y * ARENA_X_LIMIT + x] = 0;
+				s_heights[y * ARENA_X_LMT + x] = 0;
 		}
 	}
-	fwrite(s_heights, sizeof(int16_t), ARENA_X_LIMIT * ARENA_Y_LIMIT, ofile);
+	fwrite(s_heights, sizeof(int16_t), ARENA_X_LMT * ARENA_Y_LMT, ofile);
 }
 
 static VERTEX *OutputArenaVertices(const char *arena, int16_t limit, FILE *ofile)
@@ -635,8 +635,8 @@ static VERTEX *OutputArenaVertices(const char *arena, int16_t limit, FILE *ofile
 
 	if (!s_vertices)
 		s_vertices = malloc(sizeof(VERTEX) * limit);
-	for (y = 0, i = 0; y < ARENA_Y_LIMIT; ++y) {
-		for (x = 0; x < ARENA_X_LIMIT; ++x) {
+	for (y = 0, i = 0; y < ARENA_Y_LMT; ++y) {
+		for (x = 0; x < ARENA_X_LMT; ++x) {
 			focus = ArenaCharacterAt(arena, x, y);
 			if (strchr(arena_vertices0, focus)) {
 				s_vertices[i].x = ARENA_X_OR_Y(x);
@@ -675,8 +675,8 @@ static void OutputArenaSegments(const char *arena, VERTEX *vertices, int16_t lim
 	if (!s_segments)
 		s_segments = malloc(sizeof(SEGMENT) * limit);
 	count = CountArenaVertices(arena);
-	for (y = 0, i = 0; y < ARENA_Y_LIMIT; ++y) {
-		for (x = 0; x < ARENA_X_LIMIT; ++x) {
+	for (y = 0, i = 0; y < ARENA_Y_LMT; ++y) {
+		for (x = 0; x < ARENA_X_LMT; ++x) {
 			focus = ArenaCharacterAt(arena, x, y);
 			if (strchr(arena_vertices0, focus)) {
 				v2.x = ARENA_X_OR_Y(x);
@@ -747,8 +747,8 @@ static int CountArenaSegments(const char *arena)
 	char focus, tmp;
 	int16_t x, y, count = 0;
 
-	for (y = 0; y < ARENA_Y_LIMIT; ++y) {
-		for (x = 0; x < ARENA_X_LIMIT; ++x) {
+	for (y = 0; y < ARENA_Y_LMT; ++y) {
+		for (x = 0; x < ARENA_X_LMT; ++x) {
 			focus = ArenaCharacterAt(arena, x, y);
 			if (strchr(arena_vertices0, focus)) {
 				count += 1;
@@ -769,8 +769,8 @@ static char ArenaCharacterAt(const char *arena, int16_t x, int16_t y)
 {
 	char result = ' ';
 
-	if (y >= 0 && y < ARENA_Y_LIMIT && x >= 0 && x < ARENA_X_LIMIT)
-		result = arena[y * ARENA_X_LIMIT + x];
+	if (y >= 0 && y < ARENA_Y_LMT && x >= 0 && x < ARENA_X_LMT)
+		result = arena[y * ARENA_X_LMT + x];
 
 	return result;
 }
@@ -853,8 +853,8 @@ static OFFSET *GetVehicleVertices(const char *vehicle, int16_t limit)
 
 	if (!s_vertices)
 		s_vertices = malloc(sizeof(OFFSET) * limit);
-	for (y = 0, i = 0; y < VEH_Y_LIMIT; ++y) {
-		for (x = 0; x < VEH_X_LIMIT; ++x) {
+	for (y = 0, i = 0; y < VEH_Y_LMT; ++y) {
+		for (x = 0; x < VEH_X_LMT; ++x) {
 			focus = VehicleCharacterAt(vehicle, x, y);
 			if (strchr(vehicle_vertices0, focus)) {
 				s_vertices[i].x = x;
@@ -985,8 +985,8 @@ static char VehicleCharacterAt(const char *vehicle, int16_t x, int16_t y)
 {
 	char result = ' ';
 
-	if (y >= 0 && y < VEH_Y_LIMIT && x >= 0 && x < VEH_X_LIMIT)
-		result = vehicle[y * VEH_X_LIMIT + x];
+	if (y >= 0 && y < VEH_Y_LMT && x >= 0 && x < VEH_X_LMT)
+		result = vehicle[y * VEH_X_LMT + x];
 
 	return result;
 }

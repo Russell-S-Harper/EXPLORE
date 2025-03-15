@@ -14,10 +14,10 @@
 #define SCALE_1_0	4096	/* Equivalent to 1.0 in some contexts */
 #define SHIFT_1_0	12	/* log2(SCALE_1_0) */
 
-/* Arenas are confined to cubes of size 16384 = ARENA_(X|Y|Z)_LIMIT * 1024 */
-#define ARENA_X_LIMIT	16
-#define ARENA_Y_LIMIT	16
-#define ARENA_Z_LIMIT	16
+/* Arenas are confined to cubes of size 16384 = ARENA_(X|Y|Z)_LMT * 1024 */
+#define ARENA_X_LMT	16
+#define ARENA_Y_LMT	16
+#define ARENA_Z_LMT	16
 
 /* Vehicle resolutions when rendering */
 #define VEHICLE_HGTS	8
