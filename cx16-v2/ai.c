@@ -7,9 +7,9 @@ void NPCAI(VEHICLE *player) {
 		z = g_vehicles[PLAYER_INDEX].z;
 		player->a_delta = 1;
 		if (player->z < z)
-			player->z_delta = 1;
+			player->z_delta = player->gear;
 		else if (player->z > z)
-			player->z_delta = -1;
+			player->z_delta = -player->gear;
 		if (!player->loading_cd)
 			player->firing = true;
 	}
