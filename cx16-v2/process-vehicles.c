@@ -230,7 +230,7 @@ void ProcessVehicles(void)
 		}
 	}
 	/* Check if there's a winner */
-	for (i = 0, j = 0, player = NULL; i < PLAYER_COUNT && j <= 1; ++i) {
+	for (i = j = 0, player = NULL; i < PLAYER_COUNT && j <= 1; ++i) {
 		if (g_vehicles[i].active) {
 			player = g_vehicles + i;
 			++j;
