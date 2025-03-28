@@ -70,6 +70,9 @@ void InitProgram(void)
 
 	/* Initialize the players */
 	InitPlayers();
+
+	/* Initialize the AI */
+	InitAI();
 }
 
 static void InitData(char *file)
@@ -212,8 +215,10 @@ bool AdvancePlayer(VEHICLE *player)
 		return false;
 	++player->level;
 	level = g_levels + player->level;
-	if (g_arena_index < level->arena)
+	if (g_arena_index < level->arena) {
 		g_arena_index = level->arena;
+		ReportToAI(player, AIE_NEW_ARENA, g_arena_index);
+	}
 	player->health = PLAYER_HEALTH;
 	player->appearance[APP_PRM] = level->player;
 	player->appearance[APP_MSS] = level->missile;

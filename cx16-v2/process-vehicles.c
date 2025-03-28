@@ -102,6 +102,9 @@ void ProcessVehicles(void)
 			player->y = y;
 		else if (z >= arena[ARENA_INDEX(x, player->y)])
 			player->x = x;
+		else
+			/* Stuck! */
+			ReportToAI(player, AIE_STUCK_PLAYER, arena[ARENA_INDEX(x, y)]);
 
 		/* Finalize Z */
 		if (z >= arena[ARENA_INDEX(player->x, player->y)])
@@ -138,7 +141,7 @@ void ProcessVehicles(void)
 		if (!missile->active)
 			continue;
 
-		/* Explode if a wall was created underneath */
+		/* Explode if a wall was created above */
 		z = arena[ARENA_INDEX(missile->x, missile->y)];
 		if (missile->z < z)
 			missile->exploding = true;
@@ -185,9 +188,12 @@ void ProcessVehicles(void)
 				missile->y = y;
 		else if (z >= arena[ARENA_INDEX(x, missile->y)])
 				missile->x = x;
-		/* Still can't move? Explode! */
-		else
+		/* Still can't move? Explode and report stuck! */
+		else {
 			missile->exploding = true;
+			ReportToAI(g_vehicles + missile->identifier, AIE_STUCK_MISSILE, arena[ARENA_INDEX(x, y)]);
+		}
+
 		/* Finalize Z */
 		if (z >= arena[ARENA_INDEX(missile->x, missile->y)])
 			missile->z = z;
@@ -201,11 +207,15 @@ void ProcessVehicles(void)
 					missile->exploding = true;
 					player->health -= missile->damage;
 					player->hit_cd = MSS_HIT;
+					ReportToAI(player, AIE_DAMAGED_PLAYER, missile->identifier);
 					if (player->health <= 0) {
 						if (!AdvancePlayer(g_vehicles + missile->identifier))
 							g_vehicles[missile->identifier].health = PLAYER_HEALTH;
-						if (!AdvancePlayer(player))
+						if (!AdvancePlayer(player)) {
 							player->active = false;
+							ReportToAI(player, AIE_ELIMINATED_PLAYER, missile->identifier);
+						} else
+							ReportToAI(player, AIE_ADVANCED_PLAYER, missile->identifier);
 						AddSound(BELL_RINGING);
 					}
 				}
@@ -219,4 +229,13 @@ void ProcessVehicles(void)
 			AddSound(MSS_EXPLODING);
 		}
 	}
+	/* Check if there's a winner */
+	for (i = 0, j = 0, player = NULL; i < PLAYER_COUNT && j <= 1; ++i) {
+		if (g_vehicles[i].active) {
+			player = g_vehicles + i;
+			++j;
+		}
+	}
+	if (j == 1)
+		ReportToAI(player, AIE_WINNING_PLAYER, 0);
 }

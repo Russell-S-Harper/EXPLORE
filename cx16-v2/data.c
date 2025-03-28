@@ -32,7 +32,8 @@ const char *strings0[] = {
 	/*ERR_XM*/ "\nA banked memory request larger than 8K\nwas requested.\n",
 	/*ERR_GI*/ "\nThere is a problem involving graphics\ninitialization.\n",
 	/*ERR_OB*/ "\nThere was an attempt to access an array\nout of bounds.\n",
-	/*ERR_DC*/ "\nThe display configuration has been\ncorrupted.\n"
+	/*ERR_DC*/ "\nThe display configuration has been\ncorrupted.\n",
+	/*ERR_AI*/ "\nThere is a problem with the AI file.\n"
 };
 
 /*

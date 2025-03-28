@@ -71,7 +71,7 @@ void ProcessVehicles(void);		/* Defined in process-vehicles.c */
 void RenderObjects(void);		/* Defined in render-objects.c */
 void UpdateDisplay(void);		/* Defined in cx16-specific.c */
 
-/* Routines defined in cx16-specific.c and called by InitProgram */
+/* Routine defined in cx16-specific.c and called by InitProgram */
 void InitSpecific(void);
 
 /* Math routines defined in cx16-specific.c and called throughout the program */
@@ -93,9 +93,21 @@ void StopSounds(void);
 /* Routine defined in initialize.c and called by InitVehicles and other places */
 bool AdvancePlayer(VEHICLE *player);
 
-/* AI Routines */
+/* AI */
+typedef enum {
+	AIE_NEW_ARENA,
+	AIE_STUCK_PLAYER,
+	AIE_STUCK_MISSILE,
+	AIE_DAMAGED_PLAYER,
+	AIE_ADVANCED_PLAYER,
+	AIE_ELIMINATED_PLAYER,
+	AIE_WINNING_PLAYER
+} AI_EVENT;
+
+void InitAI(void);
 void NPCAI(VEHICLE *player);
 void MissileAI(VEHICLE *missile);
+void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra);
 
 /* Other routines called throughout the program */
 int16_t Minimum(int16_t a, int16_t b);

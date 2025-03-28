@@ -114,14 +114,16 @@ void InitSpecific(void)
 void UpdateDisplay(void)
 {
 	static clock_t s_frame_clock, s_clocks_per_frame;
-	uint8_t base, address, i, j;
+	static bool s_initialized;
 	clock_t current_clock;
+	uint8_t base, address, i, j;
 	register volatile uint8_t *p;
 
 	/* Wait for the end of the frame based on clock cycles */
-	if (!s_frame_clock) {
+	if (!s_initialized) {
 		s_frame_clock = clock();
 		s_clocks_per_frame = CLOCKS_PER_SEC / (f_use_workaround? FRAMES_PER_SEC_LO: FRAMES_PER_SEC_HI);
+		s_initialized = true;
 	} else {
 		do {
 			/* While waiting for the end of the frame, do some work */
@@ -556,12 +558,12 @@ void GetPlayerInput(VEHICLE *player)
 
 	/* Process joystick input - JOY_2 is the first physical joystick */
 	if (joy = joy_read(JOY_2)) {
-		if (JOY_UP(joy)) {		/* Joystick forward */
+		if (JOY_UP(joy)) {		/* Joystick forward - dive or gear up */
 			if (player->airborne)
 				player->z_delta -= JOY_UP(player->joy)? 2: 1;
 			else
 				player->gear += 1;
-		} else if (JOY_DOWN(joy)) {	/* Joystick back */
+		} else if (JOY_DOWN(joy)) {	/* Joystick back - climb or gear down */
 			if (player->airborne)
 				player->z_delta += JOY_DOWN(player->joy)? 2: 1;
 			else
@@ -579,9 +581,9 @@ void GetPlayerInput(VEHICLE *player)
 	/* Save */
 	player->joy = joy;
 
-	/* Keep deltas within limits! */
-	player->z_delta = Minimum(Z_DELTA_LMT, Maximum(-Z_DELTA_LMT, player->z_delta));
-	player->a_delta = Minimum(A_DELTA_LMT, Maximum(-A_DELTA_LMT, player->a_delta));
+	/* Keep player deltas within limits! */
+	player->z_delta = Minimum(Maximum(player->z_delta, -Z_DELTA_LMT), Z_DELTA_LMT);
+	player->a_delta = Minimum(Maximum(player->a_delta, -A_DELTA_LMT), A_DELTA_LMT);
 }
 
 /* The program insures that the values passed to and returned

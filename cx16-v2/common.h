@@ -36,9 +36,10 @@ typedef struct {int8_t x, y;} OFFSET;
 	ERR_GI: graphics initialization error
 	ERR_OB: accessing array out-of-bounds error
 	ERR_DC: display configuration has been corrupted
+	ERR_AI: AI file access read or write error
 	ERR_NO: no error, also used to provide a count of errors
 */
-enum {ERR_FO, ERR_FC, ERR_XM, ERR_GI, ERR_OB, ERR_DC, ERR_NO};
+enum {ERR_FO, ERR_FC, ERR_XM, ERR_GI, ERR_OB, ERR_DC, ERR_AI, ERR_NO};
 
 /* Program data sections
 
