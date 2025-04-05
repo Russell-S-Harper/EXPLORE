@@ -208,6 +208,9 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 		case AIE_NEW_ARENA:
 			/* extra = arena index */
 			break;
+		case AIE_SWITCHED_FOCUS:
+			/* extra = not used */
+			break;
 		case AIE_STUCK_PLAYER:
 			/* extra = wall height */
 			if (!player) OutputAsNumber('W', extra);

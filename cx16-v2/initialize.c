@@ -17,6 +17,7 @@ XM_HANDLE
 	g_arena_data,
 	g_exploding_prm,
 	g_exploding_aux,
+	g_human_badge_aux,
 	*g_vehicle_data;
 
 VEHICLE
@@ -116,6 +117,7 @@ static void InitData(char *file)
 					g_vehicle_data[t] = AllocXM(1, size);
 				g_exploding_prm = g_vehicle_data[count - EXP_APP_PRM_OFFSET];
 				g_exploding_aux = g_vehicle_data[count - EXP_APP_AUX_OFFSET];
+				g_human_badge_aux = g_vehicle_data[count - HMN_BDG_AUX_OFFSET];
 				GetData(&g_max_vehicle_vertices, sizeof(int16_t), ifile);
 				GetData(&g_max_vehicle_segments, sizeof(int16_t), ifile);
 				for (t = 0; t < count; ++t)
@@ -191,7 +193,8 @@ static void InitPlayers(void)
 		/* Starting as active */
 		player->active = true;
 		/* Default to player as the target, except for the player */
-		player->target = i? PLAYER_INDEX: PLAYER_COUNT;
+		player->target = (i == PLAYER_INDEX)? PLAYER_COUNT: PLAYER_INDEX;
+		if (i == PLAYER_INDEX) player->appearance[APP_AUX] = g_human_badge_aux;
 		/* Initialize direction and position */
 		player->angle = (i << (SHIFT_FC - 2)) + (SCALE_FC / 8);
 		player->sin = Sin(player->angle);

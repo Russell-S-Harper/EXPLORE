@@ -20,7 +20,7 @@
 /* How many participants */
 #define VEHICLE_COUNT		24
 #define PLAYER_COUNT		4
-#define PLAYER_INDEX		0	/* Human */
+#define PLAYER_INDEX		0	/* The human, if playing */
 
 /* Initial player health */
 #define PLAYER_HEALTH		60
@@ -37,9 +37,10 @@
 #define MSS_LIVE		30
 #define MSS_HIT			3
 
-/* Explosions are last two "vehicles" */
-#define EXP_APP_PRM_OFFSET	2
-#define EXP_APP_AUX_OFFSET	1
+/* Explosions and badges are last three "vehicles" */
+#define EXP_APP_PRM_OFFSET	3
+#define EXP_APP_AUX_OFFSET	2
+#define HMN_BDG_AUX_OFFSET	1
 
 /* Appearance */
 enum {APP_PRM, APP_AUX, APP_MSS, APP_CNT};
@@ -96,6 +97,7 @@ bool AdvancePlayer(VEHICLE *player);
 /* AI */
 typedef enum {
 	AIE_NEW_ARENA,
+	AIE_SWITCHED_FOCUS,
 	AIE_STUCK_PLAYER,
 	AIE_STUCK_MISSILE,
 	AIE_DAMAGED_PLAYER,
@@ -122,6 +124,7 @@ extern XM_HANDLE
 	g_arena_data,
 	g_exploding_prm,
 	g_exploding_aux,
+	g_human_badge_aux,
 	*g_vehicle_data;
 
 extern VEHICLE

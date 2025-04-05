@@ -442,6 +442,32 @@ const char *vehicles0[] = {
 	"                         "
 	"                         "
 	"                         "
+	"                         ",
+	/* v11-human-badge */
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"            @            "
+	"           +++           "
+	"          ++ ++          "
+	"         ++   ++         "
+	"        @+++++++@        "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
+	"                         "
 	"                         "
 };
 
@@ -799,9 +825,11 @@ static int CompareArenaVertices(const void *p, const void *q)
 
 static void OutputVehicleData(FILE *ofile)
 {
+	/* Literal constants so that we don't have to link in the entire stdio library! */
 	static const char *s_ordinals[] = {
-		"\n  1 ", "\n  2 ", "\n  3 ", "\n  4 ", "\n  5 ", "\n  6 ",
-		"\n  7 ", "\n  8 ", "\n  9 ", "\n 10 ", "\n 11 ", "\n 12 "
+		"\n  1 ", "\n  2 ", "\n  3 ", "\n  4 ", "\n  5 ",
+		"\n  6 ", "\n  7 ", "\n  8 ", "\n  9 ", "\n 10 ",
+		"\n 11 ", "\n 12 ", "\n 13 ", "\n 14 ", "\n 15 "
 	};
 	int16_t t, tmp, vertices, segments;
 	OFFSET *V;
@@ -1024,8 +1052,10 @@ static void OutputSoundData(FILE *ofile) {
 		else {
 			if (!volumes[key])
 				volumes[key] = value;
-			else if (volumes[key] != value)
-				fputs("\nEnvelope conflict!\n", stdout);
+			else if (volumes[key] != value) {
+				fputs("\nEnvelope conflict!\n", stderr);
+				exit(EXIT_FAILURE);
+			}
 		}
 	}
 	/* Output the settings */

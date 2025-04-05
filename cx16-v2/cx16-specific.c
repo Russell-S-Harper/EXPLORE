@@ -544,6 +544,7 @@ void GetPlayerInput(VEHICLE *player)
 					j = (g_vehicle_index + i) % PLAYER_COUNT;
 					if (g_vehicles[j].active) {
 						g_vehicle_index = j;
+						ReportToAI(g_vehicles + j, AIE_SWITCHED_FOCUS, 0);
 						break;
 					}
 				}
