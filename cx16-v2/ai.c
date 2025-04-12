@@ -27,11 +27,11 @@
 
 #define AI_K10	-54	/* Initial score */
 
-#define AI_K13	-5	/* What to change stuck_cd when the player is stuck */
-#define AI_K14	-1	/* What to change stuck_cd when a missile is stuck */
-#define AI_K15	-11	/* What to change score when player is advanced when health goes to zero */
-#define AI_K16	9	/* What to change score when attacker is advanced */
-#define AI_K17	13	/* What to change score when attacker eliminates another player */
+#define AI_K13	-5	/* What to change stuck_cd by when the player is stuck */
+#define AI_K14	-1	/* What to change stuck_cd by when a missile is stuck */
+#define AI_K15	-11	/* What to change score by when player is advanced when health goes to zero */
+#define AI_K16	9	/* What to change score by when attacker is advanced */
+#define AI_K17	13	/* What to change score by when attacker eliminates another player */
 
 #define AI_K20	4	/* How much to shift randomizer when adding to escape or evade */
 #define AI_K18	24	/* What to set action_cd when mourning */
@@ -137,7 +137,7 @@ static int8_t AddRandomValue(uint8_t modulus, int8_t current, int8_t minimum, in
 	/* Random bit for the sign */
 	s_bit <<= 1;
 	if (!s_bit)
-		s_bit = 0x01;
+		++s_bit;
 
 	/* Get signed byte */
 	delta = GetRandomByte(modulus);
