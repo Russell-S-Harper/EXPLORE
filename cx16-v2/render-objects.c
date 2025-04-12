@@ -16,10 +16,10 @@
 
 /* Color based on delta-z or health */
 static uint8_t DeltaZColor(int16_t dz);
-static uint8_t StatusLineColor(int16_t health);
+static uint8_t StatusLineColor(int8_t health);
 
 /* Classify by below, targetable, and above */
-static void ClassifyIndicesByVehicleHeight(uint8_t *indices, int16_t count);
+static void ClassifyIndicesByVehicleHeight(uint8_t *indices, uint8_t count);
 
 /* Render all the objects */
 void RenderObjects(void)
@@ -28,14 +28,13 @@ void RenderObjects(void)
 	static int16_t s_focus_x, s_focus_y, s_health_x, s_health_y;
 	static uint8_t *s_indices;
 	static bool s_initialized;
-	char *xm;
-	uint8_t color;
-	int16_t i, j, count, dx, dy, dz, da, screen_x, screen_y, last_dz, scale;
-	VERTEX *P, *p1, *p2;
-	OFFSET *O, *o1, *o2;
-	VERTEX *V;
-	SEGMENT *S;
 	VEHICLE *focus, *vehicle;
+	SEGMENT *S;
+	VERTEX *V, *P, *p1, *p2;
+	OFFSET *O, *o1, *o2;
+	int16_t dx, dy, dz, da, screen_x, screen_y, last_dz, scale;
+	uint8_t i, j, count, color;
+	char *xm;
 
 	if (!s_initialized) {
 		s_points = malloc(sizeof(VERTEX) * (g_max_arena_vertices + 1));
@@ -148,7 +147,7 @@ static uint8_t DeltaZColor(int16_t dz)
 		return CLR16_WHITE;
 }
 
-static uint8_t StatusLineColor(int16_t health)
+static uint8_t StatusLineColor(int8_t health)
 {
 	if (health < PLAYER_HEALTH >> 2)
 		return CLR16_RED;
@@ -158,12 +157,12 @@ static uint8_t StatusLineColor(int16_t health)
 		return CLR16_GREEN;
 }
 
-static void ClassifyIndicesByVehicleHeight(uint8_t *indices, int16_t count)
+static void ClassifyIndicesByVehicleHeight(uint8_t *indices, uint8_t count)
 {
 	static uint8_t *s_indices_l, *s_indices_m, *s_indices_h;
 	static bool s_initialized;
-	uint8_t j, t, l, m, h;
-	int16_t i, z, dz;
+	uint8_t i, j, t, l, m, h;
+	int16_t z, dz;
 
 	if (!s_initialized) {
 		s_indices_l = malloc(sizeof(uint8_t) * VEHICLE_COUNT);

@@ -112,8 +112,10 @@ void MissileAI(VEHICLE *missile);
 void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra);
 
 /* Other routines called throughout the program */
-int16_t Minimum(int16_t a, int16_t b);
-int16_t Maximum(int16_t a, int16_t b);
+int16_t Min16(int16_t a, int16_t b);
+int16_t Max16(int16_t a, int16_t b);
+int8_t Min8(int8_t a, int8_t b);
+int8_t Max8(int8_t a, int8_t b);
 int16_t Sin(int16_t angle);
 int16_t Cos(int16_t angle);
 

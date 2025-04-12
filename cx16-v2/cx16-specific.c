@@ -30,7 +30,7 @@
 	31 - 60        | 60
 */
 #define FRAMES_PER_SEC_LO	4	/* If HW VERA FX Line Helper 4bpp workaround is required */
-#define FRAMES_PER_SEC_HI	7	/* No restrictions */
+#define FRAMES_PER_SEC_HI	6	/* No restrictions */
 
 /* Keyboard defines used in GetPlayerInput */
 #define PAUSE_PROGRAM		27	/* escape: pause/unpause program */
@@ -200,7 +200,7 @@ void AddSound(uint8_t type) {
 
 void StopSounds(void)
 {
-	int16_t i;
+	uint8_t i;
 	uint32_t a;
 
 	for (i = 0, a = VERA_PSG_BASE + VERA_PSG_RLV_OFFSET; i < VERA_PSG_VOICES; ++i, a += VERA_PSG_BLOCK_SIZE)
@@ -210,10 +210,10 @@ void StopSounds(void)
 /* Default callback to do useful work while waiting */
 static void DefaultCallback(uint8_t waiting)
 {
-	static uint16_t s_frame_counter, s_player_counter = PLAYER_INDEX + 1, s_missile_counter = PLAYER_COUNT;
-	uint8_t b, v;
-	int16_t i;
+	static uint16_t s_frame_counter;
+	static uint8_t s_player_counter = PLAYER_INDEX + 1, s_missile_counter = PLAYER_COUNT;
 	uint32_t a;
+	uint8_t i, b, v;
 
 	/* Perform tasks dependent on what we're waiting for */
 	switch (waiting) {
@@ -287,10 +287,10 @@ static void DrawLine16(void)
 	y2 = f_y_to_point;
 
 	/* Will need these */
-	ymax = Maximum(y1, y2);
-	ymin = Minimum(y1, y2);
-	xmax = Maximum(x1, x2);
-	xmin = Minimum(x1, x2);
+	ymax = Max16(y1, y2);
+	ymin = Min16(y1, y2);
+	xmax = Max16(x1, x2);
+	xmin = Min16(x1, x2);
 
 	/* Check if clipping is required */
 	if (ymax > (VERA_VERT_RES - 1) || ymin < 0 || xmax > (VERA_HORZ_RES - 1) || xmin < 0) {
@@ -298,7 +298,7 @@ static void DrawLine16(void)
 		if (ymax < 0 || ymin > (VERA_VERT_RES - 1) || xmax < 0 || xmin > (VERA_HORZ_RES - 1))
 			return;
 		/* Coordinates can change, so discarding xmin, xmax, ymin, and ymax */
-		if (Maximum(y1, y2) > (VERA_VERT_RES - 1) && y2 != y1) {
+		if (Max16(y1, y2) > (VERA_VERT_RES - 1) && y2 != y1) {
 			xt = MultiplyThenDivide((VERA_VERT_RES - 1) - y1, x2 - x1, y2 - y1) + x1;
 			if (y2 > y1) {
 				y2 = VERA_VERT_RES - 1;
@@ -308,7 +308,7 @@ static void DrawLine16(void)
 				x1 = xt;
 			}
 		}
-		if (Minimum(y1, y2) < 0 && y2 != y1) {
+		if (Min16(y1, y2) < 0 && y2 != y1) {
 			xt = MultiplyThenDivide(-y1, x2 - x1, y2 - y1) + x1;
 			if (y2 < y1) {
 				y2 = 0;
@@ -318,7 +318,7 @@ static void DrawLine16(void)
 				x1 = xt;
 			}
 		}
-		if (Maximum(x1, x2) > (VERA_HORZ_RES - 1) && x2 != x1) {
+		if (Max16(x1, x2) > (VERA_HORZ_RES - 1) && x2 != x1) {
 			yt = MultiplyThenDivide((VERA_HORZ_RES - 1) - x1, y2 - y1, x2 - x1) + y1;
 			if (x2 > x1) {
 				x2 = VERA_HORZ_RES - 1;
@@ -328,7 +328,7 @@ static void DrawLine16(void)
 				y1 = yt;
 			}
 		}
-		if (Minimum(x1, x2) < 0 && x2 != x1) {
+		if (Min16(x1, x2) < 0 && x2 != x1) {
 			yt = MultiplyThenDivide(-x1, y2 - y1, x2 - x1) + y1;
 			if (x2 < x1) {
 				x2 = 0;
@@ -354,9 +354,6 @@ static void DrawLine16(void)
 		y2 = yt;
 	}
 
-	/* Flag to indicate if HW VERA FX Line Helper 4bpp workaround is required */
-	use_workaround = false;
-
 	/* Will need these */
 	dx = x2 - x1;
 	dy = y2 - y1;
@@ -373,6 +370,7 @@ static void DrawLine16(void)
 		d0 = VERA_ADV_BY_160 | (dy < 0? VERA_DECR: VERA_INCR);
 		d1 = VERA_ADV_BY_0_5 | (dx < 0? VERA_DECR: VERA_INCR);
 		i = abs(dx) + 1;
+		use_workaround = false;
 	}
 
 	if (use_workaround) {
@@ -492,9 +490,13 @@ void ErasePoint16(int16_t x, int16_t y)
 
 /* Convenience functions usually implemented as macros, but using functions to avoid side effects! */
 
-int16_t Minimum(int16_t a, int16_t b) { return a < b? a: b; }
+int16_t Min16(int16_t a, int16_t b) { return a < b? a: b; }
 
-int16_t Maximum(int16_t a, int16_t b) { return a > b? a: b; }
+int16_t Max16(int16_t a, int16_t b) { return a > b? a: b; }
+
+int8_t Min8(int8_t a, int8_t b) { return a < b? a: b; }
+
+int8_t Max8(int8_t a, int8_t b) { return a > b? a: b; }
 
 /* Processes keyboard and joystick input */
 void GetPlayerInput(VEHICLE *player)
@@ -583,8 +585,8 @@ void GetPlayerInput(VEHICLE *player)
 	player->joy = joy;
 
 	/* Keep player deltas within limits! */
-	player->z_delta = Minimum(Maximum(player->z_delta, -Z_DELTA_LMT), Z_DELTA_LMT);
-	player->a_delta = Minimum(Maximum(player->a_delta, -A_DELTA_LMT), A_DELTA_LMT);
+	player->z_delta = Min8(Max8(player->z_delta, -Z_DELTA_LMT), Z_DELTA_LMT);
+	player->a_delta = Min8(Max8(player->a_delta, -A_DELTA_LMT), A_DELTA_LMT);
 }
 
 /* The program insures that the values passed to and returned

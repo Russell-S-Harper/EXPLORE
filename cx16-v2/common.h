@@ -25,7 +25,7 @@
 
 /* Common structures */
 typedef struct {int16_t x, y, z;} VERTEX;
-typedef struct {int16_t index_from, index_to;} SEGMENT;
+typedef struct {int8_t index_from, index_to;} SEGMENT;
 typedef struct {int8_t x, y;} OFFSET;
 
 /* Errors
@@ -68,6 +68,6 @@ enum {MSS_FIRING, MSS_EXPLODING, BELL_RINGING, SOUNDS_CNT};
 void OutputAsNumber(char prefix, int16_t value);
 
 /* Defined in initialize.c, ExitProgram is called throughout the program as well as by main */
-void ExitProgram(int16_t status);
+void ExitProgram(uint8_t status);
 
 #endif /* _COMMON_H */

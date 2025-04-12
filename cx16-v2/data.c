@@ -805,7 +805,6 @@ static char ArenaCharacterAt(const char *arena, int16_t x, int16_t y)
 static int16_t IndexOfArenaVertex(VERTEX *vertices, VERTEX *vertex, int16_t count)
 {
 	VERTEX *v = bsearch(vertex, vertices, count, sizeof(VERTEX), CompareArenaVertices);
-
 	return v? (int16_t)(v - vertices): -1;
 }
 

@@ -270,7 +270,7 @@ void OutputAsNumber(char prefix, int16_t value)
 	fputc('\n', stdout);
 }
 
-void ExitProgram(int16_t stat)
+void ExitProgram(uint8_t stat)
 {
 	StopSounds();
 	if (stat != ERR_NO) {

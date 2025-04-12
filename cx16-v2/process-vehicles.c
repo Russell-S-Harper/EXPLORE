@@ -25,7 +25,8 @@ void ProcessVehicles(void)
 {
 	VEHICLE *player, *missile;
 	int8_t shift;
-	int16_t *arena, i, j, x, y, z, dx, dy;
+	uint8_t i, j;
+	int16_t *arena, x, y, z, dx, dy;
 
 	/* Will need this */
 	arena = GetXMAddress(g_arena_data, g_arena_index);
@@ -65,7 +66,7 @@ void ProcessVehicles(void)
 			x += player->sin >> shift;
 			y += player->cos >> shift;
 		} else {
-			player->gear = Minimum(Maximum(player->gear, MIN_GEAR), MAX_GEAR);
+			player->gear = Min16(Max16(player->gear, MIN_GEAR), MAX_GEAR);
 			switch (player->gear) {
 				case MIN_GEAR:
 					x -= player->sin >> XY_GND_DELTA_SHIFT;
@@ -82,13 +83,13 @@ void ProcessVehicles(void)
 			}
 		}
 		/* Keep in bounds */
-		x = Minimum(Maximum(x, MIN_XYZ), MAX_XYZ);
-		y = Minimum(Maximum(y, MIN_XYZ), MAX_XYZ);
+		x = Min16(Max16(x, MIN_XYZ), MAX_XYZ);
+		y = Min16(Max16(y, MIN_XYZ), MAX_XYZ);
 
 		/* Process Z movement */
 		if (player->z_delta) {
 			z += player->z_delta << Z_DELTA_SHIFT;
-			z = Minimum(Maximum(z, MIN_XYZ), MAX_XYZ);
+			z = Min16(Max16(z, MIN_XYZ), MAX_XYZ);
 			player->z_delta = 0;
 		}
 
@@ -117,6 +118,7 @@ void ProcessVehicles(void)
 					/* Set up the missile as a clone of the player */
 					memcpy(missile, player, sizeof(VEHICLE));
 					missile->appearance[APP_PRM] = player->appearance[APP_MSS];
+					missile->appearance[APP_AUX] = 0;
 					missile->hit_cd = 0;
 					AddSound(MSS_FIRING);
 					break;
@@ -168,13 +170,13 @@ void ProcessVehicles(void)
 		y += missile->cos >> XY_MISSILE_DELTA_SHIFT;
 
 		/* Keep in bounds */
-		x = Minimum(Maximum(x, MIN_XYZ), MAX_XYZ);
-		y = Minimum(Maximum(y, MIN_XYZ), MAX_XYZ);
+		x = Min16(Max16(x, MIN_XYZ), MAX_XYZ);
+		y = Min16(Max16(y, MIN_XYZ), MAX_XYZ);
 
 		/* Process Z movement */
 		if (missile->z_delta) {
 			z += missile->z_delta << Z_DELTA_SHIFT;
-			z = Minimum(Maximum(z, MIN_XYZ), MAX_XYZ);
+			z = Min16(Max16(z, MIN_XYZ), MAX_XYZ);
 			missile->z_delta = 0;
 		}
 
