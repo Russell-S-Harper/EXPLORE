@@ -312,7 +312,7 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 		case AIE_STUCK_MISSILE:
 			/* extra = wall height */
 			if (extra < MAX_XYZ) {
-				/* Only difference between STUCK PLAYER and STUCK MISSILE is how much stuck_cd is adusted */
+				/* Only difference between STUCK PLAYER and STUCK MISSILE is how much stuck_cd is adjusted */
 				x->stuck_cd += (event == AIE_STUCK_PLAYER)? AI_K13: AI_K14;
 				if (x->stuck_cd <= 0) {
 					/* Need to escape stuck situation! */
