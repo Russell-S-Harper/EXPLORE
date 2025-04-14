@@ -41,9 +41,11 @@
 #define AI_K22	-2	/* Offset when setting a_action */
 #define AI_K23	3	/* Modulus when setting z_action for escape status */
 #define AI_K24	0	/* Offset when setting z_action for escape status */
-#define AI_K25	5	/* Modulus when setting z_action for non-escape statuses */
-#define AI_K26	-2	/* Offset when setting z_action for non-escape statuses */
-#define AI_K27	3	/* Modulus when setting g_action */
+#define AI_K29	3	/* Modulus when setting z_action for evade status */
+#define AI_K30	-2	/* Offset when setting z_action for evade status */
+#define AI_K25	5	/* Modulus when setting z_action for celebration statuses */
+#define AI_K26	-2	/* Offset when setting z_action for celebration statuses */
+#define AI_K27	4	/* Modulus when setting g_action */
 #define AI_K28	-1	/* Offset when setting g_action */
 
 enum {AIS_READY, AIS_PURSUE, AIS_ESCAPE, AIS_EVADE, AIS_MOURN, AIS_CELEBRATE};
@@ -383,6 +385,16 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 
 static void SetAZGActions(AI_CURRENT_STATE *x) {
 	x->a_action = GetRandomByte(AI_K21) + AI_K22;
-	x->z_action = (x->status == AIS_ESCAPE)? GetRandomByte(AI_K23) + AI_K24: GetRandomByte(AI_K25) + AI_K26;
+	switch (x->status) {
+		case AIS_ESCAPE:
+			x->z_action = GetRandomByte(AI_K23) + AI_K24;
+			break;
+		case AIS_EVADE:
+			x->z_action = GetRandomByte(AI_K29) + AI_K30;
+			break;
+		case AIS_CELEBRATE:
+			x->z_action = GetRandomByte(AI_K25) + AI_K26;
+			break;
+	}
 	x->g_action = GetRandomByte(AI_K27) + AI_K28;
 }
