@@ -32,10 +32,10 @@ void ProcessVehicles(void)
 	arena = GetXMAddress(g_arena_data, g_arena_index);
 
 	/* Process each player */
-	for (i = 0, player = g_vehicles; i < PLAYER_COUNT; ++i, ++player) {
+	for (i = PLAYER_INDEX, player = g_vehicles + PLAYER_INDEX; i < PLAYER_LIMIT; ++i, ++player) {
 
-		/* Get player input even if inactive, NPCs will get inputs during idle times */
-		if (i == PLAYER_INDEX)
+		/* Get player input regardless, NPCs will get inputs during idle times */
+		if (i == HUMAN_ID)
 			GetPlayerInput(player);
 
 		/* Ignore if not active */
@@ -89,7 +89,13 @@ void ProcessVehicles(void)
 		/* Process Z movement */
 		if (player->z_delta) {
 			z += player->z_delta << Z_DELTA_SHIFT;
-			z = Min16(Max16(z, MIN_XYZ), MAX_XYZ);
+			if (z < MIN_XYZ) {
+				z = MIN_XYZ;
+				ReportToAI(player, AIE_REACHED_TOP, 0);
+			} else if (z > MAX_XYZ) {
+				z = MAX_XYZ;
+				ReportToAI(player, AIE_REACHED_BOTTOM, 0);
+			}
 			player->z_delta = 0;
 		}
 
@@ -113,7 +119,7 @@ void ProcessVehicles(void)
 
 		/* Add any missiles */
 		if (player->firing) {
-			for (j = PLAYER_COUNT, missile = g_vehicles + PLAYER_COUNT; j < VEHICLE_COUNT; ++j, ++missile) {
+			for (j = MISSILE_INDEX, missile = g_vehicles + MISSILE_INDEX; j < MISSILE_LIMIT; ++j, ++missile) {
 				if (!missile->active) {
 					/* Set up the missile as a clone of the player */
 					memcpy(missile, player, sizeof(VEHICLE));
@@ -134,7 +140,7 @@ void ProcessVehicles(void)
 			--player->hit_cd;
 	}
 	/* Process each missile */
-	for (missile = g_vehicles + i; i < VEHICLE_COUNT; ++i, ++missile) {
+	for (i = MISSILE_INDEX, missile = g_vehicles + MISSILE_INDEX; i < MISSILE_LIMIT; ++i, ++missile) {
 		/* Deactivate if exploded */
 		if (missile->exploding)
 			missile->active = false;
@@ -201,7 +207,7 @@ void ProcessVehicles(void)
 			missile->z = z;
 
 		/* Check for player collisions */
-		for (j = 0, player = g_vehicles; j < PLAYER_COUNT; ++j, ++player) {
+		for (j = PLAYER_INDEX, player = g_vehicles + PLAYER_INDEX; j < PLAYER_LIMIT; ++j, ++player) {
 			if (missile->identifier != player->identifier && player->active && abs(missile->z - player->z) <= VEHICLE_Z_TOL) {
 				dx = abs(missile->x - player->x) >> XY_COLLISION_SHIFT;
 				dy = abs(missile->y - player->y) >> XY_COLLISION_SHIFT;
@@ -232,7 +238,7 @@ void ProcessVehicles(void)
 		}
 	}
 	/* Check if there's a winner */
-	for (i = j = 0, player = NULL; i < PLAYER_COUNT && j <= 1; ++i) {
+	for (i = j = PLAYER_INDEX, player = NULL; i < PLAYER_LIMIT && j <= 1; ++i) {
 		if (g_vehicles[i].active) {
 			player = g_vehicles + i;
 			++j;

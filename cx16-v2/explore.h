@@ -18,9 +18,18 @@
 #define MIN_XYZ			0
 
 /* How many participants */
-#define VEHICLE_COUNT		24
 #define PLAYER_COUNT		4
-#define PLAYER_INDEX		0	/* The human, if playing */
+#define MISSILE_COUNT		20
+#define VEHICLE_COUNT		(PLAYER_COUNT + MISSILE_COUNT)
+
+/* Indices and limits */
+#define PLAYER_INDEX		0
+#define PLAYER_LIMIT		PLAYER_COUNT
+#define MISSILE_INDEX		PLAYER_COUNT
+#define MISSILE_LIMIT		VEHICLE_COUNT
+
+/* The human identifier, if playing */
+#define HUMAN_ID		PLAYER_INDEX
 
 /* Initial player health */
 #define PLAYER_HEALTH		60
@@ -48,7 +57,7 @@ enum {APP_PRM, APP_AUX, APP_MSS, APP_CNT};
 /* VEHICLE combines player, NPCs, and missiles; appearance is set up as an array so we
 	can iterate through them in a loop */
 typedef struct {
-	bool active, airborne, exploding, firing;
+	bool active, npc, airborne, exploding, firing;
 	int8_t health, z_delta, a_delta, level, gear;
 	uint8_t identifier, target, joy, mss_delta, damage, hit_cd, loading_cd, live_cd;
 	int16_t x, y, z, angle, sin, cos;
@@ -60,9 +69,6 @@ typedef struct {
 	uint8_t arena, gear, mss_delta, damage;
 	XM_HANDLE player, missile;
 } LEVEL;
-
-/* Callback routine hint */
-enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
 
 /******** Function declarations ********/
 
@@ -100,6 +106,8 @@ typedef enum {
 	AIE_SWITCHED_FOCUS,
 	AIE_STUCK_PLAYER,
 	AIE_STUCK_MISSILE,
+	AIE_REACHED_TOP,
+	AIE_REACHED_BOTTOM,
 	AIE_DAMAGED_PLAYER,
 	AIE_ADVANCED_PLAYER,
 	AIE_ELIMINATED_PLAYER,
@@ -126,7 +134,7 @@ extern XM_HANDLE
 	g_arena_data,
 	g_exploding_prm,
 	g_exploding_aux,
-	g_human_badge_aux,
+	g_human_id_aux,
 	*g_vehicle_data;
 
 extern VEHICLE

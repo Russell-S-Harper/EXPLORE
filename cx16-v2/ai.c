@@ -58,8 +58,8 @@ typedef struct {
 
 typedef struct {
 	uint16_t attackers[PLAYER_COUNT];
-	uint8_t status, a_action, z_action, g_action, attacker;
-	int8_t score, action_cd, stuck_cd, abuse_cd;
+	uint8_t status, attacker;
+	int8_t score, a_action, z_action, g_action, action_cd, stuck_cd, abuse_cd;
 } AI_CURRENT_STATE;
 
 /* Internal data */
@@ -86,7 +86,8 @@ static uint8_t GetRandomByte(uint8_t modulus);
 static int8_t AddRandomValue(uint8_t modulus, int8_t current, int8_t minimum, int8_t maximum);
 static void SetAZGActions(AI_CURRENT_STATE *x);
 
-void InitAI() {
+void InitAI()
+{
 	InitRNG();
 	InitSettings();
 	InitStatuses();
@@ -181,7 +182,7 @@ static void InitSettings(void)
 			ExitProgram(ERR_AI);
 	}
 	/* Read in the settings, cycling through to the begining */
-	for (i = 0, j = 0; fread(f_settings + i, sizeof(AI_SETTINGS), 1, ifile) ; i = (i + 1) % PLAYER_COUNT)
+	for (i = 0, j = 0; fread(f_settings + i, sizeof(AI_SETTINGS), 1, ifile); i = (i + 1) % PLAYER_COUNT)
 		j += sizeof(AI_SETTINGS);
 	fclose(ifile);
 
@@ -233,7 +234,7 @@ static void InitStatuses(void)
 		x->a_action = 0;
 		x->z_action = 0;
 		x->g_action = 0;
-		x->attacker = PLAYER_COUNT;
+		x->attacker = PLAYER_LIMIT;
 		for (j = 0; j < PLAYER_COUNT; ++j)
 			x->attackers[j] = 0;
 		x->action_cd = 0;
@@ -246,8 +247,8 @@ void NPCAI(VEHICLE *player)
 {
 	int16_t z;
 	/* For now do a dummy routine - remember to account for land and airborne */
-	if (player->active) {
-		z = g_vehicles[PLAYER_INDEX].z;
+	if (player->npc && player->active) {
+		z = g_vehicles[player->target].z;
 		player->a_delta = 1;
 		if (player->z < z)
 			player->z_delta = player->gear;
@@ -263,7 +264,7 @@ void MissileAI(VEHICLE *missile)
 	VEHICLE *player;
 	int16_t delta;
 	/* Just chase the target! This logic will work for land and/or airborne */
-	if (missile->active && missile->target < PLAYER_COUNT) {
+	if (missile->active && missile->target < PLAYER_LIMIT) {
 		player = g_vehicles + missile->target;
 		if (player->active) {
 			delta = SpecialMultiply(player->x - missile->x, missile->cos) - SpecialMultiply(player->y - missile->y, missile->sin);
@@ -282,9 +283,9 @@ void MissileAI(VEHICLE *missile)
 
 void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 {
-	VEHICLE *v;
 	AI_CURRENT_STATE *x;
 	AI_SETTINGS *s;
+	VEHICLE *v;
 	uint8_t i, j;
 
 	/* Will need these */
@@ -327,6 +328,16 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 				}
 			}
 			break;
+		case AIE_REACHED_TOP:
+			/* extra = not used */
+			if (x->z_action < 0)
+				x->z_action = -x->z_action;
+			break;
+		case AIE_REACHED_BOTTOM:
+			/* extra = not used */
+			if (x->z_action > 0)
+				x->z_action = -x->z_action;
+			break;
 		case AIE_DAMAGED_PLAYER:
 			/* extra = identifier of attacker */
 			/* Keep track of statistics */
@@ -360,10 +371,10 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			x->status = AIS_MOURN;
 			x->action_cd = AI_K18;
 			/* Remove eliminated player from consideration */
-			for (i = 0, x = f_current_state, v = g_vehicles, j = player->identifier; i < PLAYER_COUNT; ++i, ++x, ++v) {
+			for (i = PLAYER_INDEX, x = f_current_state, v = g_vehicles + PLAYER_INDEX, j = player->identifier; i < PLAYER_LIMIT; ++i, ++x, ++v) {
 				/* Zero counts for eliminated player */
 				if (x->attacker == j)
-					x->attacker = PLAYER_COUNT;
+					x->attacker = PLAYER_LIMIT;
 				x->attackers[j] = 0;
 				/* Change targets */
 				if (x->status == AIS_PURSUE && v->target == j)
@@ -383,7 +394,8 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 	}
 }
 
-static void SetAZGActions(AI_CURRENT_STATE *x) {
+static void SetAZGActions(AI_CURRENT_STATE *x)
+{
 	x->a_action = GetRandomByte(AI_K21) + AI_K22;
 	switch (x->status) {
 		case AIS_ESCAPE:

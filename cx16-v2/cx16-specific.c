@@ -52,9 +52,6 @@
 #define HEX_DGT_SHIFT	4
 #define CLEAR_BYTE	((CLR16_BLACK << HEX_DGT_SHIFT) | CLR16_BLACK)
 
-/* Missile allowance in scan lines */
-#define MSS_ALLOWANCE	40
-
 /* Rendering shift defines */
 #define VERA_SLOPE_SHIFT	9
 #define WORKAROUND_SHIFT	3
@@ -62,6 +59,9 @@
 /* To check if we're running in the emulator */
 #define EMULATOR_LO	(*(char *)(0x9FBE))
 #define EMULATOR_HI	(*(char *)(0x9FBF))
+
+/* Callback routine hint */
+enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
 
 static void DrawLine16(void);
 static void DefaultCallback(uint8_t waiting);
@@ -181,7 +181,8 @@ void UpdateDisplay(void)
 	}
 }
 
-void AddSound(uint8_t type) {
+void AddSound(uint8_t type)
+{
 	static uint8_t s_index;
 	uint8_t *p;
 	uint32_t a;
@@ -211,7 +212,7 @@ void StopSounds(void)
 static void DefaultCallback(uint8_t waiting)
 {
 	static uint16_t s_frame_counter;
-	static uint8_t s_player_counter = PLAYER_INDEX + 1, s_missile_counter = PLAYER_COUNT;
+	static uint8_t s_player_counter = PLAYER_INDEX, s_missile_counter = MISSILE_INDEX;
 	uint32_t a;
 	uint8_t i, b, v;
 
@@ -231,19 +232,19 @@ static void DefaultCallback(uint8_t waiting)
 					}
 				}
 			} else {
-				/* Do some NPC AI */
+				/* Do some NPC and Missile AI */
 				NPCAI(g_vehicles + s_player_counter);
-				if (++s_player_counter >= PLAYER_COUNT)
-					s_player_counter = PLAYER_INDEX + 1;
+				if (++s_player_counter >= PLAYER_LIMIT)
+					s_player_counter = PLAYER_INDEX;
+				for (i = 0; i < MISSILE_COUNT / PLAYER_COUNT; ++i) {
+					MissileAI(g_vehicles + s_missile_counter);
+					if (++s_missile_counter >= MISSILE_LIMIT)
+						s_missile_counter = MISSILE_INDEX;
+				}
 			}
 			break;
 		case SCREEN_TO_FINISH:
-			/* While there's enough time left, do some missile guidance */
-			while (MAXIMUM_SCAN_LINE - CURRENT_SCAN_LINE >= MSS_ALLOWANCE) {
-				MissileAI(g_vehicles + s_missile_counter);
-				if (++s_missile_counter >= VEHICLE_COUNT)
-					s_missile_counter = PLAYER_COUNT;
-			}
+			/* Nothing to do here yet */
 			break;
 	}
 }
@@ -501,49 +502,24 @@ int8_t Max8(int8_t a, int8_t b) { return a > b? a: b; }
 /* Processes keyboard and joystick input */
 void GetPlayerInput(VEHICLE *player)
 {
-	uint8_t joy;
-	int16_t i, j;
+	uint8_t c, i, j, joy;
 
 	/* Process keyboard input */
 	while (kbhit()) {
-		switch ((uint8_t)cgetc()) {
+		c = (uint8_t)cgetc();
+		switch (c) {
 			case PAUSE_PROGRAM:
 				StopSounds();
 				/* Wait until it's pressed again */
 				while (cgetc() != PAUSE_PROGRAM);
 				break;
 
-			case REQ_CLIMB_OR_GEAR_FWD:
-				if (player->airborne)
-					player->z_delta += 1;
-				else
-					player->gear += 1;
-				break;
-
-			case REQ_DIVE_OR_GEAR_REV:
-				if (player->airborne)
-					player->z_delta -= 1;
-				else
-					player->gear -= 1;
-				break;
-
-			case TURN_RIGHT:
-				player->a_delta += 1;
-				break;
-
-			case TURN_LEFT:
-				player->a_delta -= 1;
-				break;
-
-			case FIRE_MISSILE:
-				if (!player->loading_cd)
-					player->firing = true;
-				break;
-
 			case CYCLE_PLAYER:
 				/* Find the next active player or NPC, if any */
 				for (i = 1; i < PLAYER_COUNT; ++i) {
-					j = (g_vehicle_index + i) % PLAYER_COUNT;
+					j = g_vehicle_index + i;
+					if (j >= PLAYER_LIMIT)
+						j = PLAYER_INDEX;
 					if (g_vehicles[j].active) {
 						g_vehicle_index = j;
 						ReportToAI(g_vehicles + j, AIE_SWITCHED_FOCUS, 0);
@@ -556,6 +532,36 @@ void GetPlayerInput(VEHICLE *player)
 				tgi_done();
 				g_exit_program = true;
 				break;
+		}
+		if (!player->npc && player->active) {
+			switch (c) {
+				case REQ_CLIMB_OR_GEAR_FWD:
+					if (player->airborne)
+						player->z_delta += 1;
+					else
+						player->gear += 1;
+					break;
+
+				case REQ_DIVE_OR_GEAR_REV:
+					if (player->airborne)
+						player->z_delta -= 1;
+					else
+						player->gear -= 1;
+					break;
+
+				case TURN_RIGHT:
+					player->a_delta += 1;
+					break;
+
+				case TURN_LEFT:
+					player->a_delta -= 1;
+					break;
+
+				case FIRE_MISSILE:
+					if (!player->loading_cd)
+						player->firing = true;
+					break;
+			}
 		}
 	}
 

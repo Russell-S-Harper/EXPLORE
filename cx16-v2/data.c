@@ -443,7 +443,7 @@ const char *vehicles0[] = {
 	"                         "
 	"                         "
 	"                         ",
-	/* v11-human-badge */
+	/* v11-human-id */
 	"                         "
 	"                         "
 	"                         "
@@ -1031,7 +1031,8 @@ static int CompareVehicleVertices(const void *p, const void *q)
 	return (int)result;
 }
 
-static void OutputSoundData(FILE *ofile) {
+static void OutputSoundData(FILE *ofile)
+{
 	uint8_t i, j, key, value, initializers[SOUNDS_CNT], volumes[VERA_PSG_VOLUMES];
 	uint16_t psg;
 
