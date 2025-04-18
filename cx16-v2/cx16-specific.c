@@ -47,14 +47,17 @@
 #define A_DELTA_LMT		2
 
 /* Hex digit defines */
-#define HEX_DGT_HI	0xF0
-#define HEX_DGT_LO	0x0F
-#define HEX_DGT_SHIFT	4
-#define CLEAR_BYTE	((CLR16_BLACK << HEX_DGT_SHIFT) | CLR16_BLACK)
+#define HEX_DGT_HI		0xF0
+#define HEX_DGT_LO		0x0F
+#define HEX_DGT_SHIFT		4
+#define CLEAR_BYTE		((CLR16_BLACK << HEX_DGT_SHIFT) | CLR16_BLACK)
 
 /* Rendering shift defines */
 #define VERA_SLOPE_SHIFT	9
 #define WORKAROUND_SHIFT	3
+
+/* Incrementer */
+#define VEHICLE_IDX_INC		5
 
 /* To check if we're running in the emulator */
 #define EMULATOR_LO	(*(char *)(0x9FBE))
@@ -212,7 +215,7 @@ void StopSounds(void)
 static void DefaultCallback(uint8_t waiting)
 {
 	static uint16_t s_frame_counter;
-	static uint8_t s_player_counter = PLAYER_INDEX, s_missile_counter = MISSILE_INDEX;
+	static uint8_t s_vehicle_counter;
 	uint32_t a;
 	uint8_t i, b, v;
 
@@ -233,18 +236,22 @@ static void DefaultCallback(uint8_t waiting)
 				}
 			} else {
 				/* Do some NPC and Missile AI */
-				NPCAI(g_vehicles + s_player_counter);
-				if (++s_player_counter >= PLAYER_LIMIT)
-					s_player_counter = PLAYER_INDEX;
-				for (i = 0; i < MISSILE_COUNT / PLAYER_COUNT; ++i) {
-					MissileAI(g_vehicles + s_missile_counter);
-					if (++s_missile_counter >= MISSILE_LIMIT)
-						s_missile_counter = MISSILE_INDEX;
-				}
+#if PLAYER_INDEX == 0
+				if (s_vehicle_counter < PLAYER_LIMIT)
+#else
+				if (s_vehicle_counter >= PLAYER_INDEX)
+#endif
+					NPCAI(g_vehicles + s_vehicle_counter);
+				else
+					MissileAI(g_vehicles + s_vehicle_counter);
+				/* Skip to the next vehicle */
+				s_vehicle_counter += VEHICLE_IDX_INC;
+				if (s_vehicle_counter >= VEHICLE_COUNT)
+					s_vehicle_counter -= VEHICLE_COUNT;
 			}
 			break;
 		case SCREEN_TO_FINISH:
-			/* Nothing to do here yet */
+			/* Nothing to do here yet! */
 			break;
 	}
 }

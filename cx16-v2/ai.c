@@ -181,7 +181,7 @@ static void InitSettings(void)
 		if (!ifile)
 			ExitProgram(ERR_AI);
 	}
-	/* Read in the settings, cycling through to the begining */
+	/* Read in the settings, cycling through to the beginning */
 	for (i = 0, j = 0; fread(f_settings + i, sizeof(AI_SETTINGS), 1, ifile); i = (i + 1) % PLAYER_COUNT)
 		j += sizeof(AI_SETTINGS);
 	fclose(ifile);
