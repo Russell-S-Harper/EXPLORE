@@ -43,8 +43,8 @@
 #define AI_K24	0	/* Offset when setting z_action for escape status */
 #define AI_K29	3	/* Modulus when setting z_action for evade status */
 #define AI_K30	-2	/* Offset when setting z_action for evade status */
-#define AI_K25	5	/* Modulus when setting z_action for celebration statuses */
-#define AI_K26	-2	/* Offset when setting z_action for celebration statuses */
+#define AI_K25	5	/* Modulus when setting z_action for celebration status */
+#define AI_K26	-2	/* Offset when setting z_action for celebration status */
 #define AI_K27	4	/* Modulus when setting g_action */
 #define AI_K28	-1	/* Offset when setting g_action */
 
@@ -148,7 +148,7 @@ static int8_t AddRandomValue(uint8_t modulus, int8_t current, int8_t minimum, in
 		delta = -delta;
 
 	/* Add to current and clip within limits */
-	return Max8(Min8(current + delta, maximum), minimum);
+	return Min8(Max8(current + delta, minimum), maximum);
 }
 
 static void InitSettings(void)
@@ -164,10 +164,10 @@ static void InitSettings(void)
 		f_settings = malloc(sizeof(AI_SETTINGS) * PLAYER_COUNT);
 
 	/* Check if the file exists */
-	ifile = fopen(f_ai_data, "rb");
+	ifile = fopen(f_ai_data, g_read_mode);
 	if (!ifile) {
 		/* It doesn't, so create it */
-		ofile = fopen(f_ai_data, "wb");
+		ofile = fopen(f_ai_data, g_write_mode);
 		if (!ofile)
 			ExitProgram(ERR_AI);
 
@@ -177,7 +177,7 @@ static void InitSettings(void)
 		}
 		fclose(ofile);
 		/* Now should be able to read it! */
-		ifile = fopen(f_ai_data, "rb");
+		ifile = fopen(f_ai_data, g_read_mode);
 		if (!ifile)
 			ExitProgram(ERR_AI);
 	}
@@ -209,8 +209,8 @@ static void InitSettings(void)
 
 	/* Append the new settings by copying, adding additional, and removing the original */
 	rename(f_ai_data, f_working);
-	ifile = fopen(f_working, "rb");
-	ofile = fopen(f_ai_data, "wb");
+	ifile = fopen(f_working, g_read_mode);
+	ofile = fopen(f_ai_data, g_write_mode);
 	while (fread(&t, sizeof(AI_SETTINGS), 1, ifile))
 		fwrite(&t, sizeof(AI_SETTINGS), 1, ofile);
 	fclose(ifile);
@@ -229,6 +229,7 @@ static void InitStatuses(void)
 	if (!f_current_state)
 		f_current_state = malloc(sizeof(AI_CURRENT_STATE) * PLAYER_COUNT);
 
+	/* Initialize statuses */
 	for (i = 0, x = f_current_state, s = f_settings; i < PLAYER_COUNT; ++i, ++x, ++s) {
 		x->status = AIS_READY;
 		x->a_action = 0;
@@ -289,8 +290,8 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 	uint8_t i, j;
 
 	/* Will need these */
-	x = f_current_state + player->identifier;
-	s = f_settings + player->identifier;
+	x = f_current_state + player->identifier - PLAYER_INDEX;
+	s = f_settings + player->identifier - PLAYER_INDEX;
 
 	switch (event) {
 		case AIE_NEW_ARENA:
@@ -342,7 +343,7 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			/* extra = identifier of attacker */
 			/* Keep track of statistics */
 			x->attacker = extra;
-			x->attackers[extra] += 1;
+			x->attackers[extra - PLAYER_INDEX] += 1;
 			x->abuse_cd -= 1;
 			if (x->abuse_cd <= 0) {
 				/* Need to evade attacker! */
@@ -375,7 +376,7 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 				/* Zero counts for eliminated player */
 				if (x->attacker == j)
 					x->attacker = PLAYER_LIMIT;
-				x->attackers[j] = 0;
+				x->attackers[j - PLAYER_INDEX] = 0;
 				/* Change targets */
 				if (x->status == AIS_PURSUE && v->target == j)
 					x->status = AIS_READY;

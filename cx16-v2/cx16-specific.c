@@ -42,7 +42,7 @@
 #define CYCLE_PLAYER		67	/* C: cycle player */
 #define QUIT_PROGRAM		81	/* Q: quit program */
 
-/* To prevent cheating! */
+/* To prevent cheating (e.g. by using the keyboard and joystick together)! */
 #define Z_DELTA_LMT		2
 #define A_DELTA_LMT		2
 

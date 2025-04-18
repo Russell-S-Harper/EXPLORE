@@ -47,6 +47,11 @@ int16_t
 	g_max_vehicle_segments,
 	g_max_vehicle_vertices;
 
+/* Internal data */
+const char
+	*g_read_mode = "rb",
+	*g_write_mode = "wb";
+
 /* Internal functions */
 
 static void InitData(char *file);
@@ -83,7 +88,7 @@ static void InitData(char *file)
 	int16_t t, count, size;
 	FILE *ifile;
 
-	if (!(ifile = fopen(file, "rb")))
+	if (!(ifile = fopen(file, g_read_mode)))
 		ExitProgram(ERR_FO);
 
 	while (code != CODE_EF) {

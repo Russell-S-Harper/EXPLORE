@@ -164,4 +164,8 @@ extern int16_t
 	g_max_vehicle_segments,
 	g_max_vehicle_vertices;
 
+extern const char
+	*g_read_mode,
+	*g_write_mode;
+
 #endif /* _EXPLORE_H */
