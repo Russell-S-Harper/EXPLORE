@@ -36,6 +36,7 @@
 #define AI_K20	4	/* How much to shift randomizer when adding to escape or evade */
 #define AI_K18	24	/* What to set action_cd when mourning */
 #define AI_K19	48	/* What to set action_cd when celebrating */
+#define AI_K31	1	/* ceil(log2(AI_K07 / PLAYER_HEALTH)); what to shift player damage */
 
 #define AI_K21	5	/* Modulus when setting a_action */
 #define AI_K22	-2	/* Offset when setting a_action */
@@ -47,6 +48,8 @@
 #define AI_K26	-2	/* Offset when setting z_action for celebration status */
 #define AI_K27	4	/* Modulus when setting g_action */
 #define AI_K28	-1	/* Offset when setting g_action */
+
+/* Everything AI is kept separate from the regular operation of the game */
 
 enum {AIS_READY, AIS_PURSUE, AIS_ESCAPE, AIS_EVADE, AIS_MOURN, AIS_CELEBRATE};
 
@@ -264,7 +267,7 @@ void MissileAI(VEHICLE *missile)
 {
 	VEHICLE *player;
 	int16_t delta;
-	/* Just chase the target! This logic will work for land and/or airborne */
+	/* Just chase the target! This logic will work for land and airborne */
 	if (missile->active && missile->target < PLAYER_LIMIT) {
 		player = g_vehicles + missile->target;
 		if (player->active) {
@@ -287,7 +290,7 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 	AI_CURRENT_STATE *x;
 	AI_SETTINGS *s;
 	VEHICLE *v;
-	uint8_t i, j;
+	uint8_t a, i, j, t;
 
 	/* Will need these */
 	x = f_current_state + player->identifier - PLAYER_INDEX;
@@ -320,11 +323,11 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 				x->stuck_cd += (event == AIE_STUCK_PLAYER)? AI_K13: AI_K14;
 				if (x->stuck_cd <= 0) {
 					/* Need to escape stuck situation! */
-					j = s->randomizer >> AI_K20;
-					if (!j) j = AI_K06;
 					x->status = AIS_ESCAPE;
-					x->action_cd = AddRandomValue(j, s->escape, AI_K06, AI_K07);
 					x->stuck_cd = s->stuck_lmt;
+					t = s->randomizer >> AI_K20;
+					if (!t) t = AI_K06;
+					x->action_cd = AddRandomValue(t, s->escape, AI_K06, AI_K07);
 					SetAZGActions(x);
 				}
 			}
@@ -341,49 +344,48 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			break;
 		case AIE_DAMAGED_PLAYER:
 			/* extra = identifier of attacker */
+			a = extra - PLAYER_INDEX;
 			/* Keep track of statistics */
 			x->attacker = extra;
-			x->attackers[extra - PLAYER_INDEX] += 1;
-			x->abuse_cd -= 1;
+			x->attackers[a] += 1;
+			x->abuse_cd -= g_vehicles[extra].damage << AI_K31;
 			if (x->abuse_cd <= 0) {
 				/* Need to evade attacker! */
-				j = s->randomizer >> AI_K20;
-				if (!j) j = AI_K06;
 				x->status = AIS_EVADE;
-				x->action_cd = AddRandomValue(j, s->evade, AI_K06, AI_K07);
 				x->abuse_cd = s->abuse_lmt;
+				t = s->randomizer >> AI_K20;
+				if (!t) t = AI_K06;
+				x->action_cd = AddRandomValue(t, s->evade, AI_K06, AI_K07);
 				SetAZGActions(x);
 			}
-			/* Attacker gets reset */
-			x = f_current_state + extra;
-			s = f_settings + extra;
-			x->abuse_cd = s->abuse_lmt;
+			/* Attacker gets abuse reset */
+			f_current_state[a].abuse_cd = f_settings[a].abuse_lmt;
 			break;
 		case AIE_ADVANCED_PLAYER:
 			/* extra = identifier of attacker */
+			a = extra - PLAYER_INDEX;
 			/* Adjust scores */
 			s->score += AI_K15;
-			s = f_settings + extra;
-			s->score += AI_K16;
+			f_settings[a].score += AI_K16;
 			break;
 		case AIE_ELIMINATED_PLAYER:
 			/* extra = identifier of attacker */
+			a = extra - PLAYER_INDEX;
 			/* Pause a bit to mourn */
 			x->status = AIS_MOURN;
 			x->action_cd = AI_K18;
 			/* Remove eliminated player from consideration */
-			for (i = PLAYER_INDEX, x = f_current_state, v = g_vehicles + PLAYER_INDEX, j = player->identifier; i < PLAYER_LIMIT; ++i, ++x, ++v) {
+			for (i = PLAYER_INDEX, x = f_current_state, v = g_vehicles + PLAYER_INDEX, j = player->identifier - PLAYER_INDEX; i < PLAYER_LIMIT; ++i, ++x, ++v) {
 				/* Zero counts for eliminated player */
-				if (x->attacker == j)
+				if (x->attacker == player->identifier)
 					x->attacker = PLAYER_LIMIT;
-				x->attackers[j - PLAYER_INDEX] = 0;
+				x->attackers[j] = 0;
 				/* Change targets */
-				if (x->status == AIS_PURSUE && v->target == j)
+				if (x->status == AIS_PURSUE && v->target == player->identifier)
 					x->status = AIS_READY;
 			}
 			/* Adjust score for attacker */
-			s = f_settings + extra;
-			s->score += AI_K17;
+			f_settings[a].score += AI_K17;
 			break;
 		case AIE_WINNING_PLAYER:
 			/* extra = not used */
@@ -398,6 +400,7 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 static void SetAZGActions(AI_CURRENT_STATE *x)
 {
 	x->a_action = GetRandomByte(AI_K21) + AI_K22;
+	x->g_action = GetRandomByte(AI_K27) + AI_K28;
 	switch (x->status) {
 		case AIS_ESCAPE:
 			x->z_action = GetRandomByte(AI_K23) + AI_K24;
@@ -409,5 +412,4 @@ static void SetAZGActions(AI_CURRENT_STATE *x)
 			x->z_action = GetRandomByte(AI_K25) + AI_K26;
 			break;
 	}
-	x->g_action = GetRandomByte(AI_K27) + AI_K28;
 }
