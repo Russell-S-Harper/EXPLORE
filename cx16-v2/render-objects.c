@@ -58,8 +58,8 @@ void RenderObjects(void)
 		dx = V->x - focus->x;
 		dy = V->y - focus->y;
 		dz = V->z - focus->z;
-		P->x = s_focus_x + ((MultiplyThenDivide(dx, focus->cos, scale) - MultiplyThenDivide(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
-		P->y = s_focus_y + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
+		P->x = s_focus_x + ((MulDiv16(dx, focus->cos, scale) - MulDiv16(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
+		P->y = s_focus_y + ((MulDiv16(dx, focus->sin, -scale) + MulDiv16(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
 		P->z = dz >> 1;
 	}
 	for (; S->index_from != S->index_to; ++S) {
@@ -74,10 +74,10 @@ void RenderObjects(void)
 		dz = V->z - focus->z;
 		if (last_dz != dz) {
 			last_dz = dz;
-			scale = MultiplyThenDivide(dz, ARENA_SCALE_M1, ARENA_SCALE_M2) + ARENA_SCALE_B;
+			scale = MulDiv16(dz, ARENA_SCALE_M1, ARENA_SCALE_M2) + ARENA_SCALE_B;
 		}
-		P->x = s_focus_x + ((MultiplyThenDivide(dx, focus->cos, scale) - MultiplyThenDivide(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
-		P->y = s_focus_y + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
+		P->x = s_focus_x + ((MulDiv16(dx, focus->cos, scale) - MulDiv16(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
+		P->y = s_focus_y + ((MulDiv16(dx, focus->sin, -scale) + MulDiv16(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
 	}
 	for (; S->index_from != S->index_to; ++S) {
 		p1 = s_points + S->index_from;
@@ -115,11 +115,11 @@ void RenderObjects(void)
 			da = vehicle->angle - focus->angle;
 			if (last_dz != dz) {
 				last_dz = dz;
-				scale = MultiplyThenDivide(dz, ARENA_SCALE_M1, ARENA_SCALE_M2) + ARENA_SCALE_B;
+				scale = MulDiv16(dz, ARENA_SCALE_M1, ARENA_SCALE_M2) + ARENA_SCALE_B;
 				color = DeltaZColor(dz);
 			}
-			screen_x = s_focus_x + ((MultiplyThenDivide(dx, focus->cos, scale) - MultiplyThenDivide(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
-			screen_y = s_focus_y + ((MultiplyThenDivide(dx, focus->sin, -scale) + MultiplyThenDivide(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
+			screen_x = s_focus_x + ((MulDiv16(dx, focus->cos, scale) - MulDiv16(dy, focus->sin, scale)) >> ARENA_XY_SHIFT);
+			screen_y = s_focus_y + ((MulDiv16(dx, focus->sin, -scale) + MulDiv16(dy, focus->cos, -scale)) >> ARENA_XY_SHIFT);
 		}
 		/* Render the vehicle */
 		for (j = APP_PRM; j < APP_MSS; ++j) {

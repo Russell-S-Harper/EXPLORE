@@ -82,9 +82,9 @@ void UpdateDisplay(void);		/* Defined in cx16-specific.c */
 void InitSpecific(void);
 
 /* Math routines defined in cx16-specific.c and called throughout the program */
-int16_t MultiplyThenDivide(int16_t num1, int16_t num2, int16_t denom);
-#define SpecialMultiply(num1, num2)	MultiplyThenDivide((num1), (num2), SCALE_1_0)
-#define SpecialDivide(num, denom)	MultiplyThenDivide((num), SCALE_1_0, (denom))
+int16_t MulDiv16(int16_t num1, int16_t num2, int16_t denom);
+#define SpcMul16(num1, num2)	MulDiv16((num1), (num2), SCALE_1_0)
+#define SpcDiv16(num, denom)	MulDiv16((num), SCALE_1_0, (denom))
 
 /* Drawing routines */
 void DrawLineFromTo16(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color);

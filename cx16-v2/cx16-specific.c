@@ -215,7 +215,7 @@ void StopSounds(void)
 static void DefaultCallback(uint8_t waiting)
 {
 	static uint16_t s_frame_counter;
-	static uint8_t s_vehicle_counter;
+	static uint8_t s_vehicle_cd, s_vehicle_index;
 	uint32_t a;
 	uint8_t i, b, v;
 
@@ -233,21 +233,25 @@ static void DefaultCallback(uint8_t waiting)
 						b = (b & VERA_PSG_RL_MASK) | g_psg_volumes[v];
 						vpoke(b, a);
 					}
+					s_vehicle_cd = VEHICLE_COUNT;
 				}
 			} else {
 				/* Do some NPC and Missile AI */
+				if (s_vehicle_cd) {
 #if PLAYER_INDEX == 0
-				if (s_vehicle_counter < PLAYER_LIMIT)
+					if (s_vehicle_index < PLAYER_LIMIT)
 #else
-				if (s_vehicle_counter >= PLAYER_INDEX)
+					if (s_vehicle_index >= PLAYER_INDEX)
 #endif
-					NPCAI(g_vehicles + s_vehicle_counter);
-				else
-					MissileAI(g_vehicles + s_vehicle_counter);
-				/* Skip to the next vehicle */
-				s_vehicle_counter += VEHICLE_IDX_INC;
-				if (s_vehicle_counter >= VEHICLE_COUNT)
-					s_vehicle_counter -= VEHICLE_COUNT;
+						NPCAI(g_vehicles + s_vehicle_index);
+					else
+						MissileAI(g_vehicles + s_vehicle_index);
+					/* Skip to the next vehicle */
+					s_vehicle_index += VEHICLE_IDX_INC;
+					if (s_vehicle_index >= VEHICLE_COUNT)
+						s_vehicle_index -= VEHICLE_COUNT;
+					--s_vehicle_cd;
+				}
 			}
 			break;
 		case SCREEN_TO_FINISH:
@@ -307,7 +311,7 @@ static void DrawLine16(void)
 			return;
 		/* Coordinates can change, so discarding xmin, xmax, ymin, and ymax */
 		if (Max16(y1, y2) > (VERA_VERT_RES - 1) && y2 != y1) {
-			xt = MultiplyThenDivide((VERA_VERT_RES - 1) - y1, x2 - x1, y2 - y1) + x1;
+			xt = MulDiv16((VERA_VERT_RES - 1) - y1, x2 - x1, y2 - y1) + x1;
 			if (y2 > y1) {
 				y2 = VERA_VERT_RES - 1;
 				x2 = xt;
@@ -317,7 +321,7 @@ static void DrawLine16(void)
 			}
 		}
 		if (Min16(y1, y2) < 0 && y2 != y1) {
-			xt = MultiplyThenDivide(-y1, x2 - x1, y2 - y1) + x1;
+			xt = MulDiv16(-y1, x2 - x1, y2 - y1) + x1;
 			if (y2 < y1) {
 				y2 = 0;
 				x2 = xt;
@@ -327,7 +331,7 @@ static void DrawLine16(void)
 			}
 		}
 		if (Max16(x1, x2) > (VERA_HORZ_RES - 1) && x2 != x1) {
-			yt = MultiplyThenDivide((VERA_HORZ_RES - 1) - x1, y2 - y1, x2 - x1) + y1;
+			yt = MulDiv16((VERA_HORZ_RES - 1) - x1, y2 - y1, x2 - x1) + y1;
 			if (x2 > x1) {
 				x2 = VERA_HORZ_RES - 1;
 				y2 = yt;
@@ -337,7 +341,7 @@ static void DrawLine16(void)
 			}
 		}
 		if (Min16(x1, x2) < 0 && x2 != x1) {
-			yt = MultiplyThenDivide(-x1, y2 - y1, x2 - x1) + y1;
+			yt = MulDiv16(-x1, y2 - y1, x2 - x1) + y1;
 			if (x2 < x1) {
 				x2 = 0;
 				y2 = yt;
@@ -603,11 +607,11 @@ void GetPlayerInput(VEHICLE *player)
 }
 
 /* The program insures that the values passed to and returned
-	from MultiplyThenDivide never exceed |32767|. Since this routine
+	from MulDiv16 never exceed |32767|. Since this routine
 	is used frequently, it is well worth the effort to optimize it. */
 
 /* Equivalent to (int16_t)((int32_t)num1 * num2 / denom) */
-int16_t MultiplyThenDivide(int16_t num1, int16_t num2, int16_t denom)
+int16_t MulDiv16(int16_t num1, int16_t num2, int16_t denom)
 {
 	uint8_t *p, *q, *r;
 	int32_t c;

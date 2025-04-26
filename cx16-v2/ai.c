@@ -46,12 +46,12 @@
 #define AI_K30	-2	/* Offset when setting z_action for evade status */
 #define AI_K25	5	/* Modulus when setting z_action for celebration status */
 #define AI_K26	-2	/* Offset when setting z_action for celebration status */
-#define AI_K27	4	/* Modulus when setting g_action */
+#define AI_K27	3	/* Modulus when setting g_action */
 #define AI_K28	-1	/* Offset when setting g_action */
 
 /* Everything AI is kept separate from the regular operation of the game */
 
-enum {AIS_READY, AIS_PURSUE, AIS_ESCAPE, AIS_EVADE, AIS_MOURN, AIS_CELEBRATE};
+enum {AIS_READY, AIS_PURSUE, AIS_ESCAPE, AIS_EVADE, AIS_MOURN, AIS_CELEBRATE, AIS_DEAD};
 
 typedef struct {
 	char identifer, parent;
@@ -190,7 +190,7 @@ static void InitSettings(void)
 	fclose(ifile);
 
 	/* Magic numbers to generate moduli [AI_K06, AI_K09] decreasing with file size */
-	modulus = Max16(Min16(MultiplyThenDivide(j, AI_K01, AI_K02) + AI_K03, AI_K09), AI_K06);
+	modulus = Max16(Min16(MulDiv16(j, AI_K01, AI_K02) + AI_K03, AI_K09), AI_K06);
 
 	/* Randomize settings */
 	for (i = 0, s = f_settings; i < PLAYER_COUNT; ++i, ++s) {
@@ -249,17 +249,63 @@ static void InitStatuses(void)
 
 void NPCAI(VEHICLE *player)
 {
-	int16_t z;
-	/* For now do a dummy routine - remember to account for land and airborne */
-	if (player->npc && player->active) {
-		z = g_vehicles[player->target].z;
-		player->a_delta = 1;
-		if (player->z < z)
-			player->z_delta = player->gear;
-		else if (player->z > z)
-			player->z_delta = -player->gear;
-		if (!player->loading_cd)
-			player->firing = true;
+	AI_CURRENT_STATE *x;
+	AI_SETTINGS *s;
+	VEHICLE *v;
+	uint8_t i, j;
+
+	/* Must be NPC */
+	if (!player->npc)
+		return;
+
+	x = f_current_state + player->identifier - PLAYER_INDEX;
+	s = f_settings + player->identifier - PLAYER_INDEX;
+	switch (x->status) {
+		case AIS_READY:
+			player->target = (player->identifier + 1) % 4;
+			x->status = AIS_PURSUE;
+			// TODO: pick target
+			break;
+		case AIS_PURSUE:
+			v = g_vehicles + player->target;
+			if (v->active) {
+				// TODO: steer towards, check closeness, and fire if conditions permit
+				x->action_cd -= 1;
+				if (x->action_cd <= 0)
+					x->status = AIS_READY;
+			} else
+				x->status = AIS_READY;
+			break;
+		case AIS_ESCAPE:
+		case AIS_EVADE:
+		case AIS_CELEBRATE:
+			player->a_delta = x->a_action;
+			if (player->airborne)
+				player->z_delta = x->z_action;
+			else
+				player->gear += x->g_action;
+			x->action_cd -= 1;
+			if (x->action_cd <= 0)
+				x->status = AIS_READY;
+			break;
+		case AIS_MOURN:
+			x->action_cd -= 1;
+			if (x->action_cd <= 0) {
+				if (g_vehicle_index == player->identifier) {
+					/* Find the next active player or NPC, if any */
+					for (i = 1; i < PLAYER_COUNT; ++i) {
+						j = g_vehicle_index + i;
+						if (j >= PLAYER_LIMIT)
+							j = PLAYER_INDEX;
+						if (g_vehicles[j].active) {
+							g_vehicle_index = j;
+							break;
+						}
+					}
+				}
+				x->status = AIS_DEAD;
+			}
+			break;
 	}
 }
 
@@ -271,7 +317,7 @@ void MissileAI(VEHICLE *missile)
 	if (missile->active && missile->target < PLAYER_LIMIT) {
 		player = g_vehicles + missile->target;
 		if (player->active) {
-			delta = SpecialMultiply(player->x - missile->x, missile->cos) - SpecialMultiply(player->y - missile->y, missile->sin);
+			delta = SpcMul16(player->x - missile->x, missile->cos) - SpcMul16(player->y - missile->y, missile->sin);
 			if (delta < -MSS_XY_TOL)
 				missile->a_delta = -missile->mss_delta;
 			else if (delta > MSS_XY_TOL)
@@ -295,7 +341,6 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 	/* Will need these */
 	x = f_current_state + player->identifier - PLAYER_INDEX;
 	s = f_settings + player->identifier - PLAYER_INDEX;
-
 	switch (event) {
 		case AIE_NEW_ARENA:
 			/* extra = arena index */
@@ -312,7 +357,7 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			for (i = 0, x = f_current_state; i < PLAYER_COUNT; ++i, ++x) {
 				/* No longer mourning */
 				if (x->status == AIS_MOURN)
-					x->status = AIS_READY;
+					x->status = AIS_DEAD;
 			}
 			break;
 		case AIE_STUCK_PLAYER:
@@ -400,7 +445,6 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 static void SetAZGActions(AI_CURRENT_STATE *x)
 {
 	x->a_action = GetRandomByte(AI_K21) + AI_K22;
-	x->g_action = GetRandomByte(AI_K27) + AI_K28;
 	switch (x->status) {
 		case AIS_ESCAPE:
 			x->z_action = GetRandomByte(AI_K23) + AI_K24;
@@ -412,4 +456,5 @@ static void SetAZGActions(AI_CURRENT_STATE *x)
 			x->z_action = GetRandomByte(AI_K25) + AI_K26;
 			break;
 	}
+	x->g_action = GetRandomByte(AI_K27) + AI_K28;
 }

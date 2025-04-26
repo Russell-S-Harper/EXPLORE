@@ -209,8 +209,8 @@ static void InitPlayers(void)
 		player->angle = (i << (SHIFT_FC - 2)) + (SCALE_FC / 8);
 		player->sin = Sin(player->angle);
 		player->cos = Cos(player->angle);
-		player->x = (MAX_XYZ >> 1) - SpecialMultiply(MAX_XYZ >> 2, player->sin);
-		player->y = (MAX_XYZ >> 1) - SpecialMultiply(MAX_XYZ >> 2, player->cos);
+		player->x = (MAX_XYZ >> 1) - SpcMul16(MAX_XYZ >> 2, player->sin);
+		player->y = (MAX_XYZ >> 1) - SpcMul16(MAX_XYZ >> 2, player->cos);
 		player->z = MIN_XYZ;
 		/* To use for missiles */
 		player->live_cd = MSS_LIVE;
