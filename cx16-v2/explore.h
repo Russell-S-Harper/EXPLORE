@@ -40,6 +40,7 @@
 /* Exploadable distances - these are scaled */
 #define MSS_XY_TOL		114
 #define MSS_DST_TOL_SQR		13224
+#define TGT_XY_TOL		57
 
 /* Counters (in frames) for how long a missile takes to reload, missile lifespan, and hit animation */
 #define MSS_LOADING		6

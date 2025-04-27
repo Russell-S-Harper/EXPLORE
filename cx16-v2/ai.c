@@ -11,6 +11,9 @@
 
 /* Defining constants generically for now, once they are all defined, will come up with a unified naming convention */
 
+#define AI_K39	9	/* ceil(log2(MAXIMUM_SCAN_LINE)); used to set srand seed */
+#define AI_K40	4	/* What to shift value from rand to get "good" randomness */
+
 #define AI_K11	'a'	/* When initializing AI.DATA, this is the identifier of the first player */
 #define AI_K12	'd'	/* When initializing AI.DATA, this is the identifier of the last player */
 
@@ -48,6 +51,15 @@
 #define AI_K26	-2	/* Offset when setting z_action for celebration status */
 #define AI_K27	3	/* Modulus when setting g_action */
 #define AI_K28	-1	/* Offset when setting g_action */
+
+#define AI_K32	2	/* What to set a_delta if target is far left or right */
+#define AI_K33	1	/* What to set a_delta if target is near left or right */
+#define AI_K34	3	/* Modulus for setting a_delta if target is directly behind */
+#define AI_K35	-1	/* Offset for setting a_delta if target is directly behind */
+
+#define AI_K36	9	/* What to shift dx and dy for accuracy calculation */
+#define AI_K37	961	/* Constant used in ensure result of accuracy calculation is [-120, 120] */
+#define AI_K38	3	/* What to shift to ensure result of accuracy calculation is [-120, 120] */
 
 /* Everything AI is kept separate from the regular operation of the game */
 
@@ -104,8 +116,8 @@ static void InitRNG(void)
 		f_random_bytes = malloc(sizeof(uint8_t) * UINT8_MAX);
 
 	/* Using the current scan line and clock as the seed, gather 256 pseudo-random bytes */
-	for (srand((clock() << 9) + CURRENT_SCAN_LINE), i = 0; i < UINT8_MAX; ++i)
-		f_random_bytes[i] = (rand() >> 4) & UINT8_MAX;
+	for (srand((clock() << AI_K39) + CURRENT_SCAN_LINE), i = 0; i < UINT8_MAX; ++i)
+		f_random_bytes[i] = (rand() >> AI_K40) & UINT8_MAX;
 }
 
 static uint8_t GetRandomByte(uint8_t modulus)
@@ -251,25 +263,73 @@ void NPCAI(VEHICLE *player)
 {
 	AI_CURRENT_STATE *x;
 	AI_SETTINGS *s;
-	VEHICLE *v;
+	VEHICLE *t;
+	int16_t dx, dy, dz, fb, lr;
 	uint8_t i, j;
 
-	/* Must be NPC */
-	if (!player->npc)
-		return;
-
+	/* Will need these */
 	x = f_current_state + player->identifier - PLAYER_INDEX;
 	s = f_settings + player->identifier - PLAYER_INDEX;
+	/* Exit if not NPC and not mourning */
+	if (!player->npc && x->status != AIS_MOURN)
+		return;
 	switch (x->status) {
 		case AIS_READY:
-			player->target = (player->identifier + 1) % 4;
+			player->target = PLAYER_INDEX; // (player->identifier + 1) % 4;
 			x->status = AIS_PURSUE;
 			// TODO: pick target
 			break;
 		case AIS_PURSUE:
-			v = g_vehicles + player->target;
-			if (v->active) {
-				// TODO: steer towards, check closeness, and fire if conditions permit
+			t = g_vehicles + player->target;
+			if (t->active) {
+				/* Will need these */
+				dx = t->x - player->x;
+				dy = t->y - player->y;
+				dz = t->z - player->z;
+				/* Front or back */
+				fb = SpcMul16(dx, player->sin) + SpcMul16(dy, player->cos);
+				/* Left or right */
+				lr = SpcMul16(dx, player->cos) - SpcMul16(dy, player->sin);
+				/* Steer towards */
+				if (fb > TGT_XY_TOL) {
+					if (lr < -MSS_XY_TOL)
+						player->a_delta = -AI_K32;
+					else if (lr < -TGT_XY_TOL)
+						player->a_delta = -AI_K33;
+					else if (lr > MSS_XY_TOL)
+						player->a_delta = AI_K32;
+					else if (lr > TGT_XY_TOL)
+						player->a_delta = AI_K33;
+				} else if (fb < -TGT_XY_TOL) {
+					if (lr < 0)
+						player->a_delta = -AI_K32;
+					else if (lr > 0)
+						player->a_delta = AI_K32;
+					else
+						player->a_delta = GetRandomByte(AI_K34) + AI_K35;
+				}
+				/* Try to match height */
+				if (player->airborne) {
+					if (dz > VEHICLE_Z_TOL)
+						player->z_delta = player->gear;
+					else if (dz < -VEHICLE_Z_TOL)
+						player->z_delta = -player->gear;
+				} else
+					player->gear += 1;
+				/* Fire */
+				if (!player->loading_cd && abs(dz) < VEHICLE_Z_TOL) {
+					/* Really close, just fire */
+					if (abs(dx) < MSS_XY_TOL && abs(dy) < MSS_XY_TOL)
+						player->firing = true;
+					/* Not so close, check accuracy */
+					else if (fb > 0 && abs(lr) < MSS_XY_TOL) {
+						dx >>= AI_K36;
+						dy >>= AI_K36;
+						if ((AI_K37 - dx * dx - dy * dy) >> AI_K38 >= s->accuracy)
+							player->firing = true;
+					}
+				}
+				/* Countdown */
 				x->action_cd -= 1;
 				if (x->action_cd <= 0)
 					x->status = AIS_READY;
@@ -284,11 +344,13 @@ void NPCAI(VEHICLE *player)
 				player->z_delta = x->z_action;
 			else
 				player->gear += x->g_action;
+			/* Countdown */
 			x->action_cd -= 1;
 			if (x->action_cd <= 0)
 				x->status = AIS_READY;
 			break;
 		case AIS_MOURN:
+			/* Countdown */
 			x->action_cd -= 1;
 			if (x->action_cd <= 0) {
 				if (g_vehicle_index == player->identifier) {
@@ -322,10 +384,10 @@ void MissileAI(VEHICLE *missile)
 				missile->a_delta = -missile->mss_delta;
 			else if (delta > MSS_XY_TOL)
 				missile->a_delta = missile->mss_delta;
-			delta = missile->z - player->z;
-			if (delta < -VEHICLE_Z_TOL)
+			delta = player->z - missile->z;
+			if (delta > VEHICLE_Z_TOL)
 				missile->z_delta = missile->mss_delta;
-			else if (delta > VEHICLE_Z_TOL)
+			else if (delta < -VEHICLE_Z_TOL)
 				missile->z_delta = -missile->mss_delta;
 		}
 	}
@@ -363,18 +425,16 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 		case AIE_STUCK_PLAYER:
 		case AIE_STUCK_MISSILE:
 			/* extra = wall height */
-			if (extra < MAX_XYZ) {
-				/* Only difference between STUCK PLAYER and STUCK MISSILE is how much stuck_cd is adjusted */
-				x->stuck_cd += (event == AIE_STUCK_PLAYER)? AI_K13: AI_K14;
-				if (x->stuck_cd <= 0) {
-					/* Need to escape stuck situation! */
-					x->status = AIS_ESCAPE;
-					x->stuck_cd = s->stuck_lmt;
-					t = s->randomizer >> AI_K20;
-					if (!t) t = AI_K06;
-					x->action_cd = AddRandomValue(t, s->escape, AI_K06, AI_K07);
-					SetAZGActions(x);
-				}
+			/* STUCK PLAYER and STUCK MISSILE differ by how much stuck_cd is adjusted */
+			x->stuck_cd += (event == AIE_STUCK_PLAYER)? AI_K13: AI_K14;
+			if (x->stuck_cd <= 0) {
+				/* Need to escape stuck situation! */
+				x->status = AIS_ESCAPE;
+				x->stuck_cd = s->stuck_lmt;
+				t = s->randomizer >> AI_K20;
+				if (!t) t = AI_K06;
+				x->action_cd = AddRandomValue(t, s->escape, AI_K06, AI_K07);
+				SetAZGActions(x);
 			}
 			break;
 		case AIE_REACHED_TOP:

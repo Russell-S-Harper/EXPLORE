@@ -184,31 +184,100 @@ void UpdateDisplay(void)
 	}
 }
 
-void AddSound(uint8_t type)
+/* Processes keyboard and joystick input */
+void GetPlayerInput(VEHICLE *player)
 {
-	static uint8_t s_index;
-	uint8_t *p;
-	uint32_t a;
+	uint8_t c, i, j, joy;
 
-	a = VERA_PSG_BASE + (s_index << VERA_PSG_BLOCK_SHIFT);
-	if (++s_index >= VERA_PSG_VOICES)
-		s_index = 0;
+	/* Process keyboard input */
+	while (kbhit()) {
+		c = (uint8_t)cgetc();
+		switch (c) {
+			case PAUSE_PROGRAM:
+				StopSounds();
+				/* Wait until it's pressed again */
+				while (cgetc() != PAUSE_PROGRAM);
+				break;
 
-	p = g_psg_settings + (type << VERA_PSG_BLOCK_SHIFT);
+			case CYCLE_PLAYER:
+				/* Find the next active player or NPC, if any */
+				for (i = 1; i < PLAYER_COUNT; ++i) {
+					j = g_vehicle_index + i;
+					if (j >= PLAYER_LIMIT)
+						j = PLAYER_INDEX;
+					if (g_vehicles[j].active) {
+						g_vehicle_index = j;
+						ReportToAI(g_vehicles + j, AIE_SWITCHED_FOCUS, 0);
+						break;
+					}
+				}
+				break;
 
-	vpoke(*p, a);		/* Frequency low byte */
-	vpoke(*++p, ++a);	/* Frequency high byte */
-	vpoke(*++p, ++a);	/* Initial volume */
-	vpoke(*++p, ++a);	/* Waveform */
-}
+			case QUIT_PROGRAM:
+				tgi_done();
+				g_exit_program = true;
+				break;
+		}
+		if (!player->npc && player->active) {
+			switch (c) {
+				case REQ_CLIMB_OR_GEAR_FWD:
+					if (player->airborne)
+						player->z_delta += 1;
+					else
+						player->gear += 1;
+					break;
 
-void StopSounds(void)
-{
-	uint8_t i;
-	uint32_t a;
+				case REQ_DIVE_OR_GEAR_REV:
+					if (player->airborne)
+						player->z_delta -= 1;
+					else
+						player->gear -= 1;
+					break;
 
-	for (i = 0, a = VERA_PSG_BASE + VERA_PSG_RLV_OFFSET; i < VERA_PSG_VOICES; ++i, a += VERA_PSG_BLOCK_SIZE)
-		vpoke(VERA_PSG_VOLUME_OFF, a);	/* No volume */
+				case TURN_RIGHT:
+					player->a_delta += 1;
+					break;
+
+				case TURN_LEFT:
+					player->a_delta -= 1;
+					break;
+
+				case FIRE_MISSILE:
+					if (!player->loading_cd)
+						player->firing = true;
+					break;
+			}
+		}
+	}
+
+	/* Process joystick input - JOY_2 is the first physical joystick */
+	if (joy = joy_read(JOY_2)) {
+		if (JOY_UP(joy)) {		/* Joystick forward - dive or gear up */
+			if (player->airborne)
+				player->z_delta -= JOY_UP(player->joy)? 2: 1;
+			else
+				player->gear += 1;
+		} else if (JOY_DOWN(joy)) {	/* Joystick back - climb or gear down */
+			if (player->airborne)
+				player->z_delta += JOY_DOWN(player->joy)? 2: 1;
+			else
+				player->gear -= 1;
+		}
+		if (JOY_RIGHT(joy))
+			player->a_delta += JOY_RIGHT(player->joy)? 2: 1;
+		else if (JOY_LEFT(joy))
+			player->a_delta -= JOY_LEFT(player->joy)? 2: 1;
+		if (JOY_BTN_1(joy)) {
+			if (!player->loading_cd)
+				player->firing = true;
+		}
+	}
+	/* Save */
+	player->joy = joy;
+
+	/* Keep player deltas within limits! */
+	player->z_delta = Min8(Max8(player->z_delta, -Z_DELTA_LMT), Z_DELTA_LMT);
+	player->a_delta = Min8(Max8(player->a_delta, -A_DELTA_LMT), A_DELTA_LMT);
 }
 
 /* Default callback to do useful work while waiting */
@@ -258,6 +327,34 @@ static void DefaultCallback(uint8_t waiting)
 			/* Nothing to do here yet! */
 			break;
 	}
+}
+
+/* Sound routines */
+void AddSound(uint8_t type)
+{
+	static uint8_t s_index;
+	uint8_t *p;
+	uint32_t a;
+
+	a = VERA_PSG_BASE + (s_index << VERA_PSG_BLOCK_SHIFT);
+	if (++s_index >= VERA_PSG_VOICES)
+		s_index = 0;
+
+	p = g_psg_settings + (type << VERA_PSG_BLOCK_SHIFT);
+
+	vpoke(*p, a);		/* Frequency low byte */
+	vpoke(*++p, ++a);	/* Frequency high byte */
+	vpoke(*++p, ++a);	/* Initial volume */
+	vpoke(*++p, ++a);	/* Waveform */
+}
+
+void StopSounds(void)
+{
+	uint8_t i;
+	uint32_t a;
+
+	for (i = 0, a = VERA_PSG_BASE + VERA_PSG_RLV_OFFSET; i < VERA_PSG_VOICES; ++i, a += VERA_PSG_BLOCK_SIZE)
+		vpoke(VERA_PSG_VOLUME_OFF, a);	/* No volume */
 }
 
 /* Drawing routines */
@@ -509,102 +606,6 @@ int16_t Max16(int16_t a, int16_t b) { return a > b? a: b; }
 int8_t Min8(int8_t a, int8_t b) { return a < b? a: b; }
 
 int8_t Max8(int8_t a, int8_t b) { return a > b? a: b; }
-
-/* Processes keyboard and joystick input */
-void GetPlayerInput(VEHICLE *player)
-{
-	uint8_t c, i, j, joy;
-
-	/* Process keyboard input */
-	while (kbhit()) {
-		c = (uint8_t)cgetc();
-		switch (c) {
-			case PAUSE_PROGRAM:
-				StopSounds();
-				/* Wait until it's pressed again */
-				while (cgetc() != PAUSE_PROGRAM);
-				break;
-
-			case CYCLE_PLAYER:
-				/* Find the next active player or NPC, if any */
-				for (i = 1; i < PLAYER_COUNT; ++i) {
-					j = g_vehicle_index + i;
-					if (j >= PLAYER_LIMIT)
-						j = PLAYER_INDEX;
-					if (g_vehicles[j].active) {
-						g_vehicle_index = j;
-						ReportToAI(g_vehicles + j, AIE_SWITCHED_FOCUS, 0);
-						break;
-					}
-				}
-				break;
-
-			case QUIT_PROGRAM:
-				tgi_done();
-				g_exit_program = true;
-				break;
-		}
-		if (!player->npc && player->active) {
-			switch (c) {
-				case REQ_CLIMB_OR_GEAR_FWD:
-					if (player->airborne)
-						player->z_delta += 1;
-					else
-						player->gear += 1;
-					break;
-
-				case REQ_DIVE_OR_GEAR_REV:
-					if (player->airborne)
-						player->z_delta -= 1;
-					else
-						player->gear -= 1;
-					break;
-
-				case TURN_RIGHT:
-					player->a_delta += 1;
-					break;
-
-				case TURN_LEFT:
-					player->a_delta -= 1;
-					break;
-
-				case FIRE_MISSILE:
-					if (!player->loading_cd)
-						player->firing = true;
-					break;
-			}
-		}
-	}
-
-	/* Process joystick input - JOY_2 is the first physical joystick */
-	if (joy = joy_read(JOY_2)) {
-		if (JOY_UP(joy)) {		/* Joystick forward - dive or gear up */
-			if (player->airborne)
-				player->z_delta -= JOY_UP(player->joy)? 2: 1;
-			else
-				player->gear += 1;
-		} else if (JOY_DOWN(joy)) {	/* Joystick back - climb or gear down */
-			if (player->airborne)
-				player->z_delta += JOY_DOWN(player->joy)? 2: 1;
-			else
-				player->gear -= 1;
-		}
-		if (JOY_RIGHT(joy))
-			player->a_delta += JOY_RIGHT(player->joy)? 2: 1;
-		else if (JOY_LEFT(joy))
-			player->a_delta -= JOY_LEFT(player->joy)? 2: 1;
-		if (JOY_BTN_1(joy)) {
-			if (!player->loading_cd)
-				player->firing = true;
-		}
-	}
-	/* Save */
-	player->joy = joy;
-
-	/* Keep player deltas within limits! */
-	player->z_delta = Min8(Max8(player->z_delta, -Z_DELTA_LMT), Z_DELTA_LMT);
-	player->a_delta = Min8(Max8(player->a_delta, -A_DELTA_LMT), A_DELTA_LMT);
-}
 
 /* The program insures that the values passed to and returned
 	from MulDiv16 never exceed |32767|. Since this routine
