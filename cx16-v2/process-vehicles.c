@@ -105,10 +105,10 @@ void ProcessVehicles(void)
 			player->y = y;
 		}
 		/* Can't move? Try sliding along the wall */
-		else if (z >= arena[ARENA_INDEX(player->x, y)])
-			player->y = y;
-		else if (z >= arena[ARENA_INDEX(x, player->y)])
+		else if (player->x != x && z >= arena[ARENA_INDEX(x, player->y)])
 			player->x = x;
+		else if (player->y != y && z >= arena[ARENA_INDEX(player->x, y)])
+			player->y = y;
 		else
 			/* Stuck! */
 			ReportToAI(player, AIE_STUCK_PLAYER, arena[ARENA_INDEX(x, y)]);
