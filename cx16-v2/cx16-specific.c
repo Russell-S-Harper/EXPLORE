@@ -32,7 +32,12 @@
 #define FRAMES_PER_SEC_LO	4	/* If HW VERA FX Line Helper 4bpp workaround is required */
 #define FRAMES_PER_SEC_HI	6	/* No restrictions */
 
+
 /* Keyboard defines used in GetPlayerInput */
+#define JOIN_AS_NORMAL		74	/* J: join game */
+#define FOCUS_ON_HUMAN		75	/* K: focus on human */
+#define NO_REFRESH_AT_LAST_LVL	76	/* L: last level doesn't refresh */
+
 #define PAUSE_PROGRAM		27	/* escape: pause/unpause program */
 #define REQ_CLIMB_OR_GEAR_FWD	145	/* cursor up: climb or gear forward */
 #define REQ_DIVE_OR_GEAR_REV	17	/* cursor down: dive or gear reverse */
@@ -187,6 +192,7 @@ void UpdateDisplay(void)
 /* Processes keyboard and joystick input */
 void GetPlayerInput(VEHICLE *player)
 {
+	bool active_human = !player->npc && player->active;
 	uint8_t c, i, j, joy;
 
 	/* Process keyboard input */
@@ -201,16 +207,27 @@ void GetPlayerInput(VEHICLE *player)
 
 			case CYCLE_PLAYER:
 				/* Find the next active player or NPC, if any */
-				for (i = 1; i < PLAYER_COUNT; ++i) {
-					j = g_vehicle_index + i;
+				for (i = 1, j = g_vehicle_index + 1; i < PLAYER_COUNT; ++i, ++j) {
 					if (j >= PLAYER_LIMIT)
 						j = PLAYER_INDEX;
 					if (g_vehicles[j].active) {
 						g_vehicle_index = j;
-						ReportToAI(g_vehicles + j, AIE_SWITCHED_FOCUS, 0);
+						ReportToAI(g_vehicles + j, EVT_SWITCHED_FOCUS, 0);
 						break;
 					}
 				}
+				break;
+
+			case JOIN_AS_NORMAL:
+				ReportToAI(player, EVT_HUMAN_JOINED, MD_JOIN_AS_NORMAL);
+				break;
+
+			case FOCUS_ON_HUMAN:
+				ReportToAI(player, EVT_HUMAN_JOINED, MD_FOCUS_ON_HUMAN);
+				break;
+
+			case NO_REFRESH_AT_LAST_LVL:
+				ReportToAI(player, EVT_HUMAN_JOINED, MD_NO_REFRESH_AT_LAST_LEVEL);
 				break;
 
 			case QUIT_PROGRAM:
@@ -218,7 +235,7 @@ void GetPlayerInput(VEHICLE *player)
 				g_exit_program = true;
 				break;
 		}
-		if (!player->npc && player->active) {
+		if (active_human) {
 			switch (c) {
 				case REQ_CLIMB_OR_GEAR_FWD:
 					if (player->airborne)
@@ -250,34 +267,36 @@ void GetPlayerInput(VEHICLE *player)
 		}
 	}
 
-	/* Process joystick input - JOY_2 is the first physical joystick */
-	if (joy = joy_read(JOY_2)) {
-		if (JOY_UP(joy)) {		/* Joystick forward - dive or gear up */
-			if (player->airborne)
-				player->z_delta -= JOY_UP(player->joy)? 2: 1;
-			else
-				player->gear += 1;
-		} else if (JOY_DOWN(joy)) {	/* Joystick back - climb or gear down */
-			if (player->airborne)
-				player->z_delta += JOY_DOWN(player->joy)? 2: 1;
-			else
-				player->gear -= 1;
+	if (active_human) {
+		/* Process joystick input - JOY_2 is the first physical joystick */
+		if (joy = joy_read(JOY_2)) {
+			if (JOY_UP(joy)) {		/* Joystick forward - dive or gear up */
+				if (player->airborne)
+					player->z_delta -= JOY_UP(player->joy)? 2: 1;
+				else
+					player->gear += 1;
+			} else if (JOY_DOWN(joy)) {	/* Joystick back - climb or gear down */
+				if (player->airborne)
+					player->z_delta += JOY_DOWN(player->joy)? 2: 1;
+				else
+					player->gear -= 1;
+			}
+			if (JOY_RIGHT(joy))
+				player->a_delta += JOY_RIGHT(player->joy)? 2: 1;
+			else if (JOY_LEFT(joy))
+				player->a_delta -= JOY_LEFT(player->joy)? 2: 1;
+			if (JOY_BTN_1(joy)) {
+				if (!player->loading_cd)
+					player->firing = true;
+			}
 		}
-		if (JOY_RIGHT(joy))
-			player->a_delta += JOY_RIGHT(player->joy)? 2: 1;
-		else if (JOY_LEFT(joy))
-			player->a_delta -= JOY_LEFT(player->joy)? 2: 1;
-		if (JOY_BTN_1(joy)) {
-			if (!player->loading_cd)
-				player->firing = true;
-		}
-	}
-	/* Save */
-	player->joy = joy;
+		/* Save */
+		player->joy = joy;
 
-	/* Keep player deltas within limits! */
-	player->z_delta = Min8(Max8(player->z_delta, -Z_DELTA_LMT), Z_DELTA_LMT);
-	player->a_delta = Min8(Max8(player->a_delta, -A_DELTA_LMT), A_DELTA_LMT);
+		/* Keep player deltas within limits! */
+		player->z_delta = Min8(Max8(player->z_delta, -Z_DELTA_LMT), Z_DELTA_LMT);
+		player->a_delta = Min8(Max8(player->a_delta, -A_DELTA_LMT), A_DELTA_LMT);
+	}
 }
 
 /* Default callback to do useful work while waiting */

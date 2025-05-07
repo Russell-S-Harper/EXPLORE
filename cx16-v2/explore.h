@@ -40,7 +40,8 @@
 /* Exploadable distances - these are scaled */
 #define MSS_XY_TOL		114
 #define MSS_DST_TOL_SQR		13224
-#define TGT_XY_TOL		57
+#define TGT_NR_XY_TOL		114
+#define TGT_FR_XY_TOL		171
 
 /* Counters (in frames) for how long a missile takes to reload, missile lifespan, and hit animation */
 #define MSS_LOADING		6
@@ -103,17 +104,23 @@ bool AdvancePlayer(VEHICLE *player);
 
 /* AI */
 typedef enum {
-	AIE_NEW_ARENA,
-	AIE_SWITCHED_FOCUS,
-	AIE_STUCK_PLAYER,
-	AIE_STUCK_MISSILE,
-	AIE_REACHED_TOP,
-	AIE_REACHED_BOTTOM,
-	AIE_DAMAGED_PLAYER,
-	AIE_ADVANCED_PLAYER,
-	AIE_ELIMINATED_PLAYER,
-	AIE_WINNING_PLAYER
+	EVT_HUMAN_JOINED,	/* human has joined the game */
+	EVT_NEW_ARENA,		/* players are playing in a new arena */
+	EVT_SWITCHED_FOCUS,	/* focus was switched to a new player (to cut short mourning) */
+	EVT_DAMAGED_PLAYER,	/* a player has been damaged */
+	EVT_PLAYER_IMPEDED,	/* a player or missile is stuck, or a player is brushing up against a wall, or had an unsuccessful pursuit */
+	EVT_REACHED_TOP,	/* a player has reached the top of the arena */
+	EVT_REACHED_BOTTOM,	/* a player has reached the bottom of the arena */
+	EVT_ADVANCED_PLAYER,	/* a player has advanced */
+	EVT_ELIMINATED_PLAYER,	/* a player has been eliminated */
+	EVT_WINNING_PLAYER	/* a player has won */
 } AI_EVENT;
+
+/* Game modes */
+enum {MD_JOIN_AS_NORMAL, MD_FOCUS_ON_HUMAN, MD_NO_REFRESH_AT_LAST_LEVEL};
+
+/* Impediment types and severities  */
+enum {IMP_LOW = -3, IMP_MEDIUM = -5, IMP_HIGH = -8, IMP_EXTREME = -13};
 
 void InitAI(void);
 void NPCAI(VEHICLE *player);

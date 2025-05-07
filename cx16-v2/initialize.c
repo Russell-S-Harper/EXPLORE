@@ -197,14 +197,8 @@ static void InitPlayers(void)
 		player->identifier = i;
 		/* Starting as active */
 		player->active = true;
-		/* Human vs. NPC controlled */
-		if (i == HUMAN_ID) {
-			player->appearance[APP_AUX] = g_human_id_aux;
-			player->target = PLAYER_LIMIT;
-		} else {
-			player->npc = true;
-			player->target = HUMAN_ID;
-		}
+		player->npc = true;
+		player->target = PLAYER_LIMIT;
 		/* Initialize direction and position */
 		player->angle = (i << (SHIFT_FC - 2)) + (SCALE_FC / 8);
 		player->sin = Sin(player->angle);
@@ -218,8 +212,6 @@ static void InitPlayers(void)
 		player->level = -1;
 		AdvancePlayer(player);
 	}
-
-	g_vehicle_index = PLAYER_INDEX;
 }
 
 bool AdvancePlayer(VEHICLE *player)
@@ -232,7 +224,7 @@ bool AdvancePlayer(VEHICLE *player)
 	level = g_levels + player->level;
 	if (g_arena_index < level->arena) {
 		g_arena_index = level->arena;
-		ReportToAI(player, AIE_NEW_ARENA, g_arena_index);
+		ReportToAI(player, EVT_NEW_ARENA, g_arena_index);
 	}
 	player->health = PLAYER_HEALTH;
 	player->appearance[APP_PRM] = level->player;

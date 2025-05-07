@@ -91,10 +91,10 @@ void ProcessVehicles(void)
 			z += player->z_delta << Z_DELTA_SHIFT;
 			if (z < MIN_XYZ) {
 				z = MIN_XYZ;
-				ReportToAI(player, AIE_REACHED_TOP, 0);
+				ReportToAI(player, EVT_REACHED_TOP, 0);
 			} else if (z > MAX_XYZ) {
 				z = MAX_XYZ;
-				ReportToAI(player, AIE_REACHED_BOTTOM, 0);
+				ReportToAI(player, EVT_REACHED_BOTTOM, 0);
 			}
 			player->z_delta = 0;
 		}
@@ -105,13 +105,17 @@ void ProcessVehicles(void)
 			player->y = y;
 		}
 		/* Can't move? Try sliding along the wall */
-		else if (player->x != x && z >= arena[ARENA_INDEX(x, player->y)])
+		else if (player->x != x && z >= arena[ARENA_INDEX(x, player->y)]) {
 			player->x = x;
-		else if (player->y != y && z >= arena[ARENA_INDEX(player->x, y)])
+			/* Impeded */
+			ReportToAI(player, EVT_PLAYER_IMPEDED, IMP_MEDIUM);
+		} else if (player->y != y && z >= arena[ARENA_INDEX(player->x, y)]) {
 			player->y = y;
-		else
-			/* Stuck! */
-			ReportToAI(player, AIE_STUCK_PLAYER, arena[ARENA_INDEX(x, y)]);
+			/* Impeded */
+			ReportToAI(player, EVT_PLAYER_IMPEDED, IMP_MEDIUM);
+		} else
+			/* Stuck */
+			ReportToAI(player, EVT_PLAYER_IMPEDED, IMP_HIGH);
 
 		/* Finalize Z */
 		if (z >= arena[ARENA_INDEX(player->x, player->y)])
@@ -196,10 +200,10 @@ void ProcessVehicles(void)
 				missile->y = y;
 		else if (z >= arena[ARENA_INDEX(x, missile->y)])
 				missile->x = x;
-		/* Still can't move? Explode and report stuck! */
+		/* Still can't move? Explode and report impediment! */
 		else {
 			missile->exploding = true;
-			ReportToAI(g_vehicles + missile->identifier, AIE_STUCK_MISSILE, arena[ARENA_INDEX(x, y)]);
+			ReportToAI(g_vehicles + missile->identifier, EVT_PLAYER_IMPEDED, IMP_LOW);
 		}
 
 		/* Finalize Z */
@@ -215,15 +219,15 @@ void ProcessVehicles(void)
 					missile->exploding = true;
 					player->health -= missile->damage;
 					player->hit_cd = MSS_HIT;
-					ReportToAI(player, AIE_DAMAGED_PLAYER, missile->identifier);
+					ReportToAI(player, EVT_DAMAGED_PLAYER, missile->identifier);
 					if (player->health <= 0) {
 						if (!AdvancePlayer(g_vehicles + missile->identifier))
 							g_vehicles[missile->identifier].health = PLAYER_HEALTH;
 						if (!AdvancePlayer(player)) {
 							player->active = false;
-							ReportToAI(player, AIE_ELIMINATED_PLAYER, missile->identifier);
+							ReportToAI(player, EVT_ELIMINATED_PLAYER, missile->identifier);
 						} else
-							ReportToAI(player, AIE_ADVANCED_PLAYER, missile->identifier);
+							ReportToAI(player, EVT_ADVANCED_PLAYER, missile->identifier);
 						AddSound(BELL_RINGING);
 					}
 				}
@@ -238,12 +242,12 @@ void ProcessVehicles(void)
 		}
 	}
 	/* Check if there's a winner */
-	for (i = j = PLAYER_INDEX, player = NULL; i < PLAYER_LIMIT && j <= 1; ++i) {
+	for (i = PLAYER_INDEX, j = 0, player = NULL; i < PLAYER_LIMIT && j <= 1; ++i) {
 		if (g_vehicles[i].active) {
 			player = g_vehicles + i;
 			++j;
 		}
 	}
 	if (j == 1)
-		ReportToAI(player, AIE_WINNING_PLAYER, 0);
+		ReportToAI(player, EVT_WINNING_PLAYER, 0);
 }
