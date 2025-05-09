@@ -778,7 +778,7 @@ static int CountArenaSegments(const char *arena)
 		for (x = 0; x < ARENA_X_LMT; ++x) {
 			focus = ArenaCharacterAt(arena, x, y);
 			if (strchr(arena_vertices0, focus)) {
-				count += 1;
+				++count;
 				tmp = ArenaCharacterAt(arena, x + 1, y);
 				if (tmp == '-' || tmp == focus)
 					count += 2;

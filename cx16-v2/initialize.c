@@ -47,6 +47,9 @@ int16_t
 	g_max_vehicle_segments,
 	g_max_vehicle_vertices;
 
+bool
+	g_no_refresh_at_last_level;
+
 /* Internal data */
 const char
 	*g_read_mode = "rb",
@@ -56,8 +59,6 @@ const char
 
 static void InitData(char *file);
 static void InitSquares(void);
-static void InitPlayers(void);
-
 static void GetData(void *buffer, size_t size, FILE *ifile);
 
 void InitProgram(void)
@@ -176,7 +177,8 @@ static void InitSquares(void)
 {
 	uint16_t s, i, j;
 
-	g_squares = calloc(MSS_XY_TOL + 1, sizeof(uint16_t));
+	if (!g_squares)
+		g_squares = calloc(MSS_XY_TOL + 1, sizeof(uint16_t));
 
 	for (s = i = 0, j = 1; i <= MSS_XY_TOL; ++i) {
 		g_squares[i] = s;
@@ -185,12 +187,13 @@ static void InitSquares(void)
 	}
 }
 
-static void InitPlayers(void)
+void InitPlayers(void)
 {
 	int16_t i;
 	VEHICLE *player;
 
-	g_vehicles = calloc(VEHICLE_COUNT, sizeof(VEHICLE));
+	if (!g_vehicles)
+		g_vehicles = calloc(VEHICLE_COUNT, sizeof(VEHICLE));
 
 	for (i = PLAYER_INDEX, player = g_vehicles + PLAYER_INDEX; i < PLAYER_LIMIT; ++i, ++player) {
 		/* To prevent collisions with your own missiles! */

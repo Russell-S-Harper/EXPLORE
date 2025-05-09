@@ -11,10 +11,6 @@
 
 /* Defining constants generically for now, once they are all defined, will come up with a unified naming convention */
 
-#define AI_K13	'?'	/* Currently unused */
-#define AI_K14	'?'	/* Currently unused */
-#define AI_K35	'?'	/* Currently unused */
-
 #define AI_K39	9	/* ceil(log2(MAXIMUM_SCAN_LINE)); used to set srand seed */
 #define AI_K40	4	/* What to shift value from rand() to get "good" randomness */
 
@@ -61,6 +57,14 @@
 #define AI_K27	3	/* Modulus when setting g_action */
 #define AI_K28	-1	/* Offset when setting g_action */
 
+/* Avoiding is meant to handle corners, so best to define a preset action, like an instinct! */
+#define AI_K49	32	/* Offset for action_cd when avoiding */
+#define AI_K50	4	/* Modulus for action_cd when avoiding (to provide some variability) */
+#define AI_K13	2	/* Modulus to determine sign of a_action when avoiding */
+#define AI_K14	2	/* What to set a_action when avoiding */
+#define AI_K35	1	/* z_action when avoiding */
+#define AI_K48	-1	/* g_action when avoiding */
+
 #define AI_K32	2	/* What to set a_delta if target is far left or right */
 #define AI_K33	1	/* What to set a_delta if target is near left or right */
 #define AI_K46	1	/* AND of player identifier to determine a_delta direction if target is directly behind */
@@ -72,7 +76,7 @@
 
 /* Most AI is kept separate from the regular operation of the game */
 
-enum {AIS_READY, AIS_PURSUE, AIS_ESCAPE, AIS_EVADE, AIS_MOURN, AIS_CELEBRATE, AIS_DEAD};
+enum {AIS_READY, AIS_PURSUE, AIS_ESCAPE, AIS_EVADE, AIS_AVOID, AIS_MOURN, AIS_CELEBRATE, AIS_DEAD};
 
 typedef struct {
 	char identifier, parent;
@@ -87,10 +91,10 @@ typedef struct {
 } AI_CURRENT_STATE;
 
 /* Internal data */
+
 static bool
 	f_human_joined,
-	f_focus_on_human,
-	f_no_refresh_at_last_level;
+	f_focus_on_human;
 
 static char
 	f_identifier;
@@ -462,7 +466,7 @@ void NPCAI(VEHICLE *player)
 					else if (dz < -VEHICLE_Z_TOL)
 						player->z_delta = -player->gear;
 				} else
-					player->gear += 1;
+					++player->gear;
 				/* Fire */
 				if (!player->loading_cd && abs(dz) < VEHICLE_Z_TOL) {
 					/* Really close, just fire */
@@ -477,7 +481,7 @@ void NPCAI(VEHICLE *player)
 					}
 				}
 				/* Countdown */
-				x->action_cd -= 1;
+				--x->action_cd;
 				if (x->action_cd <= 0) {
 					x->status = AIS_READY;
 					/* Player was not successful in pursuing */
@@ -488,27 +492,36 @@ void NPCAI(VEHICLE *player)
 			break;
 		case AIS_CELEBRATE:
 			/* Countdown */
-			x->action_cd -= 1;
+			--x->action_cd;
 			if (x->action_cd <= 0) {
 				UpdateSettings(s);
-				g_exit_program = true;
+				OutputAsNumber('F', g_frame_counter);
+				g_frame_counter = 0;
+				/* Set up a new game */
+				f_human_joined = false;
+				f_focus_on_human = false;
+				g_no_refresh_at_last_level = false;
+				g_arena_index = 0;
+				InitPlayers();
+				InitAI();
 			}
 			break;
 		case AIS_ESCAPE:
 		case AIS_EVADE:
+		case AIS_AVOID:
 			player->a_delta = x->a_action;
 			if (player->airborne)
 				player->z_delta = x->z_action;
 			else
 				player->gear += x->g_action;
 			/* Countdown */
-			x->action_cd -= 1;
+			--x->action_cd;
 			if (x->action_cd <= 0)
 				x->status = AIS_READY;
 			break;
 		case AIS_MOURN:
 			/* Countdown */
-			x->action_cd -= 1;
+			--x->action_cd;
 			if (x->action_cd <= 0) {
 				if (g_vehicle_index == player->identifier) {
 					/* Find the next active player or NPC, if any */
@@ -567,22 +580,26 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 		case EVT_HUMAN_JOINED:
 			/* extra = game mode */
 			player = g_vehicles + HUMAN_ID;
-			player->npc = false;
-			player->appearance[APP_AUX] = g_human_id_aux;
+			if (player->npc) {
+				player->npc = false;
+				player->active = true;
+				player->health = PLAYER_HEALTH;
+				player->appearance[APP_AUX] = g_human_id_aux;
+				f_human_joined = true;
+			}
 			g_vehicle_index = player->identifier;
 			/* Set flags according to mode */
-			f_human_joined = true;
 			switch (extra) {
 				case MD_JOIN_AS_NORMAL:
 					f_focus_on_human = false;
-					f_no_refresh_at_last_level = false;
+					g_no_refresh_at_last_level = false;
 					break;
 				case MD_FOCUS_ON_HUMAN:
 					f_focus_on_human = true;
-					f_no_refresh_at_last_level = false;
+					g_no_refresh_at_last_level = false;
 					break;
 				case MD_NO_REFRESH_AT_LAST_LEVEL:
-					f_no_refresh_at_last_level = true;
+					g_no_refresh_at_last_level = true;
 					f_focus_on_human = false;
 					break;
 			}
@@ -592,8 +609,8 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			for (i = 0, x = f_current_state, s = f_settings; i < PLAYER_COUNT; ++i, ++x, ++s) {
 				/* Reset stuck countdown */
 				x->impeded_cd = s->impeded_lmt;
-				/* No longer escaping */
-				if (x->status == AIS_ESCAPE)
+				/* No longer escaping or avoiding */
+				if (x->status == AIS_ESCAPE || x->status == AIS_AVOID)
 					x->status = AIS_READY;
 			}
 			break;
@@ -605,13 +622,23 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 					x->status = AIS_DEAD;
 			}
 			break;
+		case EVT_PLAYER_CORNERED:
+			/* extra = not used */
+			/* Fixed action to avoid being cornered for an extended period of time */
+			/* No need to change behaviour if already avoiding */
+			if (x->status != AIS_AVOID) {
+				x->status = AIS_AVOID;
+				x->action_cd = AddRandomValue(AI_K50, AI_K49, AI_K49 - AI_K50, AI_K49 + AI_K50);
+				SetAZGActions(x);
+			}
+			break;
 		case EVT_PLAYER_IMPEDED:
 			/* extra = severity */
 			x->impeded_cd += extra;
 			if (x->impeded_cd <= 0) {
 				x->impeded_cd = s->impeded_lmt;
-				/* No need to change behaviour if already escaping */
-				if (x->status != AIS_ESCAPE) {
+				/* No need to change behaviour if already escaping, evading, or avoiding */
+				if (x->status != AIS_ESCAPE && x->status != AIS_EVADE && x->status != AIS_AVOID) {
 					/* Need to mix things up a bit */
 					x->status = AIS_ESCAPE;
 					t = s->randomizer >> AI_K20;
@@ -636,12 +663,12 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			a = extra - PLAYER_INDEX;
 			/* Keep track of statistics */
 			x->attacker = extra;
-			x->attackers[a] += 1;
+			++x->attackers[a];
 			x->abuse_cd -= g_vehicles[extra].damage << AI_K31;
 			if (x->abuse_cd <= 0) {
 				x->abuse_cd = s->abuse_lmt;
-				/* No need to change behaviour if already evading */
-				if (x->status != AIS_EVADE) {
+				/* No need to change behaviour if already evading or avoiding */
+				if (x->status != AIS_EVADE && x->status != AIS_AVOID) {
 					/* Need to evade attacker! */
 					x->status = AIS_EVADE;
 					t = s->randomizer >> AI_K20;
@@ -656,7 +683,6 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			x->abuse_cd = s->abuse_lmt;
 			x->impeded_cd = s->impeded_lmt;
 			break;
-
 		case EVT_ADVANCED_PLAYER:
 			/* extra = identifier of attacker */
 			a = extra - PLAYER_INDEX;
@@ -695,9 +721,16 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 
 static void SetAZGActions(AI_CURRENT_STATE *x)
 {
-	do
-		x->a_action = GetRandomByte(AI_K21) + AI_K22;
-	while (!x->a_action);
+	switch (x->status) {
+		case AIS_AVOID:
+			x->a_action = GetRandomByte(AI_K13)? -AI_K14: AI_K14;
+			break;
+		default:
+			do
+				x->a_action = GetRandomByte(AI_K21) + AI_K22;
+			while (!x->a_action);
+			break;
+	}
 	switch (x->status) {
 		case AIS_ESCAPE:
 			x->z_action = GetRandomByte(AI_K23) + AI_K24;
@@ -705,9 +738,19 @@ static void SetAZGActions(AI_CURRENT_STATE *x)
 		case AIS_EVADE:
 			x->z_action = GetRandomByte(AI_K29) + AI_K30;
 			break;
+		case AIS_AVOID:
+			x->z_action = AI_K35;
+			break;
 		case AIS_CELEBRATE:
 			x->z_action = GetRandomByte(AI_K25) + AI_K26;
 			break;
 	}
-	x->g_action = GetRandomByte(AI_K27) + AI_K28;
+	switch (x->status) {
+		case AIS_AVOID:
+			x->g_action = AI_K48;
+			break;
+		default:
+			x->g_action = GetRandomByte(AI_K27) + AI_K28;
+			break;
+	}
 }

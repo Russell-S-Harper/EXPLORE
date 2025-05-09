@@ -76,6 +76,7 @@ typedef struct {
 
 /* Routines called by main */
 void InitProgram(void);			/* Defined in initialize.c */
+void InitPlayers(void);			/* Defined in initialize.c */
 void ProcessVehicles(void);		/* Defined in process-vehicles.c */
 void RenderObjects(void);		/* Defined in render-objects.c */
 void UpdateDisplay(void);		/* Defined in cx16-specific.c */
@@ -108,6 +109,7 @@ typedef enum {
 	EVT_NEW_ARENA,		/* players are playing in a new arena */
 	EVT_SWITCHED_FOCUS,	/* focus was switched to a new player (to cut short mourning) */
 	EVT_DAMAGED_PLAYER,	/* a player has been damaged */
+	EVT_PLAYER_CORNERED,	/* a player is cornered */
 	EVT_PLAYER_IMPEDED,	/* a player or missile is stuck, or a player is brushing up against a wall, or had an unsuccessful pursuit */
 	EVT_REACHED_TOP,	/* a player has reached the top of the arena */
 	EVT_REACHED_BOTTOM,	/* a player has reached the bottom of the arena */
@@ -171,6 +173,9 @@ extern int16_t
 	g_vehicle_index,
 	g_max_vehicle_segments,
 	g_max_vehicle_vertices;
+
+extern bool
+	g_no_refresh_at_last_level;
 
 extern const char
 	*g_read_mode,

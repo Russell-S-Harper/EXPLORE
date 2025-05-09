@@ -239,24 +239,24 @@ void GetPlayerInput(VEHICLE *player)
 			switch (c) {
 				case REQ_CLIMB_OR_GEAR_FWD:
 					if (player->airborne)
-						player->z_delta += 1;
+						++player->z_delta;
 					else
-						player->gear += 1;
+						++player->gear;
 					break;
 
 				case REQ_DIVE_OR_GEAR_REV:
 					if (player->airborne)
-						player->z_delta -= 1;
+						--player->z_delta;
 					else
-						player->gear -= 1;
+						--player->gear;
 					break;
 
 				case TURN_RIGHT:
-					player->a_delta += 1;
+					++player->a_delta;
 					break;
 
 				case TURN_LEFT:
-					player->a_delta -= 1;
+					--player->a_delta;
 					break;
 
 				case FIRE_MISSILE:
@@ -274,12 +274,12 @@ void GetPlayerInput(VEHICLE *player)
 				if (player->airborne)
 					player->z_delta -= JOY_UP(player->joy)? 2: 1;
 				else
-					player->gear += 1;
+					++player->gear;
 			} else if (JOY_DOWN(joy)) {	/* Joystick back - climb or gear down */
 				if (player->airborne)
 					player->z_delta += JOY_DOWN(player->joy)? 2: 1;
 				else
-					player->gear -= 1;
+					--player->gear;
 			}
 			if (JOY_RIGHT(joy))
 				player->a_delta += JOY_RIGHT(player->joy)? 2: 1;

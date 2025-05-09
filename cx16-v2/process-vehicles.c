@@ -115,7 +115,7 @@ void ProcessVehicles(void)
 			ReportToAI(player, EVT_PLAYER_IMPEDED, IMP_MEDIUM);
 		} else
 			/* Stuck */
-			ReportToAI(player, EVT_PLAYER_IMPEDED, IMP_HIGH);
+			ReportToAI(player, EVT_PLAYER_CORNERED, 0);
 
 		/* Finalize Z */
 		if (z >= arena[ARENA_INDEX(player->x, player->y)])
@@ -221,7 +221,7 @@ void ProcessVehicles(void)
 					player->hit_cd = MSS_HIT;
 					ReportToAI(player, EVT_DAMAGED_PLAYER, missile->identifier);
 					if (player->health <= 0) {
-						if (!AdvancePlayer(g_vehicles + missile->identifier))
+						if (!AdvancePlayer(g_vehicles + missile->identifier) && !g_no_refresh_at_last_level)
 							g_vehicles[missile->identifier].health = PLAYER_HEALTH;
 						if (!AdvancePlayer(player)) {
 							player->active = false;
