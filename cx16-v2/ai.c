@@ -11,72 +11,72 @@
 
 /* Defining constants generically for now, once they are all defined, will come up with a unified naming convention */
 
-#define AI_K39	9	/* ceil(log2(MAXIMUM_SCAN_LINE)); used to set srand seed */
-#define AI_K40	4	/* What to shift value from rand() to get "good" randomness */
+#define AI_K01	9	/* ceil(log2(MAXIMUM_SCAN_LINE)); used to set srand seed */
+#define AI_K02	4	/* What to shift value from rand() to get "good" randomness */
 
-#define AI_K11	'a'	/* When initializing AI.DATA, this is the identifier of the first player */
-#define AI_K12	'd'	/* When initializing AI.DATA, this is the identifier of the last player */
-#define AI_K41	2	/* Winners offset */
+#define AI_K03	'a'	/* When initializing AI.DATA, identifier of the first player */
+#define AI_K04	'd'	/* When initializing AI.DATA, identifier of the last player */
+#define AI_K05	2	/* Winners offset */
 
-#define AI_K01	-79	/* To convert AI.DAT file size to randomizer "slope numerator" */
-#define AI_K02	1417	/* To convert AI.DAT file size to randomizer "slope denominator" */
-#define AI_K03	63	/* To convert AI.DAT file size to randomizer "intercept" */
+#define AI_K06	-79	/* To convert AI.DAT file size to randomizer "slope numerator" */
+#define AI_K07	1417	/* To convert AI.DAT file size to randomizer "slope denominator" */
+#define AI_K08	63	/* To convert AI.DAT file size to randomizer "intercept" */
 
-#define AI_K04	-120	/* Lower bounds of full range setting */
-#define AI_K05	120	/* Upper bounds of full range setting */
-#define AI_K08	0	/* Middle of full range setting */
-#define AI_K06	1	/* Lower bounds of half range setting */
-#define AI_K07	120	/* Upper bounds of half range setting */
-#define AI_K09	60	/* Middle of half range setting */
+#define AI_K09	-120	/* Lower bounds of full range setting */
+#define AI_K10	120	/* Upper bounds of full range setting */
+#define AI_K11	0	/* Middle of full range setting */
+#define AI_K12	1	/* Lower bounds of half range setting */
+#define AI_K13	120	/* Upper bounds of half range setting */
+#define AI_K14	60	/* Middle of half range setting */
 
-#define AI_K10	-5	/* Initial score */
-#define AI_K42	0	/* Initial tally */
+#define AI_K15	-5	/* Initial score */
+#define AI_K16	0	/* Initial tally */
 
-#define AI_K44	8	/* What to shift delta XYZ to use when calculating distance */
-#define AI_K47	3	/* What to shift (delta Z)² to account for height bias */
-#define AI_K45	2	/* Modulus to randomly pick in the event of ties */
-#define AI_K43	145	/* Tally adjustment to "focus on human" */
+#define AI_K17	8	/* What to shift delta XYZ to use when calculating distance */
+#define AI_K18	3	/* What to shift (delta Z)² to account for height bias */
+#define AI_K19	2	/* Modulus to randomly pick in the event of ties */
+#define AI_K20	145	/* Tally adjustment to "focus on human" */
 
-#define AI_K15	-10	/* What to change score by when player is advanced when health goes to zero */
-#define AI_K16	5	/* What to change score by when attacker is advanced */
-#define AI_K17	15	/* What to change score by when attacker eliminates another player */
+#define AI_K21	-10	/* What to change score by when player is advanced when health goes to zero */
+#define AI_K22	5	/* What to change score by when attacker is advanced */
+#define AI_K23	15	/* What to change score by when attacker eliminates another player */
 
-#define AI_K20	4	/* How much to shift randomizer when adding to escape or evade */
-#define AI_K18	24	/* What to set action_cd when mourning */
-#define AI_K19	60	/* What to set action_cd when celebrating */
-#define AI_K31	1	/* ceil(log2(AI_K07 / PLAYER_HEALTH)); what to shift player damage */
+#define AI_K24	4	/* How much to shift randomizer when adding to escape or evade */
+#define AI_K25	24	/* What to set action_cd when mourning */
+#define AI_K26	60	/* What to set action_cd when celebrating */
+#define AI_K27	1	/* ceil(log2(AI_K13 / PLAYER_HEALTH)); what to shift player damage */
 
-#define AI_K21	5	/* Modulus when setting a_action */
-#define AI_K22	-2	/* Offset when setting a_action */
-#define AI_K23	3	/* Modulus when setting z_action for escape status */
-#define AI_K24	0	/* Offset when setting z_action for escape status */
-#define AI_K29	3	/* Modulus when setting z_action for evade status */
-#define AI_K30	-2	/* Offset when setting z_action for evade status */
-#define AI_K25	5	/* Modulus when setting z_action for celebration status */
-#define AI_K26	-2	/* Offset when setting z_action for celebration status */
-#define AI_K27	3	/* Modulus when setting g_action */
-#define AI_K28	-1	/* Offset when setting g_action */
+#define AI_K28	5	/* Modulus when setting a_action */
+#define AI_K29	-2	/* Offset when setting a_action */
+#define AI_K30	3	/* Modulus when setting z_action for escape status */
+#define AI_K31	0	/* Offset when setting z_action for escape status */
+#define AI_K32	3	/* Modulus when setting z_action for evade status */
+#define AI_K33	-2	/* Offset when setting z_action for evade status */
+#define AI_K34	5	/* Modulus when setting z_action for celebration status */
+#define AI_K35	-2	/* Offset when setting z_action for celebration status */
+#define AI_K36	3	/* Modulus when setting g_action */
+#define AI_K37	-1	/* Offset when setting g_action */
 
-#define AI_K52	1	/* Right shift of action_cd for 3 players */
-#define AI_K53	2	/* Right shift of action_cd for 2 players */
-#define AI_K51	4	/* Minimum value after shifting action_cd */
+#define AI_K38	1	/* Shift of action_cd for 3 players */
+#define AI_K39	2	/* Shift of action_cd for 2 players */
+#define AI_K40	4	/* Minimum value after shifting action_cd */
 
 /* Avoiding is meant to handle corners, so best to define a preset action, like an instinct */
-#define AI_K49	32	/* Offset for action_cd when avoiding */
-#define AI_K50	4	/* Modulus for action_cd when avoiding (to provide some variability) */
-#define AI_K13	2	/* Modulus to determine sign of a_action when avoiding */
-#define AI_K14	2	/* What to set a_action when avoiding */
-#define AI_K35	1	/* z_action when avoiding */
-#define AI_K48	-1	/* g_action when avoiding */
+#define AI_K41	32	/* Offset for action_cd when avoiding */
+#define AI_K42	4	/* Modulus for action_cd when avoiding (to provide some variability) */
+#define AI_K43	2	/* Modulus to determine sign of a_action when avoiding */
+#define AI_K44	2	/* What to set a_action when avoiding */
+#define AI_K45	1	/* z_action when avoiding */
+#define AI_K46	-1	/* g_action when avoiding */
 
-#define AI_K32	2	/* What to set a_delta if target is far left or right */
-#define AI_K33	1	/* What to set a_delta if target is near left or right */
-#define AI_K46	1	/* AND of player identifier to determine a_delta direction if target is directly behind */
-#define AI_K34	2	/* What to set a_delta if target is directly behind; based on player identifier */
+#define AI_K47	2	/* What to set a_delta if target is far left or right */
+#define AI_K48	1	/* What to set a_delta if target is near left or right */
+#define AI_K49	1	/* AND of player identifier to determine a_delta direction if target is directly behind */
+#define AI_K50	2	/* What to set a_delta if target is directly behind; based on player identifier */
 
-#define AI_K36	9	/* What to shift dx and dy for accuracy calculation */
-#define AI_K37	961	/* Constant used in ensure result of accuracy calculation is [-120, 120] */
-#define AI_K38	3	/* What to shift to ensure result of accuracy calculation is [-120, 120] */
+#define AI_K51	9	/* What to shift dx and dy for accuracy calculation */
+#define AI_K52	961	/* Constant used in ensure result of accuracy calculation is [-120, 120] */
+#define AI_K53	3	/* What to shift to ensure result of accuracy calculation is [-120, 120] */
 
 /* Most AI is kept separate from the regular operation of the game */
 
@@ -109,9 +109,9 @@ static const char
 
 static uint8_t
 	f_modulus,
-	f_initialize[] = {'_', AI_K10,
-		AI_K09, AI_K09, AI_K09, AI_K09, AI_K09, AI_K09,
-		AI_K08, AI_K08, AI_K08, AI_K08, AI_K08, AI_K08, AI_K08},
+	f_initialize[] = {'_', AI_K15,
+		AI_K14, AI_K14, AI_K14, AI_K14, AI_K14, AI_K14,
+		AI_K11, AI_K11, AI_K11, AI_K11, AI_K11, AI_K11, AI_K11},
 	*f_random_bytes;
 
 static AI_SETTINGS
@@ -147,8 +147,8 @@ static void InitRNG(void)
 		f_random_bytes = malloc(sizeof(uint8_t) * UINT8_MAX);
 
 	/* Using the current scan line and clock as the seed, gather 256 pseudo-random bytes */
-	for (srand((clock() << AI_K39) + CURRENT_SCAN_LINE), i = 0; i < UINT8_MAX; ++i)
-		f_random_bytes[i] = (rand() >> AI_K40) & UINT8_MAX;
+	for (srand((clock() << AI_K01) + CURRENT_SCAN_LINE), i = 0; i < UINT8_MAX; ++i)
+		f_random_bytes[i] = (rand() >> AI_K02) & UINT8_MAX;
 }
 
 static uint8_t GetRandomByte(uint8_t modulus)
@@ -217,7 +217,7 @@ static void InitSettings(void)
 		if (!ofile)
 			ExitProgram(ERR_AI);
 
-		for (c = AI_K11; c <= AI_K12; ++c) {
+		for (c = AI_K03; c <= AI_K04; ++c) {
 			fwrite(&c, sizeof(char), 1, ofile);
 			fwrite(f_initialize, sizeof(AI_SETTINGS) - sizeof(char), 1, ofile);
 		}
@@ -232,25 +232,25 @@ static void InitSettings(void)
 		j += sizeof(AI_SETTINGS);
 	fclose(ifile);
 
-	/* Magic numbers to generate moduli [AI_K06, AI_K09] decreasing with file size */
-	f_modulus = Max16(Min16(MulDiv16(j, AI_K01, AI_K02) + AI_K03, AI_K09), AI_K06);
+	/* Magic numbers to generate moduli [AI_K12, AI_K14] decreasing with file size */
+	f_modulus = Max16(Min16(MulDiv16(j, AI_K06, AI_K07) + AI_K08, AI_K14), AI_K12);
 
 	/* Randomize settings */
 	for (i = 0, s = f_settings; i < PLAYER_COUNT; ++i, ++s) {
-		s->score = AI_K10;
-		s->pursue = AddRandomValue(f_modulus, s->pursue, AI_K06, AI_K07);
-		s->escape = AddRandomValue(f_modulus, s->escape, AI_K06, AI_K07);
-		s->evade = AddRandomValue(f_modulus, s->evade, AI_K06, AI_K07);
-		s->impeded_lmt = AddRandomValue(f_modulus, s->impeded_lmt, AI_K06, AI_K07);
-		s->abuse_lmt = AddRandomValue(f_modulus, s->abuse_lmt, AI_K06, AI_K07);
-		s->accuracy = AddRandomValue(f_modulus, s->accuracy, AI_K06, AI_K07);
-		s->randomizer = AddRandomValue(f_modulus, s->randomizer, AI_K06, AI_K07);
-		s->proximity = AddRandomValue(f_modulus, s->proximity, AI_K04, AI_K05);
-		s->tit_for_tat = AddRandomValue(f_modulus, s->tit_for_tat, AI_K04, AI_K05);
-		s->revenge = AddRandomValue(f_modulus, s->revenge, AI_K04, AI_K05);
-		s->persistence = AddRandomValue(f_modulus, s->persistence, AI_K04, AI_K05);
-		s->lowest_health = AddRandomValue(f_modulus, s->lowest_health, AI_K04, AI_K05);
-		s->lowest_level = AddRandomValue(f_modulus, s->lowest_level, AI_K04, AI_K05);
+		s->score = AI_K15;
+		s->pursue = AddRandomValue(f_modulus, s->pursue, AI_K12, AI_K13);
+		s->escape = AddRandomValue(f_modulus, s->escape, AI_K12, AI_K13);
+		s->evade = AddRandomValue(f_modulus, s->evade, AI_K12, AI_K13);
+		s->impeded_lmt = AddRandomValue(f_modulus, s->impeded_lmt, AI_K12, AI_K13);
+		s->abuse_lmt = AddRandomValue(f_modulus, s->abuse_lmt, AI_K12, AI_K13);
+		s->accuracy = AddRandomValue(f_modulus, s->accuracy, AI_K12, AI_K13);
+		s->randomizer = AddRandomValue(f_modulus, s->randomizer, AI_K12, AI_K13);
+		s->proximity = AddRandomValue(f_modulus, s->proximity, AI_K09, AI_K10);
+		s->tit_for_tat = AddRandomValue(f_modulus, s->tit_for_tat, AI_K09, AI_K10);
+		s->revenge = AddRandomValue(f_modulus, s->revenge, AI_K09, AI_K10);
+		s->persistence = AddRandomValue(f_modulus, s->persistence, AI_K09, AI_K10);
+		s->lowest_health = AddRandomValue(f_modulus, s->lowest_health, AI_K09, AI_K10);
+		s->lowest_level = AddRandomValue(f_modulus, s->lowest_level, AI_K09, AI_K10);
 	}
 }
 
@@ -261,7 +261,7 @@ static void UpdateSettings(AI_SETTINGS *s)
 	uint8_t i;
 	char identifier = '\0';
 
-	if (f_modulus > AI_K06 && !f_human_joined) {
+	if (f_modulus > AI_K12 && !f_human_joined) {
 		/* Will need this when sorting */
 		f_identifier = s->identifier;
 		/* Sort according to winner and scores */
@@ -280,13 +280,13 @@ static void UpdateSettings(AI_SETTINGS *s)
 		remove(f_working);
 		fwrite(f_settings, sizeof(AI_SETTINGS), PLAYER_COUNT, ofile);
 		/* Update parentage */
-		for (i = PLAYER_COUNT - AI_K41; i < PLAYER_COUNT; ++i) {
+		for (i = PLAYER_COUNT - AI_K05; i < PLAYER_COUNT; ++i) {
 			s = f_settings + i;
 			s->parent = s->identifier;
 			s->identifier = ++identifier;
 		}
 		/* Output cloned players */
-		fwrite(f_settings + PLAYER_COUNT - AI_K41, sizeof(AI_SETTINGS), AI_K41, ofile);
+		fwrite(f_settings + PLAYER_COUNT - AI_K05, sizeof(AI_SETTINGS), AI_K05, ofile);
 		fclose(ofile);
 	}
 }
@@ -358,13 +358,13 @@ void NPCAI(VEHICLE *player)
 			/* Initialize using the randomizer and add in tit-for-tat, persistence, and focus on human */
 			for (i = PLAYER_INDEX, j = 0, t = g_vehicles + PLAYER_INDEX; i < PLAYER_LIMIT; ++i, ++j, ++t) {
 				if (t->active && t->identifier != player->identifier) {
-					s_tallies[j] = AddRandomValue(s->randomizer, AI_K42, AI_K06, AI_K07);
+					s_tallies[j] = AddRandomValue(s->randomizer, AI_K16, AI_K12, AI_K13);
 					if (i == x->attacker)
 						s_tallies[j] += s->tit_for_tat;
 					if (i == player->target)
 						s_tallies[j] += s->persistence;
 					if (f_focus_on_human && !t->npc)
-						s_tallies[j] += AI_K43;
+						s_tallies[j] += AI_K20;
 				} else
 					s_tallies[j] = INT16_MIN;
 			}
@@ -372,10 +372,10 @@ void NPCAI(VEHICLE *player)
 			for (i = 0, j = PLAYER_COUNT, current = INT16_MAX, t = g_vehicles + PLAYER_INDEX; i < PLAYER_COUNT; ++i, ++t) {
 				if (!t->active || t->identifier == player->identifier)
 					continue;
-				working = g_squares[abs(t->x - player->x) >> AI_K44]
-						+ g_squares[abs(t->y - player->y) >> AI_K44]
-						+ (g_squares[abs(t->z - player->z) >> AI_K44] << AI_K47);
-				if (current > working || (current == working && GetRandomByte(AI_K45))) {
+				working = g_squares[abs(t->x - player->x) >> AI_K17]
+						+ g_squares[abs(t->y - player->y) >> AI_K17]
+						+ (g_squares[abs(t->z - player->z) >> AI_K17] << AI_K18);
+				if (current > working || (current == working && GetRandomByte(AI_K19))) {
 					current = working;
 					j = i;
 				}
@@ -387,7 +387,7 @@ void NPCAI(VEHICLE *player)
 				if (!t->active || t->identifier == player->identifier)
 					continue;
 				working = x->attackers[i];
-				if (current < working || (current == working && GetRandomByte(AI_K45))) {
+				if (current < working || (current == working && GetRandomByte(AI_K19))) {
 					current = working;
 					j = i;
 				}
@@ -399,7 +399,7 @@ void NPCAI(VEHICLE *player)
 				if (!t->active || t->identifier == player->identifier)
 					continue;
 				working = t->health;
-				if (current > working || (current == working && GetRandomByte(AI_K45))) {
+				if (current > working || (current == working && GetRandomByte(AI_K19))) {
 					current = working;
 					j = i;
 				}
@@ -411,7 +411,7 @@ void NPCAI(VEHICLE *player)
 				if (!t->active || t->identifier == player->identifier)
 					continue;
 				working = t->level;
-				if (current > working || (current == working && GetRandomByte(AI_K45))) {
+				if (current > working || (current == working && GetRandomByte(AI_K19))) {
 					current = working;
 					j = i;
 				}
@@ -421,16 +421,16 @@ void NPCAI(VEHICLE *player)
 			/* Pick the target with the highest tally */
 			for (i = 0, j = PLAYER_COUNT, current = INT16_MIN; i < PLAYER_COUNT; ++i) {
 				working = s_tallies[i];
-				if (current < working || (current == working && GetRandomByte(AI_K45))) {
+				if (current < working || (current == working && GetRandomByte(AI_K19))) {
 					current = working;
 					j = i;
 				}
 			}
 			if (j != PLAYER_COUNT) {
 				player->target = j + PLAYER_INDEX;
-				k = s->randomizer >> AI_K20;
-				if (!k) k = AI_K06;
-				x->action_cd = AddRandomValue(k, s->pursue, AI_K06, AI_K07);
+				k = s->randomizer >> AI_K24;
+				if (!k) k = AI_K12;
+				x->action_cd = AddRandomValue(k, s->pursue, AI_K12, AI_K13);
 				x->status = AIS_PURSUE;
 			}
 			break;
@@ -448,20 +448,20 @@ void NPCAI(VEHICLE *player)
 				/* Steer towards */
 				if (fb > TGT_NR_XY_TOL) {
 					if (lr < -TGT_FR_XY_TOL)
-						player->a_delta = -AI_K32;
+						player->a_delta = -AI_K47;
 					else if (lr < -TGT_NR_XY_TOL)
-						player->a_delta = -AI_K33;
+						player->a_delta = -AI_K48;
 					else if (lr > TGT_FR_XY_TOL)
-						player->a_delta = AI_K32;
+						player->a_delta = AI_K47;
 					else if (lr > TGT_NR_XY_TOL)
-						player->a_delta = AI_K33;
+						player->a_delta = AI_K48;
 				} else if (fb < -TGT_NR_XY_TOL) {
 					if (lr < 0)
-						player->a_delta = -AI_K32;
+						player->a_delta = -AI_K47;
 					else if (lr > 0)
-						player->a_delta = AI_K32;
+						player->a_delta = AI_K47;
 					else
-						player->a_delta = (player->identifier & AI_K46)? -AI_K34: AI_K34;
+						player->a_delta = (player->identifier & AI_K49)? -AI_K50: AI_K50;
 				}
 				/* Try to match height */
 				if (player->airborne) {
@@ -478,9 +478,9 @@ void NPCAI(VEHICLE *player)
 						player->firing = true;
 					/* Not so close, check accuracy */
 					else if (fb > 0 && abs(lr) < TGT_FR_XY_TOL) {
-						dx >>= AI_K36;
-						dy >>= AI_K36;
-						if ((AI_K37 - g_squares[dx] - g_squares[dy]) >> AI_K38 >= s->accuracy)
+						dx >>= AI_K51;
+						dy >>= AI_K51;
+						if ((AI_K52 - g_squares[dx] - g_squares[dy]) >> AI_K53 >= s->accuracy)
 							player->firing = true;
 					}
 				}
@@ -635,7 +635,7 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			/* No need to change behaviour if already avoiding */
 			if (x->status != AIS_AVOID) {
 				x->status = AIS_AVOID;
-				x->action_cd = AddRandomValue(AI_K50, AI_K49, AI_K49 - AI_K50, AI_K49 + AI_K50);
+				x->action_cd = AddRandomValue(AI_K42, AI_K41, AI_K41 - AI_K42, AI_K41 + AI_K42);
 				SetAZGActions(x);
 			}
 			break;
@@ -648,19 +648,19 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 				if (x->status != AIS_ESCAPE && x->status != AIS_EVADE && x->status != AIS_AVOID) {
 					/* Need to mix things up a bit */
 					x->status = AIS_ESCAPE;
-					t = s->randomizer >> AI_K20;
-					if (!t) t = AI_K06;
-					x->action_cd = AddRandomValue(t, s->escape, AI_K06, AI_K07);
+					t = s->randomizer >> AI_K24;
+					if (!t) t = AI_K12;
+					x->action_cd = AddRandomValue(t, s->escape, AI_K12, AI_K13);
 					switch (g_active_players) {
 						case 3:
-							x->action_cd >>= AI_K52;
-							if (x->action_cd < AI_K51)
-								x->action_cd = AI_K51;
+							x->action_cd >>= AI_K38;
+							if (x->action_cd < AI_K40)
+								x->action_cd = AI_K40;
 							break;
 						case 2:
-							x->action_cd >>= AI_K53;
-							if (x->action_cd < AI_K51)
-								x->action_cd = AI_K51;
+							x->action_cd >>= AI_K39;
+							if (x->action_cd < AI_K40)
+								x->action_cd = AI_K40;
 							break;
 					}
 					SetAZGActions(x);
@@ -683,16 +683,16 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			/* Keep track of statistics */
 			x->attacker = extra;
 			++x->attackers[a];
-			x->abuse_cd -= g_vehicles[extra].damage << AI_K31;
+			x->abuse_cd -= g_vehicles[extra].damage << AI_K27;
 			if (x->abuse_cd <= 0) {
 				x->abuse_cd = s->abuse_lmt;
 				/* No need to change behaviour if already evading or avoiding */
 				if (x->status != AIS_EVADE && x->status != AIS_AVOID) {
 					/* Need to evade attacker! */
 					x->status = AIS_EVADE;
-					t = s->randomizer >> AI_K20;
-					if (!t) t = AI_K06;
-					x->action_cd = AddRandomValue(t, s->evade, AI_K06, AI_K07);
+					t = s->randomizer >> AI_K24;
+					if (!t) t = AI_K12;
+					x->action_cd = AddRandomValue(t, s->evade, AI_K12, AI_K13);
 					SetAZGActions(x);
 				}
 			}
@@ -706,15 +706,15 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			/* extra = identifier of attacker */
 			a = extra - PLAYER_INDEX;
 			/* Adjust scores */
-			s->score += AI_K15;
-			f_settings[a].score += AI_K16;
+			s->score += AI_K21;
+			f_settings[a].score += AI_K22;
 			break;
 		case EVT_ELIMINATED_PLAYER:
 			/* extra = identifier of attacker */
 			a = extra - PLAYER_INDEX;
 			/* Pause a bit to mourn */
 			x->status = AIS_MOURN;
-			x->action_cd = AI_K18;
+			x->action_cd = AI_K25;
 			/* Remove eliminated player from consideration */
 			for (i = 0, x = f_current_state, v = g_vehicles + PLAYER_INDEX, j = player->identifier - PLAYER_INDEX; i < PLAYER_COUNT; ++i, ++x, ++v) {
 				/* Zero counts for eliminated player */
@@ -726,13 +726,13 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 					x->status = AIS_READY;
 			}
 			/* Adjust score for attacker */
-			f_settings[a].score += AI_K17;
+			f_settings[a].score += AI_K23;
 			break;
 		case EVT_WINNING_PLAYER:
 			/* extra = not used */
 			/* Pause a bit to celebrate */
 			x->status = AIS_CELEBRATE;
-			x->action_cd = AI_K19;
+			x->action_cd = AI_K26;
 			SetAZGActions(x);
 			break;
 	}
@@ -743,35 +743,35 @@ static void SetAZGActions(AI_CURRENT_STATE *x)
 	int8_t a_action;
 	switch (x->status) {
 		case AIS_AVOID:
-			x->a_action = GetRandomByte(AI_K13)? -AI_K14: AI_K14;
+			x->a_action = GetRandomByte(AI_K43)? -AI_K44: AI_K44;
 			break;
 		default:
 			do
-				a_action = GetRandomByte(AI_K21) + AI_K22;
+				a_action = GetRandomByte(AI_K28) + AI_K29;
 			while (!a_action || x->a_action == a_action);
 			x->a_action = a_action;
 			break;
 	}
 	switch (x->status) {
 		case AIS_ESCAPE:
-			x->z_action = GetRandomByte(AI_K23) + AI_K24;
+			x->z_action = GetRandomByte(AI_K30) + AI_K31;
 			break;
 		case AIS_EVADE:
-			x->z_action = GetRandomByte(AI_K29) + AI_K30;
+			x->z_action = GetRandomByte(AI_K32) + AI_K33;
 			break;
 		case AIS_AVOID:
-			x->z_action = AI_K35;
+			x->z_action = AI_K45;
 			break;
 		case AIS_CELEBRATE:
-			x->z_action = GetRandomByte(AI_K25) + AI_K26;
+			x->z_action = GetRandomByte(AI_K34) + AI_K35;
 			break;
 	}
 	switch (x->status) {
 		case AIS_AVOID:
-			x->g_action = AI_K48;
+			x->g_action = AI_K46;
 			break;
 		default:
-			x->g_action = GetRandomByte(AI_K27) + AI_K28;
+			x->g_action = GetRandomByte(AI_K36) + AI_K37;
 			break;
 	}
 }
