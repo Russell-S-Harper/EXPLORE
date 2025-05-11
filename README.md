@@ -2,7 +2,7 @@
 
 These are some demos written in the 1990s for DOS x86 and 8-bit computers being ported to the Commander X16. One is a 3-D demo; the other a very basic AI demo.
 
-The 3-D demo was written in 1992 for DOS x86 computers for which I still have the original source code. The other, using a very basic AI, is a game long lost to history, the only things left are a few hand-drawn sketches and flowcharts.
+The 3-D demo was written in 1992 for DOS x86 computers for which I still have the original source code. The other AI demo is a game long lost to history – the only things left are a few hand-drawn sketches and flowcharts.
 
 ## DOSBox
 
@@ -37,7 +37,7 @@ To build the original demo, you’ll probably need Turbo C++. I distilled some o
 - late 1990s, graphics cards made 3-D development much easier and faster, stopped developing the demo (e.g. just had yaw, was planning on adding pitch and roll)
 - 2000s to early 2020s, doing other things, forgot completely about the demo!
 - 2024, viewed a [YouTube video](https://www.youtube.com/watch?v=t2ESLQHOIhw) from David Murray, The 8-Bit Guy, where he mentioned he was interested in seeing 3-D games added to the body of existing programs available for the Commander X16 (a modern 6502 computer, a.k.a. CX16); that reminded me of the old demo from last century :wink:
-- 2024, found out the old 3-D demo can run in DOSBox!
+- 2024, found out the demo can still run in DOSBox!
 - 2024 to present day, rewriting the demo for the CX16; so far the results are not impressive – project on hold
 
 So from the mid 1980s to the present day, went from the 6502, to the 68K, then to the x86, then full circle back to the 6502!
@@ -96,7 +96,7 @@ VERA is a display co-processor used in the CX16. It has a new feature, "FX", whi
 
 V2 takes a different perspective looking overhead into an arena setting with walls and vehicles. There’s no masking, just lines. Here’s a [video](https://www.youtube.com/watch?v=6ZxkDRXkPw0) of the current progress. The rotations and scalings require a lot of multiplications and divisions such that they end up being bottlenecks. The multiplier in VERA is a major factor in getting the frame rate to 7.5 frames/s although it’s set to 6.0 frames/s to give a timeslice for the AI. Given that 5.0 frames/s is acceptable, there’s lots of room to add more details, and the code is only minimally optimized.
 
-About the AI, it uses only 13 bytes to correspond to various settings, i.e. very basic. You can let the program run on its own, and it will create an `AI.DAT` file and document the generations as the players compete with each other. It looks pretty good running as a screen saver or retro videogame attract mode.
+About the AI, it uses only 13 bytes to correspond to various settings, e.g. evade, revenge, persistence, etc. You can let the program run on its own, and it will create an `AI.DAT` file and document the generations as the players compete with each other. It looks pretty good running as a screen saver or a retro videogame attract mode.
 
 As in `cx16-v1`, should you want to build the demo, you’ll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
