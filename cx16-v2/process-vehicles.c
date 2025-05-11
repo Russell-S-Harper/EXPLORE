@@ -242,7 +242,7 @@ void ProcessVehicles(void)
 		}
 	}
 	/* Check if there's a winner */
-	for (i = PLAYER_INDEX, j = 0, player = NULL; i < PLAYER_LIMIT && j <= 1; ++i) {
+	for (i = PLAYER_INDEX, j = 0, player = NULL; i < PLAYER_LIMIT; ++i) {
 		if (g_vehicles[i].active) {
 			player = g_vehicles + i;
 			++j;
@@ -250,4 +250,6 @@ void ProcessVehicles(void)
 	}
 	if (j == 1)
 		ReportToAI(player, EVT_WINNING_PLAYER, 0);
+
+	g_active_players = j;
 }

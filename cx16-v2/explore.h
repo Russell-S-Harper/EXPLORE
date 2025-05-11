@@ -154,9 +154,13 @@ extern LEVEL
 	*g_levels;
 
 extern bool
+	g_no_refresh_at_last_level,
 	g_exit_program;
 
 extern uint8_t
+	g_arena_index,
+	g_vehicle_index,
+	g_active_players,
 	*g_psg_settings,
 	*g_psg_volumes;
 
@@ -167,15 +171,10 @@ extern uint16_t
 	*g_squares;
 
 extern int16_t
-	g_arena_index,
 	g_max_arena_segments,
 	g_max_arena_vertices,
-	g_vehicle_index,
 	g_max_vehicle_segments,
 	g_max_vehicle_vertices;
-
-extern bool
-	g_no_refresh_at_last_level;
 
 extern const char
 	*g_read_mode,

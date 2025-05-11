@@ -43,7 +43,7 @@
 
 #define AI_K20	4	/* How much to shift randomizer when adding to escape or evade */
 #define AI_K18	24	/* What to set action_cd when mourning */
-#define AI_K19	48	/* What to set action_cd when celebrating */
+#define AI_K19	60	/* What to set action_cd when celebrating */
 #define AI_K31	1	/* ceil(log2(AI_K07 / PLAYER_HEALTH)); what to shift player damage */
 
 #define AI_K21	5	/* Modulus when setting a_action */
@@ -57,7 +57,11 @@
 #define AI_K27	3	/* Modulus when setting g_action */
 #define AI_K28	-1	/* Offset when setting g_action */
 
-/* Avoiding is meant to handle corners, so best to define a preset action, like an instinct! */
+#define AI_K52	1	/* Right shift of action_cd for 3 players */
+#define AI_K53	2	/* Right shift of action_cd for 2 players */
+#define AI_K51	4	/* Minimum value after shifting action_cd */
+
+/* Avoiding is meant to handle corners, so best to define a preset action, like an instinct */
 #define AI_K49	32	/* Offset for action_cd when avoiding */
 #define AI_K50	4	/* Modulus for action_cd when avoiding (to provide some variability) */
 #define AI_K13	2	/* Modulus to determine sign of a_action when avoiding */
@@ -581,27 +585,30 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			/* extra = game mode */
 			player = g_vehicles + HUMAN_ID;
 			if (player->npc) {
-				player->npc = false;
 				player->active = true;
+				player->npc = false;
+				player->target = PLAYER_LIMIT;
 				player->health = PLAYER_HEALTH;
 				player->appearance[APP_AUX] = g_human_id_aux;
 				f_human_joined = true;
 			}
-			g_vehicle_index = player->identifier;
-			/* Set flags according to mode */
-			switch (extra) {
-				case MD_JOIN_AS_NORMAL:
-					f_focus_on_human = false;
-					g_no_refresh_at_last_level = false;
-					break;
-				case MD_FOCUS_ON_HUMAN:
-					f_focus_on_human = true;
-					g_no_refresh_at_last_level = false;
-					break;
-				case MD_NO_REFRESH_AT_LAST_LEVEL:
-					g_no_refresh_at_last_level = true;
-					f_focus_on_human = false;
-					break;
+			if (player->active) {
+				g_vehicle_index = player->identifier;
+				/* Set flags according to mode */
+				switch (extra) {
+					case MD_JOIN_AS_NORMAL:
+						f_focus_on_human = false;
+						g_no_refresh_at_last_level = false;
+						break;
+					case MD_FOCUS_ON_HUMAN:
+						f_focus_on_human = true;
+						g_no_refresh_at_last_level = false;
+						break;
+					case MD_NO_REFRESH_AT_LAST_LEVEL:
+						g_no_refresh_at_last_level = true;
+						f_focus_on_human = false;
+						break;
+				}
 			}
 			break;
 		case EVT_NEW_ARENA:
@@ -644,6 +651,18 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 					t = s->randomizer >> AI_K20;
 					if (!t) t = AI_K06;
 					x->action_cd = AddRandomValue(t, s->escape, AI_K06, AI_K07);
+					switch (g_active_players) {
+						case 3:
+							x->action_cd >>= AI_K52;
+							if (x->action_cd < AI_K51)
+								x->action_cd = AI_K51;
+							break;
+						case 2:
+							x->action_cd >>= AI_K53;
+							if (x->action_cd < AI_K51)
+								x->action_cd = AI_K51;
+							break;
+					}
 					SetAZGActions(x);
 				}
 			}
@@ -721,14 +740,16 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 
 static void SetAZGActions(AI_CURRENT_STATE *x)
 {
+	int8_t a_action;
 	switch (x->status) {
 		case AIS_AVOID:
 			x->a_action = GetRandomByte(AI_K13)? -AI_K14: AI_K14;
 			break;
 		default:
 			do
-				x->a_action = GetRandomByte(AI_K21) + AI_K22;
-			while (!x->a_action);
+				a_action = GetRandomByte(AI_K21) + AI_K22;
+			while (!a_action || x->a_action == a_action);
+			x->a_action = a_action;
 			break;
 	}
 	switch (x->status) {
