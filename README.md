@@ -125,7 +125,7 @@ When you’re playing, these are your keyboard and joystick controls:
 - cursor left or joystick left: turn left
 - space or joystick button: fire missile
 
-I’m working on an attract screen with instructions, but for now you can probably figure out the rules on your own!
+I’m working on an attract sequence with instructions, but for now you can probably figure out the rules on your own!
 
 Depending on what I’m optimizing, it might print some timing statistics in `clock` units.
 
