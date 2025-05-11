@@ -1,28 +1,12 @@
 # EXPLORE
 
-This is a 3-D demo written in 1992 for DOS x86 computers being ported to the Commander X16. There is also mention of a game long lost to history, the only things left are a few hand-drawn sketches and flowcharts.
+These are some demos written in the 1990s for DOS x86 and 8-bit computers being ported to the Commander X16. One is a 3-D demo; the other a very basic AI demo.
 
-## History
-
-In chronological order:
-
-- mid 1980s, met with a company in Chatsworth, CA to discuss a 3-D game for a popular 6502 system
-- later 1980s, using every scrap of CPU and memory created a very simple demo in 6502 assembler; it was just walls that you could fly over and around, still looked cool
-- slightly later 1980s, company goes bankrupt, project scrapped!
-- early 1990s, rewrote the demo for the 68K in mixed K&R C and 68K assembler, with walls, polygons, horizon, sound, etc., but picked the "wrong horse" because the x86 was rapidly becoming dominant
-- early 1990s, rewrote the demo for the x86 in DOS in mostly ANSI C, no sound (native sound was just beeps back then)
-- mid 1990s, used the demo to get a number of decent summer jobs!
-- late 1990s, graphics cards made 3-D development much easier and faster, stopped developing the demo (e.g. just had yaw, was planning on adding pitch and roll)
-- 2000s to early 2020s, doing other things, forgot completely about the demo!
-- 2024, viewed a [YouTube video](https://www.youtube.com/watch?v=t2ESLQHOIhw) from David Murray, The 8-Bit Guy, where he mentioned he was interested in seeing 3-D games added to the body of existing programs available for the Commander X16 (a modern 6502 computer, a.k.a. CX16); that reminded me of the old demo from last century :wink:
-- 2024, found out the old demo can run in DOSBox!
-- 2024 to present day, rewriting the demo for the CX16; the results so far are not impressive, but there are still opportunities to research
-
-So from the mid 1980s to the present day, went from the 6502, to the 68K, then to the x86, then full circle back to the 6502!
+The 3-D demo was written in 1992 for DOS x86 computers for which I still have the original source code. The other, using a very basic AI, is a game long lost to history, the only things left are a few hand-drawn sketches and flowcharts.
 
 ## DOSBox
 
-This is the original demo from 1992. I was still learning ANSI C at the time, so the code is not very good! As I port over functionality to the CX16 demo, I’m trying to clean it up and optimize it, before continuing with more functionality. Some places I’m really going to have to work to figure it out! Because the code was ported from a 68K base where it had a lot of registers available, the original code still has remnants of these keywords, as well as a lot of other strange ideas I had at the time.
+This is the original 3-D demo from 1992. I was still learning ANSI C at the time, so the code is not very good! As I ported over functionality to the CX16 demo, I tried to clean it up and optimize it, before continuing with more functionality. Some places I really had to work hard to figure it out! Because the code was ported from a 68K base where it had a lot of registers available, the original code still has remnants of these keywords, as well as a lot of other strange ideas I had at the time.
 
 To run the original demo, install [DOSBox](https://www.dosbox.com/), run it, mount a drive to point to `«explore-repo»/dosbox/bin`, and run `rgntest.exe`. Suggest running at least at 5 frames/s, i.e. press CTRL-F12 until it’s fast enough. Here’s a [video](https://www.youtube.com/watch?v=XTOIfkqW9O0) of it in action.
 
@@ -40,7 +24,25 @@ To build the original demo, you’ll probably need Turbo C++. I distilled some o
 
 † The histogram is in units of 13.7 ms (1/72.82 Hz), so to get 5 frames/s (or 0.20 s/frame), you’ll want the peak at 15 units or less.
 
-## CX16 – v1. Masking Approach
+## CX16 v1 – 3-D Demo
+
+### History
+
+- mid 1980s, met with a company in Chatsworth, CA to discuss a 3-D game for a popular 6502 system
+- later 1980s, using every scrap of CPU and memory created a very simple demo in 6502 assembler; it was just walls that you could fly over and around, still looked cool
+- slightly later 1980s, company goes bankrupt, project scrapped!
+- early 1990s, rewrote the demo for the 68K in mixed K&R C and 68K assembler, with walls, polygons, horizon, sound, etc., but picked the "wrong horse" because the x86 was rapidly becoming dominant
+- early 1990s, rewrote the demo for the x86 in DOS in mostly ANSI C, no sound (native sound was just beeps back then)
+- mid 1990s, used the demo to get a number of decent summer jobs!
+- late 1990s, graphics cards made 3-D development much easier and faster, stopped developing the demo (e.g. just had yaw, was planning on adding pitch and roll)
+- 2000s to early 2020s, doing other things, forgot completely about the demo!
+- 2024, viewed a [YouTube video](https://www.youtube.com/watch?v=t2ESLQHOIhw) from David Murray, The 8-Bit Guy, where he mentioned he was interested in seeing 3-D games added to the body of existing programs available for the Commander X16 (a modern 6502 computer, a.k.a. CX16); that reminded me of the old demo from last century :wink:
+- 2024, found out the old 3-D demo can run in DOSBox!
+- 2024 to present day, rewriting the demo for the CX16; so far the results are not impressive – project on hold
+
+So from the mid 1980s to the present day, went from the 6502, to the 68K, then to the x86, then full circle back to the 6502!
+
+### Progress
 
 Completed the following:
 
@@ -81,11 +83,20 @@ The only controls are escape to pause (!) and Q to quit, or you can just wait an
 
 Here’s a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of the very simplified demo running at 0.66 s/frame.
 
-## CX16 – v2. VERA Approach
+## CX16 v2 – AI Demo
+
+### History
+
+- early 1990s, wrote an AI demo set in an arena with competing players, however most details are lost to history
+- 2024 to present day, rewriting the demo for the CX16; so far the results are good – might have something useful for exhibitions and trade shows
+
+### Progress
 
 VERA is a display co-processor used in the CX16. It has a new feature, "FX", which provides helpers to improve line drawing, polygon filling, and other functions. Using the line drawing helper, I was able to implement 16-color line drawing routines such that, even written in C and implementing clipping, they still run in about 80% of the time required by the 256-color line drawing routines in TGI. As an aside, the line drawing routines in `cx16-v1` using Bresenham’s algorithm took 3× the time to run than the TGI drawing routines, so a huge improvement gain using VERA.
 
-V2 takes a different perspective looking overhead into an arena setting with walls and vehicles. There’s no masking, just lines. Here’s a [video](https://youtube.com/watch?v=nCTF3v2hGFo) of the current progress. The rotations and scaling require a lot of multiplications and divisions such that they end up being bottlenecks. The multiplier in VERA is a major factor in getting the frame rate to 7.5 frames/s. Given that 5.0 frames/s is acceptable, there’s lots of room to add more details, and the code is only minimally optimized. I’m getting closer to a game in mind, a recreation of something I wrote a long time ago – unfortunately the original is lost to history…
+V2 takes a different perspective looking overhead into an arena setting with walls and vehicles. There’s no masking, just lines. Here’s a [video](https://www.youtube.com/watch?v=6ZxkDRXkPw0) of the current progress. The rotations and scalings require a lot of multiplications and divisions such that they end up being bottlenecks. The multiplier in VERA is a major factor in getting the frame rate to 7.5 frames/s although it’s set to 6.0 frames/s to give a timeslice for the AI. Given that 5.0 frames/s is acceptable, there’s lots of room to add more details, and the code is only minimally optimized.
+
+About the AI, it uses only 13 bytes to correspond to various settings, i.e. very basic. You can let the program run on its own, and it will create an `AI.DAT` file and document the generations as the players compete with each other. It looks pretty good running as a screen saver or retro videogame attract mode.
 
 As in `cx16-v1`, should you want to build the demo, you’ll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
@@ -95,16 +106,26 @@ Then edit the `«explore-repo»/cx16-v2/build-cc65-cx16` script to point `XCC`, 
 
 Run the emulator, then load and run `DATA.PRG` to generate the `EXPLORE.DAT` data file, and then load and run `EXPLORE.PRG` to run the demo. Once `EXPLORE.DAT` is created, you don’t need to run `DATA.PRG` again, unless you change `«explore-repo»/cx16-v2/data.c`.
 
-The demo uses these keyboard and joystick controls:
+Note: The hardware currently has a problem in that in 16-color mode, VERA can’t render some lines at certain angles, so as a workaround these lines are handled by implementing Bresenham’s algorithm directly. The end result is that in hardware it runs at only 4.0 frames/s – I think too slow to be playable.
+
+The demo uses these keyboard controls:
 
 - escape: pause, press again to resume
+- C: cycle player
+- Q: quit
+- J: join the game in progress, your vehicle will have a little "cockpit"
+- K: join the game, but you’re the preferred target (hard)
+- L: join the game, but for you the last level doesn’t restore its health after zeroing other players (very hard)
+
+When you’re playing, these are your keyboard and joystick controls:
+
 - cursor up or joystick back: climb
 - cursor down or joystick forward: dive
 - cursor right or joystick right: turn right
 - cursor left or joystick left: turn left
 - space or joystick button: fire missile
-- C: cycle player
-- Q: quit
+
+I’m working on an attract screen with instructions, but for now you can probably figure out the rules on your own!
 
 Depending on what I’m optimizing, it might print some timing statistics in `clock` units.
 

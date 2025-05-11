@@ -220,14 +220,20 @@ void ProcessVehicles(void)
 					player->health -= missile->damage;
 					player->hit_cd = MSS_HIT;
 					ReportToAI(player, EVT_DAMAGED_PLAYER, missile->identifier);
+					/* Brought to zero? */
 					if (player->health <= 0) {
-						if (!AdvancePlayer(g_vehicles + missile->identifier) && !g_no_refresh_at_last_level)
-							g_vehicles[missile->identifier].health = PLAYER_HEALTH;
+						/* Advance or eliminate the damaged player */
 						if (!AdvancePlayer(player)) {
 							player->active = false;
 							ReportToAI(player, EVT_ELIMINATED_PLAYER, missile->identifier);
 						} else
 							ReportToAI(player, EVT_ADVANCED_PLAYER, missile->identifier);
+						/* Advance the attacking player */
+						player = g_vehicles + missile->identifier;
+						if (!AdvancePlayer(player)) {
+							if (player->npc || !g_no_refresh_at_last_level)
+								player->health = PLAYER_HEALTH;
+						}
 						AddSound(BELL_RINGING);
 					}
 				}
