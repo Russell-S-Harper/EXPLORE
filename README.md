@@ -127,7 +127,7 @@ When you’re playing, these are your keyboard and joystick controls:
 
 I’m working on an attract sequence with instructions, but for now you can probably figure out the rules on your own!
 
-Depending on what I’m optimizing, it might print some timing statistics in `clock` units.
+Depending on what I’m optimizing, it might print some timing statistics in `frame` or `clock` units.
 
 ## License
 
