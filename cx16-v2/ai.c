@@ -461,6 +461,7 @@ void NPCAI(VEHICLE *player)
 					else if (lr > 0)
 						player->a_delta = AI_K47;
 					else
+						/* Use a constant to prevent "jittering" */
 						player->a_delta = (player->identifier & AI_K49)? -AI_K50: AI_K50;
 				}
 				/* Try to match height */
