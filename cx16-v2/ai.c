@@ -474,8 +474,11 @@ void NPCAI(VEHICLE *player)
 					++player->gear;
 				/* Fire */
 				if (!player->loading_cd && abs(dz) < VEHICLE_Z_TOL) {
+					/* Don't need signs any more */
+					dx = abs(dx);
+					dy = abs(dy);
 					/* Really close, just fire */
-					if (abs(dx) < TGT_FR_XY_TOL && abs(dy) < TGT_FR_XY_TOL)
+					if (dx < TGT_FR_XY_TOL && dy < TGT_FR_XY_TOL)
 						player->firing = true;
 					/* Not so close, check accuracy */
 					else if (fb > 0 && abs(lr) < TGT_FR_XY_TOL) {
