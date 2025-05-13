@@ -114,6 +114,9 @@ void InitSpecific(void)
 	/* Clear the remainder of screen 2 */
 	UpdateDisplay();
 
+	/* Cursor off */
+	cursor(0);
+
 	/* Set up the joystick */
 	joy_install(joy_static_stddrv);
 }
@@ -202,7 +205,7 @@ void GetPlayerInput(VEHICLE *player)
 			case PAUSE_PROGRAM:
 				StopSounds();
 				/* Wait until it's pressed again */
-				while (cgetc() != PAUSE_PROGRAM);
+				while (!kbhit() || cgetc() != PAUSE_PROGRAM);
 				break;
 
 			case CYCLE_PLAYER:
