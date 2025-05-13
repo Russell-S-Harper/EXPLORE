@@ -94,7 +94,7 @@ Here’s a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) 
 
 VERA is a display co-processor used in the CX16. It has a new feature, "FX", which provides helpers to improve line drawing, polygon filling, and other functions. Using the line drawing helper, I was able to implement 16-color line drawing routines such that, even written in C and implementing clipping, they still run in about 80% of the time required by the 256-color line drawing routines in TGI. As an aside, the line drawing routines in `cx16-v1` using Bresenham’s algorithm took 3× the time to run than the TGI drawing routines, so a huge improvement gain using VERA.
 
-V2 takes a different perspective looking overhead into an arena setting with walls and vehicles. There’s no masking, just lines. Here’s a [video](https://www.youtube.com/watch?v=6ZxkDRXkPw0) of the current progress. The rotations and scalings require a lot of multiplications and divisions such that they end up being bottlenecks. The multiplier in VERA is a major factor in getting the frame rate to 7.5 frames/s although it’s set to 6.0 frames/s to give a timeslice for the AI. Given that 5.0 frames/s is acceptable, there’s lots of room to add more details, and the code is only minimally optimized.
+V2 takes a different perspective looking overhead into an arena setting with walls and vehicles. There’s no masking, just lines. Here’s a [video](https://www.youtube.com/watch?v=6ZxkDRXkPw0) of the current progress. The rotations and scalings require a lot of multiplications and divisions such that they end up being bottlenecks. The multiplier in VERA is a major factor in getting the frame rate to 7.5 frames/s, although it’s set to 6.0 frames/s to give a timeslice for the AI. Given that 5.0 frames/s is acceptable, there’s lots of room to add more details, and the code is only minimally optimized.
 
 About the AI, it uses only 13 bytes to correspond to various settings, e.g. evade, revenge, persistence, etc. You can let the program run on its own, and it will create an `AI.DAT` file and document the generations as the players compete with each other. It looks pretty good running as a screen saver or a retro videogame attract mode.
 
@@ -106,7 +106,7 @@ Then edit the `«explore-repo»/cx16-v2/build-cc65-cx16` script to point `XCC`, 
 
 Run the emulator, then load and run `DATA.PRG` to generate the `EXPLORE.DAT` data file, and then load and run `EXPLORE.PRG` to run the demo. Once `EXPLORE.DAT` is created, you don’t need to run `DATA.PRG` again, unless you change `«explore-repo»/cx16-v2/data.c`.
 
-Note: The hardware currently has a problem in that in 16-color mode, VERA can’t render some lines at certain angles, so as a workaround these lines are handled by implementing Bresenham’s algorithm directly. The end result is that in hardware it runs at only 4.0 frames/s – I think too slow to be playable.
+Note: The hardware currently has a problem in that in 16-color mode, VERA can’t render some lines at certain angles. As a workaround these lines are handled by implementing Bresenham’s algorithm directly, but the end result is that in hardware it runs at only 4.0 frames/s – I think too slow to be playable.
 
 The demo uses these keyboard controls:
 
