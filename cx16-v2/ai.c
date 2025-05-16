@@ -69,8 +69,8 @@
 #define AI_K45	1	/* z_action when avoiding */
 #define AI_K46	-1	/* g_action when avoiding */
 
-#define AI_K47	2	/* What to set a_delta if target is far left or right */
-#define AI_K48	1	/* What to set a_delta if target is near left or right */
+#define AI_K47	1	/* What to set a_delta or z_delta if initiating */
+#define AI_K48	2	/* What to set a_delta or z_delta if continuing */
 #define AI_K49	1	/* AND of player identifier to determine a_delta direction if target is directly behind */
 #define AI_K50	2	/* What to set a_delta if target is directly behind; based on player identifier */
 
@@ -447,29 +447,27 @@ void NPCAI(VEHICLE *player)
 				lr = SpcMul16(dx, player->cos) - SpcMul16(dy, player->sin);
 				/* Steer towards */
 				if (fb > TGT_NR_XY_TOL) {
-					if (lr < -TGT_FR_XY_TOL)
-						player->a_delta = -AI_K47;
-					else if (lr < -TGT_NR_XY_TOL)
-						player->a_delta = -AI_K48;
-					else if (lr > TGT_FR_XY_TOL)
-						player->a_delta = AI_K47;
+					if (lr < -TGT_NR_XY_TOL)
+						player->a_delta = (player->last_a_delta < 0)? -AI_K48: -AI_K47;
 					else if (lr > TGT_NR_XY_TOL)
-						player->a_delta = AI_K48;
+						player->a_delta = (player->last_a_delta > 0)? AI_K48: AI_K47;
 				} else if (fb < -TGT_NR_XY_TOL) {
 					if (lr < 0)
-						player->a_delta = -AI_K47;
+						player->a_delta = -AI_K48;
 					else if (lr > 0)
-						player->a_delta = AI_K47;
+						player->a_delta = AI_K48;
 					else
 						/* Use a constant to prevent "jittering" */
 						player->a_delta = (player->identifier & AI_K49)? -AI_K50: AI_K50;
 				}
+				player->last_a_delta = player->a_delta;
 				/* Try to match height */
 				if (player->airborne) {
-					if (dz > VEHICLE_Z_TOL)
-						player->z_delta = player->gear;
-					else if (dz < -VEHICLE_Z_TOL)
-						player->z_delta = -player->gear;
+					if (dz < -VEHICLE_Z_TOL)
+						player->z_delta = (player->last_z_delta < 0)? -AI_K48: -AI_K47;
+					else if (dz > VEHICLE_Z_TOL)
+						player->z_delta = (player->last_z_delta > 0)? AI_K48: AI_K47;
+					player->last_z_delta = player->z_delta;
 				} else
 					++player->gear;
 				/* Fire */
@@ -503,7 +501,6 @@ void NPCAI(VEHICLE *player)
 			--x->action_cd;
 			if (x->action_cd <= 0) {
 				UpdateSettings(s);
-				OutputAsNumber('F', g_frame_counter);
 				g_frame_counter = 0;
 				/* Set up a new game */
 				f_human_joined = false;
@@ -655,6 +652,7 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 					t = s->randomizer >> AI_K24;
 					if (!t) t = AI_K12;
 					x->action_cd = AddRandomValue(t, s->escape, AI_K12, AI_K13);
+					/* If there are fewer players, then don't need to escape for so long */
 					switch (g_active_players) {
 						case 3:
 							x->action_cd >>= AI_K38;
