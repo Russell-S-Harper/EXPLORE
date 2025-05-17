@@ -32,7 +32,6 @@
 #define FRAMES_PER_SEC_LO	4	/* If HW VERA FX Line Helper 4bpp workaround is required */
 #define FRAMES_PER_SEC_HI	6	/* No restrictions */
 
-
 /* Keyboard defines used in GetPlayerInput */
 #define JOIN_AS_NORMAL		74	/* J: join game */
 #define FOCUS_ON_HUMAN		75	/* K: focus on human */
@@ -67,6 +66,14 @@
 /* To check if we're running in the emulator */
 #define EMULATOR_LO	(*(char *)(0x9FBE))
 #define EMULATOR_HI	(*(char *)(0x9FBF))
+
+/* To control screen recording in the emulator:
+
+	FRAME_CMD = 0	- disable
+	FRAME_CMD = 1	- save a single frame
+	FRAME_CMD = 2	- continuous
+*/
+#define FRAME_CMD	(*(char *)(0x9FB5))
 
 /* Callback routine hint */
 enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
