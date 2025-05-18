@@ -6,16 +6,18 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <ctype.h>
 #include "explore.h"
 #include "vera.h"
 
 /* Defining constants generically for now, once they are all defined, will come up with a unified naming convention */
 
+
 #define AI_K01	9	/* ceil(log2(MAXIMUM_SCAN_LINE)); used to set srand seed */
 #define AI_K02	4	/* What to shift value from rand() to get "good" randomness */
 
 #define AI_K03	'a'	/* When initializing AI.DATA, identifier of the first player */
-#define AI_K04	'd'	/* When initializing AI.DATA, identifier of the last player */
+#define AI_K04	'_'	/* Placeholder for identifiers */
 #define AI_K05	2	/* Winners offset */
 
 #define AI_K06	-79	/* To convert AI.DAT file size to randomizer "slope numerator" */
@@ -109,13 +111,13 @@ static const char
 
 static uint8_t
 	f_modulus,
-	f_initialize[] = {'_', AI_K15,
-		AI_K14, AI_K14, AI_K14, AI_K14, AI_K14, AI_K14,
-		AI_K11, AI_K11, AI_K11, AI_K11, AI_K11, AI_K11, AI_K11},
 	*f_random_bytes;
 
 static AI_SETTINGS
-	*f_settings;
+	*f_settings,
+	f_initialize = {AI_K04, AI_K04, AI_K15,
+		AI_K14, AI_K14, AI_K14, AI_K14, AI_K14, AI_K14,
+		AI_K11, AI_K11, AI_K11, AI_K11, AI_K11, AI_K11, AI_K11};
 
 static AI_CURRENT_STATE
 	*f_current_state;
@@ -203,7 +205,6 @@ static void InitSettings(void)
 	AI_SETTINGS *s;
 	int16_t j;
 	uint8_t i;
-	char c;
 
 	/* Set up space */
 	if (!f_settings)
@@ -216,10 +217,9 @@ static void InitSettings(void)
 		ofile = fopen(f_ai_data, g_write_mode);
 		if (!ofile)
 			ExitProgram(ERR_AI);
-
-		for (c = AI_K03; c <= AI_K04; ++c) {
-			fwrite(&c, sizeof(char), 1, ofile);
-			fwrite(f_initialize, sizeof(AI_SETTINGS) - sizeof(char), 1, ofile);
+		for (i = 0; i < PLAYER_COUNT; ++i) {
+			f_initialize.identifier = AI_K03 + i;
+			fwrite(&f_initialize, sizeof(AI_SETTINGS), 1, ofile);
 		}
 		fclose(ofile);
 		/* Now should be able to read it! */
@@ -259,35 +259,56 @@ static void UpdateSettings(AI_SETTINGS *s)
 	FILE *ifile, *ofile;
 	AI_SETTINGS t;
 	uint8_t i;
-	char identifier = '\0';
+	char identifier = '\0', renamed[] = {'a', 'i', '-', '0', '0', '0', '0', '0', '.', 'd', 'a', 't', '\0'};
 
-	if (f_modulus > AI_K12 && !f_human_joined) {
-		/* Will need this when sorting */
-		f_identifier = s->identifier;
-		/* Sort according to winner and scores */
-		qsort(f_settings, PLAYER_COUNT, sizeof(AI_SETTINGS), CompareSettings);
-		/* Append settings */
-		rename(f_ai_data, f_working);
-		ifile = fopen(f_working, g_read_mode);
-		ofile = fopen(f_ai_data, g_write_mode);
-		while (fread(&t, sizeof(AI_SETTINGS), 1, ifile)) {
-			/* Also get the latest identifier */
-			if (identifier < t.identifier)
-				identifier = t.identifier;
-			fwrite(&t, sizeof(AI_SETTINGS), 1, ofile);
+	if (!f_human_joined) {
+		if (f_modulus > AI_K12) {
+			/* Will need this when sorting */
+			f_identifier = s->identifier;
+			/* Sort according to winner and scores */
+			qsort(f_settings, PLAYER_COUNT, sizeof(AI_SETTINGS), CompareSettings);
+			/* Append settings */
+			rename(f_ai_data, f_working);
+			ifile = fopen(f_working, g_read_mode);
+			ofile = fopen(f_ai_data, g_write_mode);
+			while (fread(&t, sizeof(AI_SETTINGS), 1, ifile)) {
+				/* Also get the latest identifier */
+				if (identifier < t.identifier)
+					identifier = t.identifier;
+				fwrite(&t, sizeof(AI_SETTINGS), 1, ofile);
+			}
+			fclose(ifile);
+			remove(f_working);
+			fwrite(f_settings, sizeof(AI_SETTINGS), PLAYER_COUNT, ofile);
+			/* Update parentage */
+			for (i = PLAYER_COUNT - AI_K05; i < PLAYER_COUNT; ++i) {
+				s = f_settings + i;
+				s->parent = s->identifier;
+				s->identifier = ++identifier;
+			}
+			/* Output cloned players */
+			fwrite(f_settings + PLAYER_COUNT - AI_K05, sizeof(AI_SETTINGS), AI_K05, ofile);
+			fclose(ofile);
+		} else {
+			/* Rename the current file to something random */
+			do {
+				for (i = 0; renamed[i]; ++i) {
+					if (isdigit(renamed[i]))
+						renamed[i] = '0' + GetRandomByte(10);
+				}
+			}
+			while (rename(f_ai_data, renamed));
+			/* Reset identifiers and parents */
+			for (i = 0; i < PLAYER_COUNT; ++i) {
+				s = f_settings + i;
+				s->identifier = AI_K03 + i;
+				s->parent = AI_K04;
+			}
+			/* Set up a new data file using the winners of the current one */
+			ofile = fopen(f_ai_data, g_write_mode);
+			fwrite(f_settings, sizeof(AI_SETTINGS), PLAYER_COUNT, ofile);
+			fclose(ofile);
 		}
-		fclose(ifile);
-		remove(f_working);
-		fwrite(f_settings, sizeof(AI_SETTINGS), PLAYER_COUNT, ofile);
-		/* Update parentage */
-		for (i = PLAYER_COUNT - AI_K05; i < PLAYER_COUNT; ++i) {
-			s = f_settings + i;
-			s->parent = s->identifier;
-			s->identifier = ++identifier;
-		}
-		/* Output cloned players */
-		fwrite(f_settings + PLAYER_COUNT - AI_K05, sizeof(AI_SETTINGS), AI_K05, ofile);
-		fclose(ofile);
 	}
 }
 
