@@ -139,7 +139,8 @@ int16_t Cos(int16_t angle);
 
 /******** Variable declarations ********/
 extern XM_HANDLE
-	g_string_data,
+	g_error_messages,
+	g_attract_messages,
 	g_trig_data,
 	g_arena_data,
 	g_exploding_prm,
@@ -154,6 +155,8 @@ extern LEVEL
 	*g_levels;
 
 extern bool
+	g_human_joined,
+	g_focus_on_human,
 	g_no_refresh_at_last_level,
 	g_exit_program;
 

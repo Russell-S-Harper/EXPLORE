@@ -82,7 +82,7 @@ void RenderObjects(void)
 	for (; S->index_from != S->index_to; ++S) {
 		p1 = s_points + S->index_from;
 		p2 = s_points + S->index_to;
-		DrawLineFromTo16(p1->x, p1->y, p2->x, p2->y, CLR16_DARKGRAY);
+		DrawLineFromTo16(p1->x, p1->y, p2->x, p2->y, !p1->z || !p2->z? CLR16_DARKGRAY: DeltaZColor(p1->z + p2->z));
 	}
 #endif
 	/* Pull out the active vehicles and sort to render from the bottom up */

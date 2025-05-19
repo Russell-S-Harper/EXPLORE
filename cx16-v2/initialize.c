@@ -12,7 +12,8 @@
 
 /* Global variables */
 XM_HANDLE
-	g_string_data,
+	g_error_messages,
+	g_attract_messages,
 	g_trig_data,
 	g_arena_data,
 	g_exploding_prm,
@@ -27,6 +28,8 @@ LEVEL
 	*g_levels;
 
 bool
+	g_human_joined,
+	g_focus_on_human,
 	g_no_refresh_at_last_level,
 	g_exit_program;
 
@@ -66,7 +69,10 @@ void InitProgram(void)
 	InitXM();
 
 	/* Set up error messages, trigonometric data, arenas, vehicles, and levels */
-	InitData("explore.dat");
+	InitData("pvp-ai.dat");
+
+	/* Set up text messages */
+	InitData("pvp-ai.txt");
 
 	/* Initialize the hardware, etc. */
 	InitSpecific();
@@ -96,9 +102,16 @@ static void InitData(char *file)
 		switch (code) {
 			case CODE_EM:
 				GetData(&size, sizeof(int16_t), ifile);
-				g_string_data = AllocXM(ERR_NO, size * sizeof(char *));
+				g_error_messages = AllocXM(ERR_NO, size * sizeof(char *));
 				for (t = 0; t < ERR_NO; ++t)
-					GetData(GetXMAddress(g_string_data, t), size, ifile);
+					GetData(GetXMAddress(g_error_messages, t), size, ifile);
+				break;
+			case CODE_AM:
+				GetData(&count, sizeof(int16_t), ifile);
+				GetData(&size, sizeof(int16_t), ifile);
+				g_attract_messages = AllocXM(count, size * sizeof(char *));
+				for (t = 0; t < count; ++t)
+					GetData(GetXMAddress(g_attract_messages, t), size, ifile);
 				break;
 			case CODE_TD:
 				g_trig_data = AllocXM(SCALE_FC, sizeof(int16_t));
@@ -282,10 +295,10 @@ void ExitProgram(uint8_t stat)
 {
 	StopSounds();
 	if (stat != ERR_NO) {
-		if (g_string_data)
-			fputs(GetXMAddress(g_string_data, stat), stdout);
+		if (g_error_messages)
+			fputs(GetXMAddress(g_error_messages, stat), stdout);
 		else
-			fputs("\nRun DATA.PRG!\n", stdout);
+			fputs("\nRun DATA.PRG & TEXT.PRG!\n", stdout);
 		exit(stat);
 	}
 }

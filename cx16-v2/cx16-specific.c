@@ -6,6 +6,7 @@
 
 /* cx16-specific.c */
 
+#include <ctype.h>
 #include <limits.h>
 #include <time.h>
 #include <conio.h>
@@ -78,14 +79,23 @@
 /* Callback routine hint */
 enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
 
+/* Messages */
+#define MSG_LINES	7
+#define MSG_WINDOW	(MSG_LINES - 2)
+#define MSG_DURATION	20		/* Or MSG_DURATION / FRAMES_PER_SEC seconds */
+#define	MSG_CYCLE	45		/* Or MSG_CYCLE * MSG_DURATION / FRAMES_PER_SEC seconds */
+
 static void DrawLine16(void);
+static void PlayerJoined(void);
 static void DefaultCallback(uint8_t waiting);
 
 static bool
 	f_use_workaround;
 
 static uint8_t
-	f_current_color;
+	f_current_color,
+	f_text_cd,
+	f_text_index;
 
 static int16_t
 	f_x_from_point,
@@ -230,14 +240,17 @@ void GetPlayerInput(VEHICLE *player)
 
 			case JOIN_AS_NORMAL:
 				ReportToAI(player, EVT_HUMAN_JOINED, MD_JOIN_AS_NORMAL);
+				PlayerJoined();
 				break;
 
 			case FOCUS_ON_HUMAN:
 				ReportToAI(player, EVT_HUMAN_JOINED, MD_FOCUS_ON_HUMAN);
+				PlayerJoined();
 				break;
 
 			case NO_REFRESH_AT_LAST_LVL:
 				ReportToAI(player, EVT_HUMAN_JOINED, MD_NO_REFRESH_AT_LAST_LEVEL);
+				PlayerJoined();
 				break;
 
 			case QUIT_PROGRAM:
@@ -309,13 +322,28 @@ void GetPlayerInput(VEHICLE *player)
 	}
 }
 
+static void PlayerJoined(void)
+{
+	f_text_cd = 0;
+	f_text_index = 0; 
+	clrscr();
+}
+
 /* Default callback to do useful work while waiting */
 static void DefaultCallback(uint8_t waiting)
 {
 	static uint16_t s_frame_counter;
-	static uint8_t s_vehicle_cd, s_vehicle_index;
+	static uint8_t s_vehicle_cd, s_vehicle_index, s_width, s_height;
+	static bool s_initialized, s_text_checked;
 	uint32_t a;
+	char *p;
 	uint8_t i, b, v;
+
+	/* Save the width and height of the text overlay */
+	if (!s_initialized) {
+		screensize(&s_width, &s_height);
+		s_initialized = true;
+	}
 
 	/* Perform tasks dependent on what we're waiting for */
 	switch (waiting) {
@@ -332,6 +360,7 @@ static void DefaultCallback(uint8_t waiting)
 						vpoke(b, a);
 					}
 					s_vehicle_cd = VEHICLE_COUNT;
+					s_text_checked = false;
 				}
 			} else {
 				/* Do some NPC and Missile AI */
@@ -349,6 +378,41 @@ static void DefaultCallback(uint8_t waiting)
 					if (s_vehicle_index >= VEHICLE_COUNT)
 						s_vehicle_index -= VEHICLE_COUNT;
 					--s_vehicle_cd;
+				/* Update the text */
+				} else if (!g_human_joined && !s_text_checked) {
+					s_text_checked = true;
+					if (!f_text_cd) {
+						if (IndexExistsForXM(g_attract_messages, f_text_index - MSG_WINDOW))
+							cclearxy(0, (((f_text_index - MSG_WINDOW) % MSG_LINES) << 1) + 1, s_width);
+						if (IndexExistsForXM(g_attract_messages, f_text_index)) {
+							p = GetXMAddress(g_attract_messages, f_text_index);
+							gotoxy(0, ((f_text_index % MSG_LINES) << 1) + 1);
+							for (i = 0; p[i]; ) {
+								if (p[i] == '\b') {
+									if (p[i + 1] == 'T') {
+										++i;
+										if (p[i + 1]) {
+											++i;
+											if (isdigit(p[i]))
+												textcolor(p[i] - '0');
+											else if (isupper(p[i]))
+												textcolor(p[i] + 10 - 'A');
+											++i;
+										}
+									}
+								} else {
+									cputc(p[i]);
+									++i;
+								}
+							}
+						
+						}
+						f_text_cd = MSG_DURATION;
+						++f_text_index;
+						if (f_text_index >= MSG_CYCLE)
+							f_text_index = 0;
+					} else
+						--f_text_cd;
 				}
 			}
 			break;

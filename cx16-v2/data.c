@@ -495,7 +495,7 @@ const uint8_t levels0[] = {
 	5,	5,	1,	2,	8,	3,	8
 };
 
-static void OutputStrings(FILE *ofile);
+static void OutputErrorMessages(FILE *ofile);
 static void OutputTrigData(FILE *ofile);
 static void OutputArenaData(FILE *ofile);
 static void OutputVehicleData(FILE *ofile);
@@ -526,13 +526,13 @@ int main(void)
 {
 	FILE *ofile;
 
-	if (!(ofile = fopen("explore.dat", "wb"))) {
-		fputs("\nCould not create EXPLORE.DAT!\n", stderr);
+	if (!(ofile = fopen("pvp-ai.dat", "wb"))) {
+		fputs("\nCould not create PVP-AI.DAT!\n", stderr);
 		return EXIT_FAILURE;
 	}
 
 	/* Set up the error messages first so that we can display them if there's a subsequent problem */
-	OutputStrings(ofile);
+	OutputErrorMessages(ofile);
 
 	/* The trigonometric data */
 	OutputTrigData(ofile);
@@ -550,7 +550,7 @@ int main(void)
 	return EXIT_SUCCESS;
 }
 
-static void OutputStrings(FILE *ofile)
+static void OutputErrorMessages(FILE *ofile)
 {
 	const char **strings = strings0;
 	int16_t t, u, length, max, count = sizeof(strings0) / sizeof(char *);
@@ -565,7 +565,7 @@ static void OutputStrings(FILE *ofile)
 	/* Add one for NULL terminator */
 	++max;
 	/* Write out the size */
-	fwrite (&max, sizeof(int16_t), 1, ofile);
+	fwrite(&max, sizeof(int16_t), 1, ofile);
 	/* Write out the strings */
 	for (t = 0; t < count; ++t) {
 		length = strlen(strings[t]);

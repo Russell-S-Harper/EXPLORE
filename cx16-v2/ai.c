@@ -12,7 +12,6 @@
 
 /* Defining constants generically for now, once they are all defined, will come up with a unified naming convention */
 
-
 #define AI_K01	9	/* ceil(log2(MAXIMUM_SCAN_LINE)); used to set srand seed */
 #define AI_K02	4	/* What to shift value from rand() to get "good" randomness */
 
@@ -97,10 +96,6 @@ typedef struct {
 } AI_CURRENT_STATE;
 
 /* Internal data */
-
-static bool
-	f_human_joined,
-	f_focus_on_human;
 
 static char
 	f_identifier;
@@ -261,7 +256,7 @@ static void UpdateSettings(AI_SETTINGS *s)
 	uint8_t i;
 	char identifier = '\0', renamed[] = {'a', 'i', '-', '0', '0', '0', '0', '0', '.', 'd', 'a', 't', '\0'};
 
-	if (!f_human_joined) {
+	if (!g_human_joined) {
 		if (f_modulus > AI_K12) {
 			/* Will need this when sorting */
 			f_identifier = s->identifier;
@@ -384,7 +379,7 @@ void NPCAI(VEHICLE *player)
 						s_tallies[j] += s->tit_for_tat;
 					if (i == player->target)
 						s_tallies[j] += s->persistence;
-					if (f_focus_on_human && !t->npc)
+					if (g_focus_on_human && !t->npc)
 						s_tallies[j] += AI_K20;
 				} else
 					s_tallies[j] = INT16_MIN;
@@ -480,6 +475,8 @@ void NPCAI(VEHICLE *player)
 					else
 						/* Use a constant to prevent "jittering" */
 						player->a_delta = (player->identifier & AI_K49)? -AI_K50: AI_K50;
+					/* To reduce endgame "circling" */
+					ReportToAI(player, EVT_PLAYER_IMPEDED, IMP_LOW);
 				}
 				player->last_a_delta = player->a_delta;
 				/* Try to match height */
@@ -524,8 +521,8 @@ void NPCAI(VEHICLE *player)
 				UpdateSettings(s);
 				g_frame_counter = 0;
 				/* Set up a new game */
-				f_human_joined = false;
-				f_focus_on_human = false;
+				g_human_joined = false;
+				g_focus_on_human = false;
 				g_no_refresh_at_last_level = false;
 				g_arena_index = 0;
 				InitPlayers();
@@ -612,23 +609,23 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 				player->target = PLAYER_LIMIT;
 				player->health = PLAYER_HEALTH;
 				player->appearance[APP_AUX] = g_human_id_aux;
-				f_human_joined = true;
+				g_human_joined = true;
 			}
 			if (player->active) {
 				g_vehicle_index = player->identifier;
 				/* Set flags according to mode */
 				switch (extra) {
 					case MD_JOIN_AS_NORMAL:
-						f_focus_on_human = false;
+						g_focus_on_human = false;
 						g_no_refresh_at_last_level = false;
 						break;
 					case MD_FOCUS_ON_HUMAN:
-						f_focus_on_human = true;
+						g_focus_on_human = true;
 						g_no_refresh_at_last_level = false;
 						break;
 					case MD_NO_REFRESH_AT_LAST_LEVEL:
 						g_no_refresh_at_last_level = true;
-						f_focus_on_human = false;
+						g_focus_on_human = false;
 						break;
 				}
 			}
