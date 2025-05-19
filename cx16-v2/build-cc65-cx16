@@ -36,7 +36,7 @@ rm *-flt.c *.s *.o
 
 # Run the emulator
 cd $EMU
-#./x16emu -scale 2 -mhz 8
+./x16emu -scale 2 -mhz 8
 #./x16emu -scale 2 -warp -prg DATA.PRG -run
 #./x16emu -scale 2 -warp -prg TEXT.PRG -run
-./x16emu -scale 2 -mhz 8 -prg PVP-AI.PRG -run
+#./x16emu -scale 2 -mhz 8 -prg PVP-AI.PRG -run
