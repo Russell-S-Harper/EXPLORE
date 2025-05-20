@@ -25,7 +25,7 @@ static char *f_prompts[] =
 	"\bTA Last survivor takes 1st place",
 	"\bTD High score among the fallen takes 2nd",
 	"\bTF These two advance!",
-	"\bT3 Each generation the players refine",
+	"\bT3 Each generation, the players refine",
 	"\bT7 Then they start all over again",
 	"\bTA Visit russell-harper.com for more..."
 };
