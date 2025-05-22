@@ -71,7 +71,7 @@ void InitProgram(void)
 	/* Set up error messages, trigonometric data, arenas, vehicles, and levels */
 	InitData("pvp-ai.dat");
 
-	/* Set up text messages */
+	/* Set up attract messages */
 	InitData("pvp-ai.txt");
 
 	/* Initialize the hardware, etc. */

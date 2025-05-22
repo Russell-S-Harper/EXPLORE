@@ -4,30 +4,37 @@
 #include <stdio.h>
 #include "common.h"
 
-static char *f_prompts[] =
+#define STD_FMT_LEN	5		/* \aT[0-9A-F] \0 */
+#define MAX_MSG_LEN	(40 - 2 + 1)	/* 40 (width) - 2 (for border) + 1 (for \0) */
+
+static char f_customized_message[STD_FMT_LEN + MAX_MSG_LEN];
+
+static const char *f_default_message = "Visit russell-harper.com for more...";
+
+static char *f_messages[] =
 {
-	"\bT7 Welcome to PvP-AI!",
-	"\bTA AI Opponents Battle for Survival",
-	"\bTD You're watching them battle live!",
-	"\bTF Colors mean: \bTE\xA9 \bTFabove \bT8\xA9 \bTFbelow \bT1\xA9 \bTFclose",
-	"\bT3 All missiles are smart!",
-	"\bT7 Both attacker and target advance",
-	"\bTA Good or bad, all reach the last level",
-	"\bTD At the last level a kill is permanent",
-	"\bTF Press C: cycle the focus - go ahead!",
-	"\bT3 Press J: join as a human",
-	"\bT7 (Yours will have a \"cockpit\")",
-	"\bTA Use gamepad or keyboard controls",
-	"\bTD (^s to move & space to fire)",
-	"\bTF Press K: be the primary target (hard)",
-	"\bT3 Press L: no endgame refresh (harder!)",
-	"\bT7 Go ahead - press J, K, or L",
-	"\bTA Last survivor takes 1st place",
-	"\bTD High score among the fallen takes 2nd",
-	"\bTF These two advance!",
-	"\bT3 Each generation, the players refine",
-	"\bT7 Then they start all over again",
-	"\bTA Visit russell-harper.com for more..."
+	"\aT7 Welcome to PvP-AI!",
+	"\aTA AI Opponents Battle for Survival",
+	"\aTD You're watching them battle live!",
+	"\aTF Colors mean: \aTE\xA9 \aTFabove \aT8\xA9 \aTFbelow \aT1\xA9 \aTFclose",
+	"\aT3 All missiles are smart!",
+	"\aT7 Both attacker and target advance",
+	"\aTA Good or bad, all reach the last level",
+	"\aTD At the last level a kill is permanent",
+	"\aTF Press C: cycle the focus - go ahead!",
+	"\aT3 Press J: join as a human",
+	"\aT7 (Yours will have a \"cockpit\")",
+	"\aTA Use gamepad or keyboard controls",
+	"\aTD (^s to move & space to fire)",
+	"\aTF Press K: be the primary target (hard)",
+	"\aT3 Press L: no endgame refresh (harder!)",
+	"\aT7 Go ahead - press J, K, or L",
+	"\aTA Last survivor takes 1st place",
+	"\aTD High score among the fallen takes 2nd",
+	"\aTF These two advance!",
+	"\aT3 Each generation, the players refine",
+	"\aT7 Then they start all over again",
+	f_customized_message
 };
 
 int main(void)
@@ -35,7 +42,13 @@ int main(void)
 	FILE *ofile;
 	int16_t max, t;
 	uint8_t i, l;
-	char c = '\0';
+	char c = '\0', working[MAX_MSG_LEN];
+
+	fputs("\nEnter custom prompt: ", stdout);
+	fgets(working, MAX_MSG_LEN, stdin);
+	working[strcspn(working, "\r\n")] = '\0';
+	strcpy(f_customized_message, "\aTA ");
+	strcat(f_customized_message, *working? working: f_default_message);
 
 	if (!(ofile = fopen("pvp-ai.txt", "wb"))) {
 		fputs("\nCould not create PVP-AI.TXT!\n", stderr);
@@ -43,11 +56,11 @@ int main(void)
 	}
 
 	/* Will need this */	
-	l = sizeof(f_prompts) / sizeof(char *);
+	l = sizeof(f_messages) / sizeof(char *);
 
 	/* Get the length of the longest string */
 	for (i = 0, max = 0; i < l; ++i) {
-		t = strlen(f_prompts[i]);
+		t = strlen(f_messages[i]);
 		if (max < t)
 			max = t;
 	}
@@ -63,10 +76,10 @@ int main(void)
 	fwrite(&t, sizeof(int16_t), 1, ofile);
 	/* How much space per message */
 	fwrite(&max, sizeof(int16_t), 1, ofile);
-
+	/* Actual messages */
 	for (i = 0; i < l; ++i) {
-		t = strlen(f_prompts[i]);
-		fwrite(f_prompts[i], sizeof(char), t, ofile);
+		t = strlen(f_messages[i]);
+		fwrite(f_messages[i], sizeof(char), t, ofile);
 		while (t < max) {
 			fwrite(&c, sizeof(char), 1, ofile);
 			++t;

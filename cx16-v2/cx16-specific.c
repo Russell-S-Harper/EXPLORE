@@ -94,8 +94,8 @@ static bool
 
 static uint8_t
 	f_current_color,
-	f_text_cd,
-	f_text_index;
+	f_message_cd,
+	f_message_index;
 
 static int16_t
 	f_x_from_point,
@@ -324,8 +324,8 @@ void GetPlayerInput(VEHICLE *player)
 
 static void PlayerJoined(void)
 {
-	f_text_cd = 0;
-	f_text_index = 0; 
+	f_message_cd = 0;
+	f_message_index = 0;
 	clrscr();
 }
 
@@ -334,7 +334,7 @@ static void DefaultCallback(uint8_t waiting)
 {
 	static uint16_t s_frame_counter;
 	static uint8_t s_vehicle_cd, s_vehicle_index, s_width, s_height;
-	static bool s_initialized, s_text_checked;
+	static bool s_initialized, s_messages_checked;
 	uint32_t a;
 	char *p;
 	uint8_t i, b, v;
@@ -348,7 +348,7 @@ static void DefaultCallback(uint8_t waiting)
 	/* Perform tasks dependent on what we're waiting for */
 	switch (waiting) {
 		case FRAME_TO_FINISH:
-			/* Once a frame, process any active sounds */
+			/* Once a frame, process any active sounds and prepare for vehicles and messages */
 			if (s_frame_counter != g_frame_counter) {
 				s_frame_counter = g_frame_counter;
 				for (i = 0, a = VERA_PSG_BASE + VERA_PSG_RLV_OFFSET; i < VERA_PSG_VOICES; ++i, a += VERA_PSG_BLOCK_SIZE) {
@@ -360,7 +360,7 @@ static void DefaultCallback(uint8_t waiting)
 						vpoke(b, a);
 					}
 					s_vehicle_cd = VEHICLE_COUNT;
-					s_text_checked = false;
+					s_messages_checked = false;
 				}
 			} else {
 				/* Do some NPC and Missile AI */
@@ -379,16 +379,16 @@ static void DefaultCallback(uint8_t waiting)
 						s_vehicle_index -= VEHICLE_COUNT;
 					--s_vehicle_cd;
 				/* Update the text */
-				} else if (!g_human_joined && !s_text_checked) {
-					s_text_checked = true;
-					if (!f_text_cd) {
-						if (IndexExistsForXM(g_attract_messages, f_text_index - MSG_WINDOW))
-							cclearxy(0, (((f_text_index - MSG_WINDOW) % MSG_LINES) << 1) + 1, s_width);
-						if (IndexExistsForXM(g_attract_messages, f_text_index)) {
-							p = GetXMAddress(g_attract_messages, f_text_index);
-							gotoxy(0, ((f_text_index % MSG_LINES) << 1) + 1);
+				} else if (!g_human_joined && !s_messages_checked) {
+					s_messages_checked = true;
+					if (!f_message_cd) {
+						if (IndexExistsForXM(g_attract_messages, f_message_index - MSG_WINDOW))
+							cclearxy(0, (((f_message_index - MSG_WINDOW) % MSG_LINES) << 1) + 1, s_width);
+						if (IndexExistsForXM(g_attract_messages, f_message_index)) {
+							p = GetXMAddress(g_attract_messages, f_message_index);
+							gotoxy(0, ((f_message_index % MSG_LINES) << 1) + 1);
 							for (i = 0; p[i]; ) {
-								if (p[i] == '\b') {
+								if (p[i] == '\a') {
 									if (p[i + 1] == 'T') {
 										++i;
 										if (p[i + 1]) {
@@ -407,12 +407,12 @@ static void DefaultCallback(uint8_t waiting)
 							}
 						
 						}
-						f_text_cd = MSG_DURATION;
-						++f_text_index;
-						if (f_text_index >= MSG_CYCLE)
-							f_text_index = 0;
+						f_message_cd = MSG_DURATION;
+						++f_message_index;
+						if (f_message_index >= MSG_CYCLE)
+							f_message_index = 0;
 					} else
-						--f_text_cd;
+						--f_message_cd;
 				}
 			}
 			break;
