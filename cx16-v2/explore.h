@@ -142,6 +142,8 @@ extern XM_HANDLE
 	g_error_messages,
 	g_attract_messages,
 	g_trig_data,
+	g_crc_data,
+	g_squares,
 	g_arena_data,
 	g_exploding_prm,
 	g_exploding_aux,
@@ -170,8 +172,7 @@ extern uint8_t
 extern uint16_t
 	g_display_width,
 	g_display_height,
-	g_frame_counter,
-	*g_squares;
+	g_frame_counter;
 
 extern int16_t
 	g_max_arena_segments,

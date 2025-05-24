@@ -15,6 +15,8 @@ XM_HANDLE
 	g_error_messages,
 	g_attract_messages,
 	g_trig_data,
+	g_crc_data,
+	g_squares,
 	g_arena_data,
 	g_exploding_prm,
 	g_exploding_aux,
@@ -43,8 +45,7 @@ uint8_t
 uint16_t
 	g_display_width,
 	g_display_height,
-	g_frame_counter,
-	*g_squares;
+	g_frame_counter;
 
 int16_t
 	g_max_arena_segments,
@@ -68,11 +69,11 @@ void InitProgram(void)
 	/* Set up extended memory */
 	InitXM();
 
-	/* Set up error messages, trigonometric data, arenas, vehicles, and levels */
-	InitData("pvp-ai.dat");
-
-	/* Set up attract messages */
+	/* Set up error message and attract messages */
 	InitData("pvp-ai.txt");
+
+	/* Set up trigonometric data, CRC8 data, arenas, vehicles, and levels */
+	InitData("pvp-ai.dat");
 
 	/* Initialize the hardware, etc. */
 	InitSpecific();
@@ -116,6 +117,10 @@ static void InitData(char *file)
 			case CODE_TD:
 				g_trig_data = AllocXM(SCALE_FC, sizeof(int16_t));
 				GetData(GetXMAddressInitial(g_trig_data), sizeof(int16_t) * SCALE_FC, ifile);
+				break;
+			case CODE_CD:
+				g_crc_data = AllocXM(UINT8_MAX + 1, sizeof(uint8_t));
+				GetData(GetXMAddressInitial(g_crc_data), sizeof(uint8_t) * (UINT8_MAX + 1), ifile);
 				break;
 			case CODE_AD:
 				GetData(&count, sizeof(int16_t), ifile);
@@ -187,13 +192,13 @@ static void GetData(void *buffer, size_t size, FILE *ifile)
 
 static void InitSquares(void)
 {
-	uint16_t s, i, j;
+	uint16_t s, i, j, *p;
 
 	if (!g_squares)
-		g_squares = calloc(MSS_XY_TOL + 1, sizeof(uint16_t));
+		g_squares = AllocXM(MSS_XY_TOL + 1, sizeof(uint16_t));
 
-	for (s = i = 0, j = 1; i <= MSS_XY_TOL; ++i) {
-		g_squares[i] = s;
+	for (p = GetXMAddressInitial(g_squares), s = i = 0, j = 1; i <= MSS_XY_TOL; ++i) {
+		p[i] = s;
 		s += j;
 		j += 2;
 	}
@@ -264,6 +269,7 @@ int16_t Cos(int16_t angle)
 	return GetXMDirectSigned(g_trig_data, (angle + SCALE_FC/4) & (SCALE_FC - 1));
 }
 
+#ifdef OUTPUT_AS_NUMBER
 /* Convenience method to output numbers for debugging purposes without linking in the entire stdio library! */
 void OutputAsNumber(char prefix, int16_t value)
 {
@@ -290,6 +296,7 @@ void OutputAsNumber(char prefix, int16_t value)
 	fputc('0' + value, stdout);
 	fputc('\n', stdout);
 }
+#endif /* OUTPUT_AS_NUMBER */
 
 void ExitProgram(uint8_t stat)
 {

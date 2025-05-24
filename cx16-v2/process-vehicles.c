@@ -215,7 +215,7 @@ void ProcessVehicles(void)
 			if (missile->identifier != player->identifier && player->active && abs(missile->z - player->z) <= VEHICLE_Z_TOL) {
 				dx = abs(missile->x - player->x) >> XY_COLLISION_SHIFT;
 				dy = abs(missile->y - player->y) >> XY_COLLISION_SHIFT;
-				if (dx <= MSS_XY_TOL && dy <= MSS_XY_TOL && g_squares[dx] + g_squares[dy] <= MSS_DST_TOL_SQR) {
+				if (dx <= MSS_XY_TOL && dy <= MSS_XY_TOL && GetXMDirectUnsigned(g_squares, dx) + GetXMDirectUnsigned(g_squares, dy) <= MSS_DST_TOL_SQR) {
 					missile->exploding = true;
 					player->health -= missile->damage;
 					player->hit_cd = MSS_HIT;
