@@ -5,7 +5,6 @@
 */
 
 #include <stdio.h>
-#include <conio.h>
 #include "explore.h"
 #include "vera.h"
 
