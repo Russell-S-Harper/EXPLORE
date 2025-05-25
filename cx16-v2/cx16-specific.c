@@ -103,8 +103,6 @@ static int16_t
 	f_x_to_point,
 	f_y_to_point;
 
-uint32_t GetRandomSeed(void);
-
 /* Initialize the hardware, etc. */
 void InitSpecific(void)
 {
