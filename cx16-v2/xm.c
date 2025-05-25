@@ -122,10 +122,10 @@ void GetOrSetXM(XM_HANDLE handle, int16_t index, void *data, XM_MODE get_or_set)
 }
 
 /* Provides a pointer to the banked memory for direct access. Note
-	that this function will change the active bank and not
-	restore it. If you're alternating among banked memory
-	allocations, it's best to refresh the address before each
-	access, or keep track of the banks, or use a copy with GetXM. */
+   that this function will change the active bank and not
+   restore it. If you're alternating among banked memory
+   allocations, it's best to refresh the address before each
+   access, or keep track of the banks, or use a copy with GetXM. */
 void *GetXMAddress(XM_HANDLE handle, int16_t index)
 {
 	ALLOC_XM *working;

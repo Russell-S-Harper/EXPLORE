@@ -16,7 +16,7 @@
 #include "vera.h"
 
 /* Ideal frames/s - adjust as required to prevent "jerking".
-	Limited by the resolution of CLOCKS_PER_SEC.
+   Limited by the resolution of CLOCKS_PER_SEC.
 
 	FRAMES_PER_SEC | Actual frames/s
 	------------- -+----------------
@@ -700,8 +700,8 @@ int8_t Min8(int8_t a, int8_t b) { return a < b? a: b; }
 int8_t Max8(int8_t a, int8_t b) { return a > b? a: b; }
 
 /* The program insures that the values passed to and returned
-	from MulDiv16 never exceed |32767|. Since this routine
-	is used frequently, it is well worth the effort to optimize it. */
+   from MulDiv16 never exceed |32767|. Since this routine
+   is used frequently, it is well worth the effort to optimize it. */
 
 /* Equivalent to (int16_t)((int32_t)num1 * num2 / denom) */
 int16_t MulDiv16(int16_t num1, int16_t num2, int16_t denom)

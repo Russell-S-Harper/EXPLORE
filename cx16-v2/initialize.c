@@ -59,7 +59,6 @@ const char
 	*g_write_mode = "wb";
 
 /* Internal functions */
-
 static void InitData(char *file);
 static void InitSquares(void);
 static void GetData(void *buffer, size_t size, FILE *ifile);
