@@ -8,7 +8,6 @@
 #include <limits.h>
 #include <ctype.h>
 #include "explore.h"
-#include "vera.h"
 
 /* Defining constants generically for now, once they are all defined, will come up with a unified naming convention */
 
