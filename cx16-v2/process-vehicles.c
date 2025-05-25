@@ -33,7 +33,6 @@ void ProcessVehicles(void)
 
 	/* Process each player */
 	for (i = PLAYER_INDEX, player = g_vehicles + PLAYER_INDEX; i < PLAYER_LIMIT; ++i, ++player) {
-
 		/* Get player input regardless, NPCs will get inputs during idle times */
 		if (i == HUMAN_ID)
 			GetPlayerInput(player);
@@ -66,7 +65,7 @@ void ProcessVehicles(void)
 			x += player->sin >> shift;
 			y += player->cos >> shift;
 		} else {
-			player->gear = Min16(Max16(player->gear, MIN_GEAR), MAX_GEAR);
+			player->gear = Min8(Max8(player->gear, MIN_GEAR), MAX_GEAR);
 			switch (player->gear) {
 				case MIN_GEAR:
 					x -= player->sin >> XY_GND_DELTA_SHIFT;

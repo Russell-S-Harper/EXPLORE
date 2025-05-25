@@ -89,6 +89,9 @@ int16_t MulDiv16(int16_t num1, int16_t num2, int16_t denom);
 #define SpcMul16(num1, num2)	MulDiv16((num1), (num2), SCALE_1_0)
 #define SpcDiv16(num, denom)	MulDiv16((num), SCALE_1_0, (denom))
 
+/* Initializer for srand defined in cx16-specific.c and called in InitRNG */
+uint32_t GetRandomSeed(void);
+
 /* Drawing routines */
 void DrawLineFromTo16(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t color);
 void DrawLineJustTo16(int16_t x, int16_t y, uint8_t color);
@@ -100,7 +103,7 @@ void GetPlayerInput(VEHICLE *player);
 void AddSound(uint8_t type);
 void StopSounds(void);
 
-/* Routine defined in initialize.c and called by InitVehicles and other places */
+/* Defined in initialize.c, called by InitVehicles and other places */
 bool AdvancePlayer(VEHICLE *player);
 
 /* AI */

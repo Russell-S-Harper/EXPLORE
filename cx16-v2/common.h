@@ -66,12 +66,13 @@ enum {CLR16_BLACK, CLR16_WHITE, CLR16_RED, CLR16_CYAN,
 /* Sounds */
 enum {MSS_FIRING, MSS_EXPLODING, BELL_RINGING, SOUNDS_CNT};
 
-#ifdef OUTPUT_AS_NUMBER
+
+#ifdef DEBUG
 /* Defined in initialize.c, to use for debugging */
 void OutputAsNumber(char prefix, int16_t value);
-#endif /* OUTPUT_AS_NUMBER */
+#endif /* DEBUG */
 
-/* Defined in initialize.c, ExitProgram is called throughout the program as well as by main */
+/* Defined in initialize.c, called throughout the program as well as by main */
 void ExitProgram(uint8_t status);
 
 #endif /* _COMMON_H */

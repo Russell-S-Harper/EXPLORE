@@ -121,7 +121,7 @@ static void OutputAttractMessages(FILE *ofile)
 	uint8_t i, l;
 	char c = '\0';
 
-	/* Will need this */	
+	/* Will need this */
 	l = sizeof(f_attract_messages) / sizeof(char *);
 
 	/* Get the length of the longest string */
@@ -136,7 +136,7 @@ static void OutputAttractMessages(FILE *ofile)
 	/* Output */
 	fputs("Attract Messages ", stdout);
 	fputc(CODE_AM, ofile);
-	
+
 	/* How many messages */
 	t = l;
 	fwrite(&t, sizeof(int16_t), 1, ofile);

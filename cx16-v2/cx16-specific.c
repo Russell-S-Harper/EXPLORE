@@ -103,6 +103,8 @@ static int16_t
 	f_x_to_point,
 	f_y_to_point;
 
+uint32_t GetRandomSeed(void);
+
 /* Initialize the hardware, etc. */
 void InitSpecific(void)
 {
@@ -405,7 +407,6 @@ static void DefaultCallback(uint8_t waiting)
 									++i;
 								}
 							}
-						
 						}
 						f_message_cd = MSG_DURATION;
 						++f_message_index;
@@ -748,4 +749,17 @@ int16_t MulDiv16(int16_t num1, int16_t num2, int16_t denom)
 
 	/* Unfortunately, no VERA divider (yet!) */
 	return (int16_t)(c / denom);
+}
+
+/* Hardcoding galore! Calls entropy_get, saves the result in user space 0x7FC, and returns as uint32_t */
+uint32_t GetRandomSeed(void)
+{
+	/* Call entropy_get */
+	__asm__("jsr $FECF");
+	__asm__("sta $07FC");
+	__asm__("stx $07FD");
+	__asm__("sty $07FE");
+	__asm__("stz $07FF");
+
+	return *((uint32_t *)0x7FC);
 }

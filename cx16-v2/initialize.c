@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <conio.h>
 #include "explore.h"
 #include "vera.h"
 
@@ -269,7 +270,7 @@ int16_t Cos(int16_t angle)
 	return GetXMDirectSigned(g_trig_data, (angle + SCALE_FC/4) & (SCALE_FC - 1));
 }
 
-#ifdef OUTPUT_AS_NUMBER
+#ifdef DEBUG
 /* Convenience method to output numbers for debugging purposes without linking in the entire stdio library! */
 void OutputAsNumber(char prefix, int16_t value)
 {
@@ -296,7 +297,7 @@ void OutputAsNumber(char prefix, int16_t value)
 	fputc('0' + value, stdout);
 	fputc('\n', stdout);
 }
-#endif /* OUTPUT_AS_NUMBER */
+#endif /* DEBUG */
 
 void ExitProgram(uint8_t stat)
 {
