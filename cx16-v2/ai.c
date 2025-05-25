@@ -172,6 +172,8 @@ static uint8_t GetRandomByte(uint8_t modulus)
 			return result;
 		/* Modulus of one can return only 0 */
 		case 1:
+			/* Reuse the byte for next invocation */
+			--s_index;
 			return 0;
 		/* Optimize for powers of two */
 		case 2:
