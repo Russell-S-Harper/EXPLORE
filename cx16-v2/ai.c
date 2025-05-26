@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <limits.h>
+#include <string.h>
 #include <ctype.h>
 #include "explore.h"
 
@@ -292,24 +293,74 @@ static void InitSettings(void)
 	}
 }
 
+/* These defines and the static strings & character arrays in UpdateSettings assume
+   the summary message is formatted as "\aT<color 0 - F>  <ordinal 1st - 4th>  " */
+#define SM_SUMMARY_MSG_IDX	2
+#define SM_REVISE_STR_IDX	10
+#define SM_IDENTIFIER_IDX	1
+#define SM_CONVERT_TO_UPPER	('A' - 'a')
+#define SM_REVISE_SCORE_IDX	7
+#define SM_BASE_CONSTANT	10
+#define SM_SCORE_MULTIPLIER	5
+
+/* The provided settings are those of the winner! */
 static void UpdateSettings(AI_SETTINGS *s)
 {
+	static const char
+		*s_parent_is_na = "---",
+		*s_human_identifier = "Human",
+		*s_initial_score = "       0  ";			/* Lots of spaces for alignment */
+	static char
+		s_parent[] = {'\"', AI_K04, '\"', '\0'},
+		s_identifier[] = {'\"', AI_K04, '\"', ' ', ' ', '\0'},	/* Two extra spaces to align with "Human" */
+		s_score[11];						/* See s_initial_score */
+
 	FILE *ifile, *ofile;
 	AI_SETTINGS t;
-	uint8_t i, crc = 0;
-	char identifier = '\0';
+	int16_t score;
+	uint8_t i, j, crc = 0;
+	char *working, identifier;
+	bool negative;
+
+	/* Will need this when sorting */
+	f_identifier = s->identifier;
+	/* Sort according to winner and scores */
+	qsort(f_settings, PLAYER_COUNT, sizeof(AI_SETTINGS), CompareSettings);
+	/* Set up a summary */
+	for (i = 0, s = f_settings; i < PLAYER_COUNT; ++i, ++s) {
+		working = GetXMAddress(g_summary_messages, i + SM_SUMMARY_MSG_IDX);
+		working[SM_REVISE_STR_IDX] = '\0';
+		if (s->identifier != AI_K04) {
+			s_identifier[SM_IDENTIFIER_IDX] = SM_CONVERT_TO_UPPER + s->identifier;
+			strcat(working, s_identifier);
+		} else
+			strcat(working, s_human_identifier);
+		score = s->score * SM_SCORE_MULTIPLIER;
+		negative = score < 0;
+		if (negative)
+			score = -score;
+		for (j = SM_REVISE_SCORE_IDX, strcpy(s_score, s_initial_score); score; --j, score /= SM_BASE_CONSTANT)
+			s_score[j] = '0' + score % SM_BASE_CONSTANT;
+		if (negative)
+			s_score[j] = '-';
+		strcat(working, s_score);
+		if (s->parent != AI_K04) {
+			s_parent[SM_IDENTIFIER_IDX] = SM_CONVERT_TO_UPPER + s->parent;
+			strcat(working, s_parent);
+		} else
+			strcat(working, s_parent_is_na);
+	}
+	/* Display it */
+	QueueNewMessages(g_summary_messages);
 
 	if (!g_human_joined) {
 		if (f_modulus > AI_K12) {
-			/* Will need this when sorting */
-			f_identifier = s->identifier;
-			/* Sort according to winner and scores */
-			qsort(f_settings, PLAYER_COUNT, sizeof(AI_SETTINGS), CompareSettings);
 			/* Append settings */
 			ifile = fopen(f_ai_data, g_read_mode);
 			do
 				RandomizeFilename(f_working);
 			while (!(ofile = fopen(f_working, g_write_mode)));
+			identifier = '\0';
 			while (fread(&t, sizeof(AI_SETTINGS), 1, ifile)) {
 				/* Update CRC */
 				crc = UpdateCRC8(crc, &t, sizeof(AI_SETTINGS));
@@ -684,6 +735,8 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			}
 			if (player->active) {
 				g_vehicle_index = player->identifier;
+				s->identifier = AI_K04;
+				s->parent = AI_K04;
 				/* Set flags according to mode */
 				switch (extra) {
 					case MD_JOIN_AS_NORMAL:
@@ -712,7 +765,8 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 			}
 			break;
 		case EVT_SWITCHED_FOCUS:
-			/* extra = not used */
+			/* extra = address of character to provide identifier! */
+			*(char *)extra = s->identifier != AI_K04? SM_CONVERT_TO_UPPER + s->identifier: ' ';
 			for (i = 0, x = f_current_state; i < PLAYER_COUNT; ++i, ++x) {
 				/* No longer mourning */
 				if (x->status == AIS_MOURN)

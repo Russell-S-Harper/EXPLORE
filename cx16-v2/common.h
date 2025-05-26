@@ -46,6 +46,7 @@ enum {ERR_FO, ERR_FC, ERR_XM, ERR_GI, ERR_OB, ERR_DC, ERR_AI, ERR_NO};
 	CODE_ID: initializing data
 	CODE_EM: error messages
 	CODE_AM: attract messages
+	CODE_SM: summary messages
 	CODE_TD: trigonometric data
 	CODE_CD: CRC8 data
 	CODE_AD: arena data
@@ -54,7 +55,7 @@ enum {ERR_FO, ERR_FC, ERR_XM, ERR_GI, ERR_OB, ERR_DC, ERR_AI, ERR_NO};
 	CODE_SD: sound data
 	CODE_EF: end-of-file
 */
-enum {CODE_ID, CODE_EM, CODE_AM, CODE_TD, CODE_CD, CODE_AD, CODE_VD, CODE_LD, CODE_SD, CODE_EF};
+enum {CODE_ID, CODE_EM, CODE_AM, CODE_SM, CODE_TD, CODE_CD, CODE_AD, CODE_VD, CODE_LD, CODE_SD, CODE_EF};
 
 /* Colors */
 enum {CLR16_BLACK, CLR16_WHITE, CLR16_RED, CLR16_CYAN,

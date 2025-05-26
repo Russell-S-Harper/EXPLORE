@@ -37,7 +37,5 @@ void GetOrSetXM(XM_HANDLE handle, int16_t index, void *data, XM_MODE get_or_set)
 void *GetXMAddress(XM_HANDLE handle, int16_t index);
 int16_t GetXMDirectSigned(XM_HANDLE handle, int16_t index);
 uint16_t GetXMDirectUnsigned(XM_HANDLE handle, int16_t index);
-void SetXMDirectSigned(XM_HANDLE handle, int16_t index, int16_t value);
-void SetXMDirectUnsigned(XM_HANDLE handle, int16_t index, uint16_t value);
 
 #endif /* _XM_H */

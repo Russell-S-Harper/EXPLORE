@@ -102,6 +102,7 @@ void ErasePoint16(int16_t x, int16_t y);
 void GetPlayerInput(VEHICLE *player);
 void AddSound(uint8_t type);
 void StopSounds(void);
+void QueueNewMessages(XM_HANDLE messages);
 
 /* Defined in initialize.c, called by InitVehicles and other places */
 bool AdvancePlayer(VEHICLE *player);
@@ -143,7 +144,9 @@ int16_t Cos(int16_t angle);
 /* Variable declarations */
 extern XM_HANDLE
 	g_error_messages,
+	g_current_messages,
 	g_attract_messages,
+	g_summary_messages,
 	g_trig_data,
 	g_crc_data,
 	g_squares,

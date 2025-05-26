@@ -13,7 +13,9 @@
 /* Global variables */
 XM_HANDLE
 	g_error_messages,
+	g_current_messages,
 	g_attract_messages,
+	g_summary_messages,
 	g_trig_data,
 	g_crc_data,
 	g_squares,
@@ -62,6 +64,7 @@ const char
 static void InitData(char *file);
 static void InitSquares(void);
 static void GetData(void *buffer, size_t size, FILE *ifile);
+static XM_HANDLE GetStrings(FILE *ifile);
 
 void InitProgram(void)
 {
@@ -101,17 +104,13 @@ static void InitData(char *file)
 		GetData(&code, sizeof(char), ifile);
 		switch (code) {
 			case CODE_EM:
-				GetData(&size, sizeof(int16_t), ifile);
-				g_error_messages = AllocXM(ERR_NO, size * sizeof(char *));
-				for (t = 0; t < ERR_NO; ++t)
-					GetData(GetXMAddress(g_error_messages, t), size, ifile);
+				g_error_messages = GetStrings(ifile);
 				break;
 			case CODE_AM:
-				GetData(&count, sizeof(int16_t), ifile);
-				GetData(&size, sizeof(int16_t), ifile);
-				g_attract_messages = AllocXM(count, size * sizeof(char *));
-				for (t = 0; t < count; ++t)
-					GetData(GetXMAddress(g_attract_messages, t), size, ifile);
+				g_attract_messages = GetStrings(ifile);
+				break;
+			case CODE_SM:
+				g_summary_messages = GetStrings(ifile);
 				break;
 			case CODE_TD:
 				g_trig_data = AllocXM(SCALE_FC, sizeof(int16_t));
@@ -187,6 +186,19 @@ static void GetData(void *buffer, size_t size, FILE *ifile)
 {
 	if (!fread(buffer, size, 1, ifile))
 		ExitProgram(ERR_FC);
+}
+
+static XM_HANDLE GetStrings(FILE *ifile)
+{
+	XM_HANDLE strings;
+	int16_t t, count, size;
+
+	GetData(&count, sizeof(int16_t), ifile);
+	GetData(&size, sizeof(int16_t), ifile);
+	strings = AllocXM(count, size * sizeof(char));
+	for (t = 0; t < count; ++t)
+		GetData(GetXMAddress(strings, t), size, ifile);
+	return strings;
 }
 
 static void InitSquares(void)

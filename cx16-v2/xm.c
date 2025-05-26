@@ -163,13 +163,3 @@ uint16_t GetXMDirectUnsigned(XM_HANDLE handle, int16_t index)
 	GetOrSetXM(handle, index, &value, XM_GET);
 	return value;
 }
-
-void SetXMDirectSigned(XM_HANDLE handle, int16_t index, int16_t value)
-{
-	GetOrSetXM(handle, index, &value, XM_SET);
-}
-
-void SetXMDirectUnsigned(XM_HANDLE handle, int16_t index, uint16_t value)
-{
-	GetOrSetXM(handle, index, &value, XM_SET);
-}

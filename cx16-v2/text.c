@@ -8,7 +8,7 @@
 #define MAX_MSG_LEN	(40 - 2 + 1)	/* 40 (width) - 2 (for border) + 1 (for \0) */
 
 /* Error messages */
-const char *f_error_messages[] = {
+static const char *f_error_messages[] = {
 	/*ERR_FO*/ "\nThe data file has been erased or\nrenamed. Recreate or restore from\nbackup.\n",
 	/*ERR_FC*/ "\nThe data file has been corrupted.\nRecreate or restore from backup.\n",
 	/*ERR_XM*/ "\nA banked memory request larger than 8K\nwas requested.\n",
@@ -18,16 +18,17 @@ const char *f_error_messages[] = {
 	/*ERR_AI*/ "\nThere is a problem with the AI file.\n"
 };
 
-static char f_customized_message[STD_FMT_LEN + MAX_MSG_LEN];
-
-static const char *f_default_message = "Visit russell-harper.com for more...";
-
 /*
 	\bT<text-color 0-F>
 	\xA9 maps to diagonal BL to TR stripes
 	^ maps to ↑
 */
-static char *f_attract_messages[] =
+
+static char f_customized_message[STD_FMT_LEN + MAX_MSG_LEN];
+
+static const char *f_default_message = "Visit russell-harper.com for more...";
+
+static const char *f_attract_messages[] =
 {
 	"\aTA Welcome to PvP-AI!",
 	"\aT7 AI Opponents Battle for Survival",
@@ -53,9 +54,17 @@ static char *f_attract_messages[] =
 	f_customized_message
 };
 
-static void OutputErrorMessages(FILE *ofile);
-static void OutputAttractMessages(FILE *ofile);
-static void OutputCRC8Data(FILE *ofile);
+static const char *f_summary_messages[] =
+{
+	"\aT3 Summary of Previous Battle",
+	"\aTA Rank  Player  Score  Parent",
+	"\aTF  4th  ",	/* Extra information is appended for these when displayeding the summary */
+	"\aTF  3rd  ",
+	"\aT7  2nd  ",
+	"\aTD  1st  "
+};
+
+static void OutputMessages(const char **strings, int16_t count, const char *prompt, char code, FILE *ofile);
 
 int main(void)
 {
@@ -77,10 +86,10 @@ int main(void)
 	}
 
 	/* Set up the error messages first so that we can display them if there's a subsequent problem */
-	OutputErrorMessages(ofile);
-
-	/* Attract messages */
-	OutputAttractMessages(ofile);
+	fputc('\n', stdout);
+	OutputMessages(f_error_messages, sizeof(f_error_messages) / sizeof(const char *), "Error Messages", CODE_EM, ofile);
+	OutputMessages(f_attract_messages, sizeof(f_attract_messages) / sizeof(const char *), "Attract Messages", CODE_AM, ofile);
+	OutputMessages(f_summary_messages, sizeof(f_summary_messages) / sizeof(const char *), "Summary Messages", CODE_SM, ofile);
 
 	/* Indicate end-of-data */
 	fputc(CODE_EF, ofile);
@@ -89,67 +98,31 @@ int main(void)
 	return EXIT_SUCCESS;
 }
 
-static void OutputErrorMessages(FILE *ofile)
+static void OutputMessages(const char **strings, int16_t count, const char *prompt, char code, FILE *ofile)
 {
-	const char **strings = f_error_messages;
-	int16_t t, u, length, max, count = sizeof(f_error_messages) / sizeof(char *);
+	int16_t t, u, length, max;
 
-	fputs("\nError Messages ", stdout);
-	fputc(CODE_EM, ofile);
 	/* Get the longest string */
 	for (t = 0, max = 0; t < count; ++t) {
 		length = strlen(strings[t]);
 		if (max < length) max = length;
 	}
-	/* Add one for NULL terminator */
+	/* Add one for \0 terminator */
 	++max;
+
+	/* Output */
+	fputs(prompt, stdout);
+	fputc(' ', stdout);
+	fputc(code, ofile);
+	/* How many messages */
+	fwrite(&count, sizeof(int16_t), 1, ofile);
 	/* Write out the size */
 	fwrite(&max, sizeof(int16_t), 1, ofile);
 	/* Write out the strings */
 	for (t = 0; t < count; ++t) {
-		length = strlen(strings[t]);
 		fputs(strings[t], ofile);
-		for (u = length; u < max; ++u)
+		for (u = strlen(strings[t]); u < max; ++u)
 			fputc('\0', ofile);
-	}
-	fputs("done\n", stdout);
-}
-
-static void OutputAttractMessages(FILE *ofile)
-{
-	int16_t max, t;
-	uint8_t i, l;
-	char c = '\0';
-
-	/* Will need this */
-	l = sizeof(f_attract_messages) / sizeof(char *);
-
-	/* Get the length of the longest string */
-	for (i = 0, max = 0; i < l; ++i) {
-		t = strlen(f_attract_messages[i]);
-		if (max < t)
-			max = t;
-	}
-	/* Add 1 for the /0 terminator */
-	++max;
-
-	/* Output */
-	fputs("Attract Messages ", stdout);
-	fputc(CODE_AM, ofile);
-
-	/* How many messages */
-	t = l;
-	fwrite(&t, sizeof(int16_t), 1, ofile);
-	/* How much space per message */
-	fwrite(&max, sizeof(int16_t), 1, ofile);
-	/* Actual messages */
-	for (i = 0; i < l; ++i) {
-		t = strlen(f_attract_messages[i]);
-		fwrite(f_attract_messages[i], sizeof(char), t, ofile);
-		while (t < max) {
-			fwrite(&c, sizeof(char), 1, ofile);
-			++t;
-		}
 	}
 	fputs("done\n", stdout);
 }

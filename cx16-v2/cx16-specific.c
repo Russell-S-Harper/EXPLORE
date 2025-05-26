@@ -6,12 +6,12 @@
 
 /* cx16-specific.c */
 
-#include <ctype.h>
-#include <limits.h>
-#include <time.h>
-#include <conio.h>
 #include <tgi.h>
 #include <joystick.h>
+#include <conio.h>
+#include <time.h>
+#include <limits.h>
+#include <ctype.h>
 #include "explore.h"
 #include "vera.h"
 
@@ -86,7 +86,7 @@ enum {FRAME_TO_FINISH, SCREEN_TO_FINISH};
 #define	MSG_CYCLE	45		/* Or MSG_CYCLE * MSG_DURATION / FRAMES_PER_SEC seconds */
 
 static void DrawLine16(void);
-static void PlayerJoined(void);
+static void ResetMessages(void);
 static void DefaultCallback(uint8_t waiting);
 
 static bool
@@ -136,6 +136,9 @@ void InitSpecific(void)
 
 	/* Set up the joystick */
 	joy_install(joy_static_stddrv);
+
+	/* Set up current messages */
+	g_current_messages = g_attract_messages;
 }
 
 /* Switch to the other screen, clear the previous screen, and perform other functions */
@@ -209,11 +212,22 @@ void UpdateDisplay(void)
 	}
 }
 
+/* To provide a little bit of feedback when cycling the player */
+#define ID_SCR_CD	6
+#define	ID_SCR_X	21
+#define	ID_SCR_Y	21
+#define	ID_SCR_CLR	1
+
 /* Processes keyboard and joystick input */
 void GetPlayerInput(VEHICLE *player)
 {
+	static uint8_t s_identifier_cd;
+
 	bool active_human = !player->npc && player->active;
 	uint8_t c, i, j, joy;
+
+	if (s_identifier_cd && !--s_identifier_cd)
+		cputcxy(ID_SCR_X, ID_SCR_Y, ' ');
 
 	/* Process keyboard input */
 	while (kbhit()) {
@@ -232,7 +246,10 @@ void GetPlayerInput(VEHICLE *player)
 						j = PLAYER_INDEX;
 					if (g_vehicles[j].active) {
 						g_vehicle_index = j;
-						ReportToAI(g_vehicles + j, EVT_SWITCHED_FOCUS, 0);
+						ReportToAI(g_vehicles + j, EVT_SWITCHED_FOCUS, (int16_t)&c);
+						textcolor(ID_SCR_CLR);
+						cputcxy(ID_SCR_X, ID_SCR_Y, c);
+						s_identifier_cd = ID_SCR_CD;
 						break;
 					}
 				}
@@ -240,17 +257,17 @@ void GetPlayerInput(VEHICLE *player)
 
 			case JOIN_AS_NORMAL:
 				ReportToAI(player, EVT_HUMAN_JOINED, MD_JOIN_AS_NORMAL);
-				PlayerJoined();
+				ResetMessages();
 				break;
 
 			case FOCUS_ON_HUMAN:
 				ReportToAI(player, EVT_HUMAN_JOINED, MD_FOCUS_ON_HUMAN);
-				PlayerJoined();
+				ResetMessages();
 				break;
 
 			case NO_REFRESH_AT_LAST_LVL:
 				ReportToAI(player, EVT_HUMAN_JOINED, MD_NO_REFRESH_AT_LAST_LEVEL);
-				PlayerJoined();
+				ResetMessages();
 				break;
 
 			case QUIT_PROGRAM:
@@ -322,7 +339,13 @@ void GetPlayerInput(VEHICLE *player)
 	}
 }
 
-static void PlayerJoined(void)
+void QueueNewMessages(XM_HANDLE messages)
+{
+	g_current_messages = messages;
+	ResetMessages();
+}
+
+static void ResetMessages(void)
 {
 	f_message_cd = 0;
 	f_message_index = 0;
@@ -382,10 +405,10 @@ static void DefaultCallback(uint8_t waiting)
 				} else if (!g_human_joined && !s_messages_checked) {
 					s_messages_checked = true;
 					if (!f_message_cd) {
-						if (IndexExistsForXM(g_attract_messages, f_message_index - MSG_WINDOW))
+						if (IndexExistsForXM(g_current_messages, f_message_index - MSG_WINDOW))
 							cclearxy(0, (((f_message_index - MSG_WINDOW) % MSG_LINES) << 1) + 1, s_width);
-						if (IndexExistsForXM(g_attract_messages, f_message_index)) {
-							p = GetXMAddress(g_attract_messages, f_message_index);
+						if (IndexExistsForXM(g_current_messages, f_message_index)) {
+							p = GetXMAddress(g_current_messages, f_message_index);
 							gotoxy(0, ((f_message_index % MSG_LINES) << 1) + 1);
 							for (i = 0; p[i]; ) {
 								if (p[i] == '\a') {
@@ -408,8 +431,10 @@ static void DefaultCallback(uint8_t waiting)
 						}
 						f_message_cd = MSG_DURATION;
 						++f_message_index;
-						if (f_message_index >= MSG_CYCLE)
+						if (f_message_index >= MSG_CYCLE) {
 							f_message_index = 0;
+							g_current_messages = g_attract_messages;
+						}
 					} else
 						--f_message_cd;
 				}
@@ -749,7 +774,7 @@ int16_t MulDiv16(int16_t num1, int16_t num2, int16_t denom)
 	return (int16_t)(c / denom);
 }
 
-/* Hardcoding galore! Returns a random seed to use for srand(). */
+/* Hardcoding galore! Returns a random seed to use for srand() */
 uint32_t GetRandomSeed(void)
 {
 	/* Call entropy_get */
