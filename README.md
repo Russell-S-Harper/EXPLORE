@@ -83,7 +83,7 @@ The only controls are escape to pause (!) and Q to quit, or you can just wait an
 
 Here’s a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) of the very simplified demo running at 0.66 s/frame.
 
-## CX16 v2 – AI Demo
+## CX16 v2 – AI Demo (a.k.a. PvP-AI)
 
 ### History
 
@@ -94,9 +94,11 @@ Here’s a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) 
 
 VERA is a display co-processor used in the CX16. It has a new feature, "FX", which provides helpers to improve line drawing, polygon filling, and other functions. Using the line drawing helper, I was able to implement 16-color line drawing routines such that, even written in C and implementing clipping, they still run in about 80% of the time required by the 256-color line drawing routines in TGI. As an aside, the line drawing routines in `cx16-v1` using Bresenham’s algorithm took 3× the time to run than the TGI drawing routines, so a huge improvement gain using VERA.
 
-V2 takes a different perspective looking overhead into an arena setting with walls and vehicles. There’s no masking, just lines. Here’s a [video](https://www.youtube.com/watch?v=6ZxkDRXkPw0) of the current progress. The rotations and scalings require a lot of multiplications and divisions such that they end up being bottlenecks. The multiplier in VERA is a major factor in getting the frame rate to 7.5 frames/s, although it’s set to 6.0 frames/s to give a timeslice for the AI. Given that 5.0 frames/s is acceptable, there’s lots of room to add more details, and the code is only minimally optimized.
+V2 takes a different perspective looking overhead into an arena setting with walls and vehicles. There’s no masking, just lines. Here’s a [video](https://www.youtube.com/watch?v=tiZMc-CJp0s) of the current progress. The rotations and scalings require a lot of multiplications and divisions such that they end up being bottlenecks. The multiplier in VERA is a major factor in getting the frame rate to 7.5 frames/s, although it’s set to 6.0 frames/s to give a timeslice for the AI. Given that 5.0 frames/s is acceptable, there’s lots of room to add more details, and the code is only minimally optimized.
 
-About the AI, it uses only 13 bytes to correspond to various settings, e.g. evade, revenge, persistence, etc. You can let the program run on its own, and it will create an `AI.DAT` file and document the generations as the players compete with each other. It looks pretty good running as a screen saver or a retro videogame attract mode.
+For those who want to try out the compiled program, you can copy the three files beginning with `PVP-AI` from my [Google Drive](https://drive.google.com/drive/folders/1nBoKQ6ZB6Fb3NYO77jeoF8aATl1pe7U-?usp=sharing) and run the `PRG`. Suggest running in an emulator for now because there is a problem with the VERA hardware, see the note below. As well, there might be issues with creating files in hardware – still investigating.
+
+About the AI, it uses only 13 bytes to correspond to various settings, e.g. evade, revenge, persistence, etc. You can let the program run on its own, and it will create an `AI.DAT` file and document the generations as the players compete with each other. It has an attract sequence and a summary screen and looks pretty good running as a screen saver or a retro videogame attract mode.
 
 As in `cx16-v1`, should you want to build the demo, you’ll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
@@ -124,10 +126,6 @@ When you’re playing, these are your keyboard and joystick controls:
 - cursor right or joystick right: turn right
 - cursor left or joystick left: turn left
 - space or joystick button: fire missile
-
-I’m working on an attract sequence with instructions, but for now you can probably figure out the rules on your own!
-
-Depending on what I’m optimizing, it might print some timing statistics in `frame` or `clock` units.
 
 ## License
 
