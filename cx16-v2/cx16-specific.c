@@ -216,7 +216,6 @@ void UpdateDisplay(void)
 #define ID_SCR_CD	6
 #define	ID_SCR_X	21
 #define	ID_SCR_Y	21
-#define	ID_SCR_CLR	1
 
 /* Processes keyboard and joystick input */
 void GetPlayerInput(VEHICLE *player)
@@ -224,7 +223,7 @@ void GetPlayerInput(VEHICLE *player)
 	static uint8_t s_identifier_cd;
 
 	bool active_human = !player->npc && player->active;
-	uint8_t c, i, j, joy;
+	uint8_t c, i, j, joy, identifier;
 
 	if (s_identifier_cd && !--s_identifier_cd)
 		cputcxy(ID_SCR_X, ID_SCR_Y, ' ');
@@ -246,9 +245,9 @@ void GetPlayerInput(VEHICLE *player)
 						j = PLAYER_INDEX;
 					if (g_vehicles[j].active) {
 						g_vehicle_index = j;
-						ReportToAI(g_vehicles + j, EVT_SWITCHED_FOCUS, (int16_t)&c);
-						textcolor(ID_SCR_CLR);
-						cputcxy(ID_SCR_X, ID_SCR_Y, c);
+						ReportToAI(g_vehicles + j, EVT_SWITCHED_FOCUS, (int16_t)&identifier);
+						textcolor(CLR16_WHITE);
+						cputcxy(ID_SCR_X, ID_SCR_Y, identifier);
 						s_identifier_cd = ID_SCR_CD;
 						break;
 					}
