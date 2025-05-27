@@ -96,7 +96,7 @@ VERA is a display co-processor used in the CX16. It has a new feature, "FX", whi
 
 V2 takes a different perspective looking overhead into an arena setting with walls and vehicles. There’s no masking, just lines. Here’s a [video](https://www.youtube.com/watch?v=tiZMc-CJp0s) of the current progress. The rotations and scalings require a lot of multiplications and divisions such that they end up being bottlenecks. The multiplier in VERA is a major factor in getting the frame rate to 7.5 frames/s, although it’s set to 6.0 frames/s to give a timeslice for the AI. Given that 5.0 frames/s is acceptable, there’s lots of room to add more details, and the code is only minimally optimized.
 
-For those who want to try out the compiled program, you can copy the three files beginning with `PVP-AI` from my [Google Drive](https://drive.google.com/drive/folders/1nBoKQ6ZB6Fb3NYO77jeoF8aATl1pe7U-?usp=sharing) and run the `PRG`. Suggest running in an emulator for now because there is a problem with the VERA hardware, see the note below. As well, there might be issues with creating files in hardware – still investigating.
+For those who want to try out the compiled program, you can copy the three files beginning with `PVP-AI` from my [Google Drive](https://drive.google.com/drive/folders/1nBoKQ6ZB6Fb3NYO77jeoF8aATl1pe7U-?usp=sharing) and run the `PRG`. Suggest running in an emulator for now because there is a problem with the VERA hardware, see the note below. As well, there might be issues with handling files in hardware using the stdio functions – still investigating.
 
 About the AI, it uses only 13 bytes to correspond to various settings, e.g. evade, revenge, persistence, etc. You can let the program run on its own, and it will create an `AI.DAT` file and document the generations as the players compete with each other. It has an attract sequence and a summary screen and looks pretty good running as a screen saver or a retro videogame attract mode.
 
@@ -104,9 +104,9 @@ As in `cx16-v1`, should you want to build the demo, you’ll need [cc65](https:/
 
 Edit the `«flt-repo»/flt/build-cc65` script to point `XCC` to where the ***cc65*** repo is located, and run the script to build the `flt.lib` library.
 
-Then edit the `«explore-repo»/cx16-v2/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `EXPLORE.PRG` and `DATA.PRG`.
+Then edit the `«explore-repo»/cx16-v2/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `EXPLORE.PRG`, `TEXT.PRG`, and `DATA.PRG`.
 
-Run the emulator, then load and run `DATA.PRG` to generate the `EXPLORE.DAT` data file, and then load and run `EXPLORE.PRG` to run the demo. Once `EXPLORE.DAT` is created, you don’t need to run `DATA.PRG` again, unless you change `«explore-repo»/cx16-v2/data.c`.
+Run the emulator, then load and run `TEXT.PRG` & `DATA.PRG` to generate the `PVP-AI.TXT` & `PVP-AI.DAT` text and data files, and then load & run `PVP-AI.PRG` to run the demo. Once the text and data files are created, you don’t need to run `TEXT.PRG` & `DATA.PRG` again, unless you change `«explore-repo»/cx16-v2/data.c` or `«explore-repo»/cx16-v2/text.c`.
 
 Note: The hardware currently has a problem in that in 16-color mode, VERA can’t render some lines at certain angles. As a workaround these lines are handled by implementing Bresenham’s algorithm directly, but the end result is that in hardware it runs at only 4.0 frames/s – I think too slow to be playable.
 
@@ -119,13 +119,13 @@ The demo uses these keyboard controls:
 - K: join the game, but you’re the preferred target (hard)
 - L: join the game, but for you the last level doesn’t restore its health after zeroing other players (very hard)
 
-When you’re playing, these are your keyboard and joystick controls:
+When you’re playing, these are your keyboard and gamepad controls:
 
-- cursor up or joystick back: climb
-- cursor down or joystick forward: dive
-- cursor right or joystick right: turn right
-- cursor left or joystick left: turn left
-- space or joystick button: fire missile
+- cursor up or gamepad back: climb
+- cursor down or gamepad forward: dive
+- cursor right or gamepad right: turn right
+- cursor left or gamepad left: turn left
+- space or gamepad button: fire missile
 
 ## License
 
