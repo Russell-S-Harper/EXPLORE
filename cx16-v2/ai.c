@@ -306,6 +306,8 @@ static void InitSettings(void)
 /* The provided settings are those of the winner! */
 static void UpdateSettings(AI_SETTINGS *s)
 {
+/* No room for summary when debugging! */
+#ifndef DEBUG
 	static const char
 		*s_parent_is_na = "---",
 		*s_human_identifier = "Human",
@@ -314,18 +316,28 @@ static void UpdateSettings(AI_SETTINGS *s)
 		s_parent[] = {'\"', AI_K04, '\"', '\0'},
 		s_identifier[] = {'\"', AI_K04, '\"', ' ', ' ', '\0'},	/* Two extra spaces to align with "Human" */
 		s_score[11];						/* See s_initial_score */
+#endif /* DEBUG */
 
 	FILE *ifile, *ofile;
 	AI_SETTINGS t;
+	uint8_t i, crc;
+	char identifier;
+
+/* No room for summary... */
+#ifndef DEBUG
 	int16_t score;
-	uint8_t i, j, crc = 0;
-	char *working, identifier;
+	uint8_t j;
+	char *working;
 	bool negative;
+#endif /* DEBUG */
 
 	/* Will need this when sorting */
 	f_identifier = s->identifier;
 	/* Sort according to winner and scores */
 	qsort(f_settings, PLAYER_COUNT, sizeof(AI_SETTINGS), CompareSettings);
+
+/* No room,,, */
+#ifndef DEBUG
 	/* Set up a summary */
 	for (i = 0, s = f_settings; i < PLAYER_COUNT; ++i, ++s) {
 		working = GetXMAddress(g_summary_messages, i + SM_SUMMARY_MSG_IDX);
@@ -352,8 +364,10 @@ static void UpdateSettings(AI_SETTINGS *s)
 	}
 	/* Display it */
 	QueueNewMessages(g_summary_messages);
+#endif /* DEBUG */
 
 	if (!g_human_joined) {
+		crc = 0;
 		if (f_modulus > AI_K12) {
 			/* Append settings */
 			ifile = fopen(f_ai_data, g_read_mode);
