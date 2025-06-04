@@ -646,14 +646,14 @@ static void DrawLine16(void)
 		p = &VERA_DATA1;
 		c = (f_current_color << HEX_DGT_SHIFT) | f_current_color;
 		while (i >= 8) {
-			VOLATILE *p = c;
-			VOLATILE *p = c;
-			VOLATILE *p = c;
-			VOLATILE *p = c;
-			VOLATILE *p = c;
-			VOLATILE *p = c;
-			VOLATILE *p = c;
-			VOLATILE *p = c;
+			*p = c;
+			*p = c;
+			*p = c;
+			*p = c;
+			*p = c;
+			*p = c;
+			*p = c;
+			*p = c;
 			i -= 8;
 		}
 		for (; i > 0; --i)
@@ -755,7 +755,7 @@ int16_t MulDiv16(int16_t num1, int16_t num2, int16_t denom)
 
 	/* Save the result */
 	VERA_ADDRx_H = VERA_INC_1;
-	VOLATILE ((uint8_t *)&c)[0] = VERA_DATA0;
+	/* VOLATILE */ ((uint8_t *)&c)[0] = VERA_DATA0;
 	VOLATILE ((uint8_t *)&c)[1] = VERA_DATA0;
 	VOLATILE ((uint8_t *)&c)[2] = VERA_DATA0;
 	VOLATILE ((uint8_t *)&c)[3] = VERA_DATA0;

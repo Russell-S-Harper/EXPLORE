@@ -132,7 +132,7 @@
 #define VERA_PSG_CLEAR_WAVEFORM	0x80
 #define VERA_PSG_NOISE_WAVEFORM	0xC0
 
-/* To disable optimizations when accessing volatile memory by breaking up pattern matching */
-#define VOLATILE                                __asm__("nop");
+/* To disable optimizations when accessing volatile memory */
+#define VOLATILE		__asm__("nop");
 
 #endif /* _VERA_H */
