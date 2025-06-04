@@ -4,11 +4,10 @@
      Contact: russell.s.harper@gmail.com
 */
 
+#include <string.h>
 #include <stdio.h>
 #include "explore.h"
 #include "vera.h"
-
-/* Defines used by InitData */
 
 /* Global variables */
 XM_HANDLE
@@ -220,8 +219,14 @@ void InitPlayers(void)
 	int16_t i;
 	VEHICLE *player;
 
-	if (!g_vehicles)
-		g_vehicles = calloc(VEHICLE_COUNT, sizeof(VEHICLE));
+	if (!g_vehicles) {
+#ifdef USER_SPACE
+		g_vehicles = (VEHICLE *)USER_SPACE;
+#else
+		g_vehicles = malloc(VEHICLE_COUNT * sizeof(VEHICLE));
+#endif /* USER_SPACE */
+		memset(g_vehicles, 0, VEHICLE_COUNT * sizeof(VEHICLE));
+	}
 
 	for (i = PLAYER_INDEX, player = g_vehicles + PLAYER_INDEX; i < PLAYER_LIMIT; ++i, ++player) {
 		/* To prevent collisions with your own missiles! */

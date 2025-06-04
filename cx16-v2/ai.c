@@ -294,7 +294,7 @@ static void InitSettings(void)
 }
 
 /* These defines and the static strings & character arrays in UpdateSettings assume
-   the summary message is formatted as "\aT<color 0 - F>  <ordinal 1st - 4th>  " */
+   the summary message is formatted as "\eT<color 0 - F>  <ordinal 1st - 4th>  " */
 #define SM_SUMMARY_MSG_IDX	2
 #define SM_REVISE_STR_IDX	10
 #define SM_IDENTIFIER_IDX	1

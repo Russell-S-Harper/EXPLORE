@@ -31,7 +31,7 @@
 	31 - 60        | 60
 */
 #define FRAMES_PER_SEC_LO	4	/* If HW VERA FX Line Helper 4bpp workaround is required */
-#define FRAMES_PER_SEC_HI	6	/* No restrictions */
+#define FRAMES_PER_SEC_HI	7	/* No restrictions */
 
 /* Keyboard defines used in GetPlayerInput */
 #define JOIN_AS_NORMAL		74	/* J: join game */
@@ -410,7 +410,7 @@ static void DefaultCallback(uint8_t waiting)
 							p = GetXMAddress(g_current_messages, f_message_index);
 							gotoxy(0, ((f_message_index % MSG_LINES) << 1) + 1);
 							for (i = 0; p[i]; ) {
-								if (p[i] == '\a') {
+								if (p[i] == '\e') {
 									if (p[i + 1] == 'T') {
 										++i;
 										if (p[i + 1]) {
@@ -646,14 +646,14 @@ static void DrawLine16(void)
 		p = &VERA_DATA1;
 		c = (f_current_color << HEX_DGT_SHIFT) | f_current_color;
 		while (i >= 8) {
-			*p = c;
-			*p = c;
-			*p = c;
-			*p = c;
-			*p = c;
-			*p = c;
-			*p = c;
-			*p = c;
+			VOLATILE *p = c;
+			VOLATILE *p = c;
+			VOLATILE *p = c;
+			VOLATILE *p = c;
+			VOLATILE *p = c;
+			VOLATILE *p = c;
+			VOLATILE *p = c;
+			VOLATILE *p = c;
 			i -= 8;
 		}
 		for (; i > 0; --i)
@@ -730,13 +730,7 @@ int8_t Max8(int8_t a, int8_t b) { return a > b? a: b; }
 /* Equivalent to (int16_t)((int32_t)num1 * num2 / denom) */
 int16_t MulDiv16(int16_t num1, int16_t num2, int16_t denom)
 {
-	uint8_t *p, *q, *r;
 	int32_t c;
-
-	/* Using the VERA multiplier so representing the parameters as sequences of bytes */
-	p = (uint8_t *)&num1;
-	q = (uint8_t *)&num2;
-	r = (uint8_t *)&c;
 
 	/* Set up the multiplier */
 	VERA_CTRL = VERA_DCSEL_2;
@@ -744,10 +738,10 @@ int16_t MulDiv16(int16_t num1, int16_t num2, int16_t denom)
 
 	/* Set the operands */
 	VERA_CTRL = VERA_DCSEL_6;
-	VERA_FX_CACHE_L = p[0];
-	VERA_FX_CACHE_M = p[1];
-	VERA_FX_CACHE_H = q[0];
-	VERA_FX_CACHE_U = q[1];
+	VERA_FX_CACHE_L = ((uint8_t *)&num1)[0];
+	VERA_FX_CACHE_M = ((uint8_t *)&num1)[1];
+	VERA_FX_CACHE_H = ((uint8_t *)&num2)[0];
+	VERA_FX_CACHE_U = ((uint8_t *)&num2)[1];
 
 	/* Set to write in unused space between the screens */
 	VERA_CTRL = VERA_DCSEL_2 | VERA_ADDR_0;
@@ -761,10 +755,10 @@ int16_t MulDiv16(int16_t num1, int16_t num2, int16_t denom)
 
 	/* Save the result */
 	VERA_ADDRx_H = VERA_INC_1;
-	r[0] = VERA_DATA0;
-	r[1] = VERA_DATA0;
-	r[2] = VERA_DATA0;
-	r[3] = VERA_DATA0;
+	VOLATILE ((uint8_t *)&c)[0] = VERA_DATA0;
+	VOLATILE ((uint8_t *)&c)[1] = VERA_DATA0;
+	VOLATILE ((uint8_t *)&c)[2] = VERA_DATA0;
+	VOLATILE ((uint8_t *)&c)[3] = VERA_DATA0;
 
 	/* Restore */
 	VERA_FX_CTRL = VERA_TRADITIONAL;

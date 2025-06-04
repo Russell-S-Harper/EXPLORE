@@ -67,7 +67,6 @@ enum {CLR16_BLACK, CLR16_WHITE, CLR16_RED, CLR16_CYAN,
 /* Sounds */
 enum {MSS_FIRING, MSS_EXPLODING, BELL_RINGING, SOUNDS_CNT};
 
-
 #ifdef DEBUG
 /* Defined in initialize.c, to use for debugging */
 void OutputAsNumber(char prefix, int16_t value);
