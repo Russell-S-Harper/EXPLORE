@@ -35,7 +35,7 @@ static const char *f_attract_messages[] =
 	"\eT3 You're watching them battle live!",
 	"\eTF Colors mean: \eTE\xA9 \eTFabove \eT8\xA9 \eTFbelow \eT1\xA9 \eTFclose",
 	"\eTE Blue like the sky, you need to climb",
-	"\eT8 Brown like the ground, dive",
+	"\eT8 Orange or brown like the ground, dive",
 	"\eT1 White means close, shoot!",
 	"\eTD All missiles are smart!",
 	"\eTA Both attacker and target advance",

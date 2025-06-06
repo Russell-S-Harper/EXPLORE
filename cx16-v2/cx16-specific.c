@@ -31,7 +31,7 @@
 	31 - 60        | 60
 */
 #define FRAMES_PER_SEC_LO	4	/* If HW VERA FX Line Helper 4bpp workaround is required */
-#define FRAMES_PER_SEC_HI	7	/* No restrictions */
+#define FRAMES_PER_SEC_HI	8	/* No restrictions */
 
 /* Keyboard defines used in GetPlayerInput */
 #define JOIN_AS_NORMAL		74	/* J: join game */
@@ -148,7 +148,6 @@ void UpdateDisplay(void)
 	static bool s_initialized;
 	clock_t current_clock;
 	uint8_t base, address, i, j;
-	register volatile uint8_t *p;
 
 	/* Wait for the end of the frame based on clock cycles */
 	if (!s_initialized) {
@@ -198,17 +197,17 @@ void UpdateDisplay(void)
 	VERA_ADDRx_H = VERA_INC_1;
 
 	/* Clear the previous screen */
-	for (p = &VERA_DATA0, i = 0; i < VERA_VERT_RES; ++i) {
-		for (j = 0; j < VERA_HORZ_RES / VERA_PX_PER_BYTE / 8; ++j) {
-			*p = CLEAR_BYTE;
-			*p = CLEAR_BYTE;
-			*p = CLEAR_BYTE;
-			*p = CLEAR_BYTE;
-			*p = CLEAR_BYTE;
-			*p = CLEAR_BYTE;
-			*p = CLEAR_BYTE;
-			*p = CLEAR_BYTE;
-		}
+	for (i = 0; i < VERA_VERT_RES; ++i) {
+		for (j = 0; j < VERA_HORZ_RES / VERA_PX_PER_BYTE / 8; ++j)
+			/* The optimizer handles this perfectly! */
+			VERA_DATA0 =
+			VERA_DATA0 =
+			VERA_DATA0 =
+			VERA_DATA0 =
+			VERA_DATA0 =
+			VERA_DATA0 =
+			VERA_DATA0 =
+			VERA_DATA0 = CLEAR_BYTE;
 	}
 }
 
@@ -501,7 +500,6 @@ static void DrawLine16(void)
 	int16_t x1, y1, x2, y2, xmin, xmax, ymin, ymax, xt, yt, dx, dy, slope;
 	int32_t l;
 	uint32_t address;
-	register volatile uint8_t *p;
 	register uint8_t c;
 	register int16_t i;
 
@@ -643,21 +641,22 @@ static void DrawLine16(void)
 		VERA_FX_X_INCR_H = slope & 0x03;
 
 		/* Draw the line */
-		p = &VERA_DATA1;
+		//p = &VERA_DATA1;
 		c = (f_current_color << HEX_DGT_SHIFT) | f_current_color;
 		while (i >= 8) {
-			*p = c;
-			*p = c;
-			*p = c;
-			*p = c;
-			*p = c;
-			*p = c;
-			*p = c;
-			*p = c;
+			/* The optimizer handles this perfectly! */
+			VERA_DATA1 =
+			VERA_DATA1 =
+			VERA_DATA1 =
+			VERA_DATA1 =
+			VERA_DATA1 =
+			VERA_DATA1 =
+			VERA_DATA1 =
+			VERA_DATA1 = c;
 			i -= 8;
 		}
 		for (; i > 0; --i)
-			*p = c;
+			VERA_DATA1 = c;
 
 		/* DCSEL = 2 */
 		VERA_CTRL = VERA_DCSEL_2;
