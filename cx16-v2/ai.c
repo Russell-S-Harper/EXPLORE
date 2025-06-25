@@ -4,6 +4,7 @@
      Contact: russell.s.harper@gmail.com
 */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
@@ -150,11 +151,8 @@ static void InitRNG(void)
 	if (!f_random_bytes)
 		f_random_bytes = AllocXM(UINT8_MAX + 1, sizeof(uint8_t));
 
-	/* Randomize */
-	srand(GetRandomSeed());
-
 	/* Gather 256 pseudo-random bytes */
-	for (i = 0, p = GetXMAddressInitial(f_random_bytes); i <= UINT8_MAX; ++i)
+	for (__randomize(), i = 0, p = GetXMAddressInitial(f_random_bytes); i <= UINT8_MAX; ++i)
 		p[i] = (rand() >> AI_K01) & UINT8_MAX;
 }
 

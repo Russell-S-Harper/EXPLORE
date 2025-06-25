@@ -766,16 +766,3 @@ int16_t MulDiv16(int16_t num1, int16_t num2, int16_t denom)
 	return (int16_t)(c / denom);
 }
 
-/* Hardcoding galore! Returns a random seed to use for srand() */
-uint32_t GetRandomSeed(void)
-{
-	/* Call entropy_get */
-	__asm__("jsr $FECF");
-	/* Save A, X, Y, and Z (zero) in user space 0x7FC */
-	__asm__("sta $07FC");
-	__asm__("stx $07FD");
-	__asm__("sty $07FE");
-	__asm__("stz $07FF");
-	/* Return 24 bits as uint32_t */
-	return *((uint32_t *)0x7FC);
-}
