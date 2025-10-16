@@ -641,7 +641,6 @@ static void DrawLine16(void)
 		VERA_FX_X_INCR_H = slope & 0x03;
 
 		/* Draw the line */
-		//p = &VERA_DATA1;
 		c = (f_current_color << HEX_DGT_SHIFT) | f_current_color;
 		while (i >= 8) {
 			/* The optimizer handles this perfectly! */

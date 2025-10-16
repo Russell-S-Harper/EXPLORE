@@ -34,7 +34,7 @@ XM_HANDLE AllocXM(size_t limit, size_t size)
 	uint8_t shift;
 	size_t total;
 
-	// Find the smallest power of two to accommodate
+	/* Find the smallest power of two to accommodate */
 	shift = 0;
 	while ((1 << shift) < size)
 		++shift;
