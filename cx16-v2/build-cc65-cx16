@@ -7,7 +7,7 @@
 
 XCC=~/Documents/development/cc65
 FLT=~/Documents/development/FLT
-EMU=~/Documents/development/x16emu_linux-x86_64-r48
+EMU=~/Documents/development/x16emu_linux-x86_64-r49
 
 # Build DATA.PRG
 php $FLT/flt/flt.php -i data.c -o data-flt.c -x "-DABSTRACT_2D -I $XCC/include -I $FLT/flt"
