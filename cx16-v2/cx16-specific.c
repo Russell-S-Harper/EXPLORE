@@ -380,9 +380,9 @@ static void DefaultCallback(uint8_t waiting)
 						b = (b & VERA_PSG_RL_MASK) | g_psg_volumes[v];
 						vpoke(b, a);
 					}
-					s_vehicle_cd = VEHICLE_COUNT;
-					s_messages_checked = false;
 				}
+				s_vehicle_cd = VEHICLE_COUNT;
+				s_messages_checked = false;
 			} else {
 				/* Do some NPC and Missile AI */
 				if (s_vehicle_cd) {
@@ -390,7 +390,7 @@ static void DefaultCallback(uint8_t waiting)
 					if (s_vehicle_index < PLAYER_LIMIT)
 #else
 					if (s_vehicle_index >= PLAYER_INDEX)
-#endif
+#endif /* PLAYER_INDEX == 0 */
 						NPCAI(g_vehicles + s_vehicle_index);
 					else
 						MissileAI(g_vehicles + s_vehicle_index);
