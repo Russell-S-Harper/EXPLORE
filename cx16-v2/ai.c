@@ -11,7 +11,7 @@
 #include <ctype.h>
 #include "explore.h"
 
-/* Defining constants generically for now, once they are all defined, will come up with a unified naming convention */
+/* Defining constants generically (easier than coming up with clever names!) */
 
 #define AI_K01	4	/* What to shift value from rand() to get "good" randomness */
 

@@ -133,7 +133,7 @@
 #define VERA_PSG_NOISE_WAVEFORM	0xC0
 
 /* To disable optimizations when accessing volatile memory. To use when it is
-   confirmed optimizations are affecting read from, or write to, VERA_DATA0/1. */
+   confirmed optimizations are affecting reads from, or writes to, VERA_DATA0/1. */
 #define VOLATILE		__asm__("nop");
 
 #endif /* _VERA_H */
