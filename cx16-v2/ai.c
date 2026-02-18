@@ -334,7 +334,7 @@ static void UpdateSettings(AI_SETTINGS *s)
 	/* Sort according to winner and scores */
 	qsort(f_settings, PLAYER_COUNT, sizeof(AI_SETTINGS), CompareSettings);
 
-/* No room,,, */
+/* No room... */
 #ifndef DEBUG
 	/* Set up a summary */
 	for (i = 0, s = f_settings; i < PLAYER_COUNT; ++i, ++s) {
