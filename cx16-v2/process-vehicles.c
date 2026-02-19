@@ -90,10 +90,10 @@ void ProcessVehicles(void)
 			z += player->z_delta << Z_DELTA_SHIFT;
 			if (z < MIN_XYZ) {
 				z = MIN_XYZ;
-				ReportToAI(player, EVT_REACHED_TOP, 0);
+				ReportToAI(player, EVT_REACHED_BOTTOM, 0);
 			} else if (z > MAX_XYZ) {
 				z = MAX_XYZ;
-				ReportToAI(player, EVT_REACHED_BOTTOM, 0);
+				ReportToAI(player, EVT_REACHED_TOP, 0);
 			}
 			player->z_delta = 0;
 		}
