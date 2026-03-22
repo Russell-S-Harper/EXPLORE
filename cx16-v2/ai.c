@@ -760,8 +760,8 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 						g_no_refresh_at_last_level = false;
 						break;
 					case MD_NO_REFRESH_AT_LAST_LEVEL:
-						g_no_refresh_at_last_level = true;
 						g_focus_on_human = false;
+						g_no_refresh_at_last_level = true;
 						break;
 				}
 			}
@@ -793,6 +793,18 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 				x->status = AIS_AVOID;
 				x->action_cd = AddRandomValue(AI_K42, AI_K41, AI_K41 - AI_K42, AI_K41 + AI_K42);
 				SetAZGActions(x);
+			/* To keep humans from hiding in corners! */
+			} else if (!player->npc) {
+				if (x->action_cd > 0)
+					--x->action_cd;
+				else {
+					if (player->health > player->damage) {
+						player->health -= player->damage;
+						player->hit_cd = MSS_HIT;
+					}
+					x->status = AIS_READY;
+					ReportToAI(player, EVT_PLAYER_IMPEDED, IMP_HIGH);
+				}
 			}
 			break;
 		case EVT_PLAYER_IMPEDED:
