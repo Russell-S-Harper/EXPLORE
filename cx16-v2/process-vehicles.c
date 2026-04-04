@@ -217,7 +217,7 @@ void ProcessVehicles(void)
 				if (dx <= MSS_XY_TOL && dy <= MSS_XY_TOL && GetXMDirectUnsigned(g_squares, dx) + GetXMDirectUnsigned(g_squares, dy) <= MSS_DST_TOL_SQR) {
 					missile->exploding = true;
 					player->health -= missile->damage;
-					player->hit_cd += MSS_HIT;
+					player->hit_cd = MSS_HIT;
 					ReportToAI(player, EVT_DAMAGED_PLAYER, missile->identifier);
 					/* Brought to zero? */
 					if (player->health <= 0) {

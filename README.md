@@ -15,7 +15,7 @@ Controls:
 - numeric pad 1 and 0: accelerate and deaccelerate
 - cursor keys: climb, descend, turn left and right
 - mouse: slide around
-- left button mouse click: “target” players, probably had some ideas for this at some time
+- left button mouse click: "target" players, probably had some ideas for this at some time
 - right button mouse click: cycle to the next player (the two-triangle things, this was way before drones!)
 - escape: pause, press again to resume
 - CTRL-Q: quit, then displays a histogram<sup>†</sup> of how long it took to render all the frames
@@ -31,7 +31,7 @@ To build the original demo, you’ll probably need Turbo C++. I distilled some o
 - mid 1980s, met with a company in Chatsworth, CA to discuss a 3-D game for a popular 6502 system
 - later 1980s, using every scrap of CPU and memory created a very simple demo in 6502 assembler; it was just walls that you could fly over and around, still looked cool
 - slightly later 1980s, company goes bankrupt, project scrapped!
-- early 1990s, rewrote the demo for the 68K in mixed K&R C and 68K assembler, with walls, polygons, horizon, sound, etc., but picked the “wrong horse” because the x86 was rapidly becoming dominant
+- early 1990s, rewrote the demo for the 68K in mixed K&R C and 68K assembler, with walls, polygons, horizon, sound, etc., but picked the "wrong horse" because the x86 was rapidly becoming dominant
 - early 1990s, rewrote the demo for the x86 in DOS in mostly ANSI C, no sound (native sound was just beeps back then)
 - mid 1990s, used the demo to get a number of decent summer jobs!
 - late 1990s, graphics cards made 3-D development much easier and faster, stopped developing the demo (e.g. just had yaw, was planning on adding pitch and roll)
@@ -88,11 +88,11 @@ Here’s a stunning :wink: [video](https://www.youtube.com/watch?v=TsXz8cJG-AU) 
 ### History
 
 - early 1990s, wrote an AI demo set in an arena with competing players, however most details are lost to history
-- 2024 to present day, rewriting the demo for the CX16; I’m happy with the results – might be useful for exhibitions and trade shows
+- 2024 to present day, rewriting the demo for the CX16; so far the results are good – might have something useful for exhibitions and trade shows
 
 ### Progress
 
-VERA is a display co-processor used in the CX16. It has a new feature, “FX”, which provides helpers to improve line drawing, polygon filling, and other functions. Using the line drawing helper, I was able to implement 16-color line drawing routines such that, even written in C and implementing clipping, they still run in about 75% of the time required by the 256-color line drawing routines in TGI. As an aside, the line drawing routines in `cx16-v1` using Bresenham’s algorithm took 3× the time to run than the TGI drawing routines, so a huge improvement gain using VERA.
+VERA is a display co-processor used in the CX16. It has a new feature, "FX", which provides helpers to improve line drawing, polygon filling, and other functions. Using the line drawing helper, I was able to implement 16-color line drawing routines such that, even written in C and implementing clipping, they still run in about 75% of the time required by the 256-color line drawing routines in TGI. As an aside, the line drawing routines in `cx16-v1` using Bresenham’s algorithm took 3× the time to run than the TGI drawing routines, so a huge improvement gain using VERA.
 
 V2 takes a different perspective looking overhead into an arena setting with walls and vehicles. There’s no masking, just lines. Here’s a [video](https://www.youtube.com/watch?v=LiRbyPf7lw4) of the current progress. The rotations and scalings require a lot of multiplications and divisions such that they end up being bottlenecks. The optimizer in cc65 and the multiplier & line drawing helper in VERA are major factors in getting the frame rate to 8.6 frames/s, with enough unused time between frames to give a decent timeslice for the AI.
 
@@ -115,7 +115,7 @@ The demo uses these keyboard controls:
 - escape: pause, press again to resume
 - C: cycle player
 - Q: quit
-- J: join the game in progress, your vehicle will have a little “cockpit”
+- J: join the game in progress, your vehicle will have a little "cockpit"
 - K: join the game, but you’re the preferred target (hard)
 - L: join the game, but for you the last level doesn’t restore its health after zeroing other players (very hard)
 
@@ -126,87 +126,6 @@ When you’re playing, these are your keyboard and gamepad controls:
 - cursor right or gamepad right: turn right
 - cursor left or gamepad left: turn left
 - space or gamepad button: fire missile
-
-## CX16 v3 – LLM vs PVP-AI
-
-### Introduction
-
-Inspired by other attempts to have LLMs interact with 8-bit systems, most notably [ChatGPT vs Atari 2600 Video Chess](https://www.linkedin.com/posts/robert-jr-caruso-23080180_ai-chess-atari2600-activity-7337108175185145856-HSP0), I wanted to explore what would happen when an LLM is placed inside a dynamic, adversarial environment “shoot-’em-up” 8-bit game.
-
-Unlike approaches that require the LLM to interpret visual or audio output directly, my method uses what I call “smart senses”: structured, text-based representations of the game world that abstract away heavy perception tasks. This lets the LLM spend less time deciphering raw data and more time doing what it excels at: reasoning about state and planning actions.
-
-To make this viable for the LLM, several accommodations were introduced in V3:
-
-- turn-based play: the live game runs at about 8.6 frames/s in the emulator, but the LLM can’t process that quickly, converting to turn-based gives the LLM the time it needs
-- persistent notes: the LLM is instructed to maintain in-play and after-game notes so that it can carry strategy forward across games
-- smart sensory input equivalent to what the 8-bit AI uses:
-
-  - touch: awareness of contact with missiles, walls, and arena boundaries
-  - EMF detection: awareness of other players’ positions and states
-
-Below is a sample of the structured information provided each turn:
-
-```
-# SWOT Analysis: Based on your strategy pick an action
-
-Your level: 1 (ship is slow, missiles deal 3 damage, and can change direction almost as fast as any ship)
-Your health: 54 (out of 60)
-
-Action codes:
-L = turn left
-R = turn right
-A = ascend
-D = descend
-1,2,3 = fire missile at that player ID
-X = fire missile at no particular target, e.g. for sensing environment
-Actions may be combined (e.g., LD = turn left and descend).
-
-Column Legend
-ID  : player ID
-OL  : opponent level
-OH  : opponent health
-PA  : pursue action
-ATK : attack probability
-AA  : attack action
-THR : threat probability
-EA  : evasion action
-
-Higher ATK means better chance to damage the opponent.
-Higher THR means greater danger from that opponent.
-
-Select the best action from PA, AA, or EA based on your strategy.
-Return the action code exactly as written.
-
-ID  OL  OH  PA  ATK  AA   THR  EA
- 1   1  60  LD   93  LD1   94  LA
- 2   1  60  R    93  R2    92  RD
- 3   1  60  RD   93  RD3   94  RA
-```
-
-XYZ coordinates, angles, and motion equations are intentionally abstracted into simple categorical options. This reduces mathematical burden and allows the LLM to focus on comparing probabilities and selecting tactics. Although the directive is to “Select the best action from PA, AA, or EA …” the LLM frequently diverged from these suggestions and generated its own plans, often with surprisingly consistent reasoning.
-
-### Progress
-
-Communication between the LLM and PVP-AI is handled through socket connections bridging Linux and the CX-16 emulator. A pull request is currently under review adding formal support for this pathway:
-
-[Add VIA2 socket support for external I/O integration](https://github.com/X16Community/x16-emulator/pull/376)
-
-For rapid experimentation, the LLM interface layer was built in PHP, which interacts directly with the ChatGPT API (model: *gpt-4o*) and coordinates state exchange with the emulator. Due to IP considerations and because a key component is still under review, this repository includes:
-
-- a **working stub** of the interface layer `«explore-repo»/cx16-v3/pvp-ai-working-stub.php`
-- an **outline** of the directives `«explore-repo»/cx16-v3/pvp-ai-chatgpt-outline.json`
-
-A functioning build directory with complete PHP and JSON can be provided for review under appropriate terms and conditions.
-
-### Other Links
-
-Game Mechanics & Dynamics: [https://pvp-ai.russell-harper.com](https://pvp-ai.russell-harper.com)
-
-YouTube Series: Three Sequential Games Played by the LLM (with persistent notes)
-
-- [game 1](https://youtu.be/reM4ojB48Kw)
-- [game 2](https://youtu.be/hD7wBwrfj8E)
-- [game 3](https://youtu.be/X0IKxCrAbpI)
 
 ## License
 
