@@ -305,8 +305,8 @@ static void InitSettings(void)
 /* The provided settings are those of the winner! */
 static void UpdateSettings(AI_SETTINGS *s)
 {
-/* No room for summary when debugging! */
-#ifndef DEBUG
+/* No room for summary when communicating with remote AI! */
+#ifndef REMOTE_AI
 	static const char
 		*s_parent_is_na = "---",
 		*s_human_identifier = "Human",
@@ -315,7 +315,7 @@ static void UpdateSettings(AI_SETTINGS *s)
 		s_parent[] = {'\"', AI_K04, '\"', '\0'},
 		s_identifier[] = {'\"', AI_K04, '\"', ' ', ' ', '\0'},	/* Two extra spaces to align with "Human" */
 		s_score[11];						/* See s_initial_score */
-#endif /* DEBUG */
+#endif /* REMOTE_AI */
 
 	FILE *ifile, *ofile;
 	AI_SETTINGS t;
@@ -323,12 +323,18 @@ static void UpdateSettings(AI_SETTINGS *s)
 	char identifier;
 
 /* No room for summary... */
-#ifndef DEBUG
+#ifndef REMOTE_AI
 	int16_t score;
 	uint8_t j;
 	char *working;
 	bool negative;
-#endif /* DEBUG */
+#else
+	int16_t value;
+	for (i = 0; i < PLAYER_COUNT; ++i) {
+		value = ((int16_t)(i) << 9) + ((f_settings[i].identifier == s->identifier? 1: 0) << 8) + ((int16_t)(f_settings[i].score) + 128);
+		OutputAsNumber(AIR_SCORE, value);
+	}
+#endif /* REMOTE_AI */
 
 	/* Will need this when sorting */
 	f_identifier = s->identifier;
@@ -336,7 +342,7 @@ static void UpdateSettings(AI_SETTINGS *s)
 	qsort(f_settings, PLAYER_COUNT, sizeof(AI_SETTINGS), CompareSettings);
 
 /* No room... */
-#ifndef DEBUG
+#ifndef REMOTE_AI
 	/* Set up a summary */
 	for (i = 0, s = f_settings; i < PLAYER_COUNT; ++i, ++s) {
 		working = GetXMAddress(g_summary_messages, i + SM_SUMMARY_MSG_IDX);
@@ -363,7 +369,7 @@ static void UpdateSettings(AI_SETTINGS *s)
 	}
 	/* Display it */
 	QueueNewMessages(g_summary_messages);
-#endif /* DEBUG */
+#endif /* REMOTE_AI */
 
 	if (!g_human_joined) {
 		crc = 0;
@@ -734,6 +740,10 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 	/* If celebrating, ignore all reports */
 	if (x->status == AIS_CELEBRATE)
 		return;
+#ifdef REMOTE_AI
+	/* Pack it in tight! */
+	OutputAsNumber(AIR_EVENT, (event << 10) | ((player->identifier - PLAYER_INDEX) << 6) | (extra & 63));
+#endif /* REMOTE_AI */
 	switch (event) {
 		case EVT_HUMAN_JOINED:
 			/* extra = game mode */
@@ -794,7 +804,7 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 				x->status = AIS_AVOID;
 				x->action_cd = AddRandomValue(AI_K42, AI_K41, AI_K41 - AI_K42, AI_K41 + AI_K42);
 				SetAZGActions(x);
-			/* To keep humans from hiding in corners! */
+			/* To keep humans and remote AI from hiding in corners! */
 			} else if (!player->npc) {
 				if (x->action_cd > 0)
 					--x->action_cd;
