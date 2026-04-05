@@ -1,0 +1,12 @@
+{
+  "model": "gpt-4o",
+  "max_tokens": 7500,
+  "temperature": 0.7,
+  "messages": [
+    {"role": "system", "content":"[-game-introduction-]"},
+    {"role": "system", "content": "Current Notes: [-notes-]"},
+    {"role": "user", "content": "[-payload-]"},
+    {"role": "system", "content": "[-response-instructions-]"},
+    {"role": "system", "content": "[-note-maintenance-rules-]"}
+  ]
+}
