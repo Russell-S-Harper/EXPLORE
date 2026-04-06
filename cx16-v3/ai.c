@@ -79,6 +79,7 @@
 #define AI_K51	9	/* What to shift dx and dy for accuracy calculation */
 #define AI_K52	961	/* Constant used in ensure result of accuracy calculation is [-120, 120] */
 #define AI_K53	3	/* What to shift to ensure result of accuracy calculation is [-120, 120] */
+
 #define AI_K54	5	/* What to increment hit_cd by when penalizing those who are intentionally idling */
 
 /* Most AI is kept separate from the regular operation of the game */
@@ -809,6 +810,7 @@ void ReportToAI(VEHICLE *player, AI_EVENT event, int16_t extra)
 				if (x->action_cd > 0)
 					--x->action_cd;
 				else {
+					/* Don't bring the health to zero */
 					if (player->health > player->damage) {
 						player->health -= player->damage;
 						player->hit_cd += AI_K54;
