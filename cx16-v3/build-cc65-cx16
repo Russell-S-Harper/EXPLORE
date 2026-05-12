@@ -46,14 +46,14 @@ done
 C=pvp-ai
 $XCC/bin/ld65 -o $(xform $C.$EXT) -t $TGT main.o initialize.o xm.o $TGT-specific.o process-vehicles.o render-objects.o ai.o -L $XCC/lib $TGT.lib
 
+# Clean up
+rm *-flt.c *.s *.o
+
 # Move to the emulator
 for C in data text pvp-ai ; do mv $(xform $C.$EXT) $EMU/ ; done
 
 # Copy to the emulator
 cp *.php *.json $EMU/
-
-# Clean up
-rm *-flt.c *.s *.o
 
 # Run the simulation
 cd $EMU

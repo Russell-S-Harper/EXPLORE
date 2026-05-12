@@ -40,11 +40,11 @@ done
 C=explore
 $XCC/bin/ld65 -o $(xform $C.$EXT) -t $TGT main.o initialize.o xm.o $TGT-specific.o process-vehicles.o scan-field.o render-objects.o -L $XCC/lib $TGT.lib
 
-# Move to the emulator
-for C in data explore ; do mv $(xform $C.$EXT) $EMU/ ; done
-
 # Clean up
 rm *-flt.c *.s *.o
+
+# Move to the emulator
+for C in data explore ; do mv $(xform $C.$EXT) $EMU/ ; done
 
 # Run the emulator
 cd $EMU
