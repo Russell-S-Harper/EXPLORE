@@ -12,13 +12,13 @@ XCC=~/Documents/development/cc65
 FLT=~/Documents/development/FLT
 EMU=~/Documents/development/x16-emulator/build
 TGT=cx16
-EXT=PRG
+EXT=prg
 OUT=upper
 
 xform() {
     local x="$1"
 
-    if [[ $OUT == upper ]]; then
+    if [[ $OUT == upper ]] ; then
         echo "${x^^}"
     else
         echo "${x,,}"
@@ -39,8 +39,7 @@ $XCC/bin/ca65 -t $TGT $C.s
 $XCC/bin/ld65 -o $(xform $C.$EXT) -t $TGT $C.o -L $XCC/lib $TGT.lib
 
 # Build pvp-ai
-for C in main initialize xm $TGT-specific process-vehicles render-objects ai
-do
+for C in main initialize xm $TGT-specific process-vehicles render-objects ai ; do
 	$XCC/bin/cc65 -t $TGT -DREMOTE_AI -DABSTRACT_2D -DREMOVE_TMP -DUSER_SPACE=0x400 -Cl -Oir -I $XCC/include $C.c
 	$XCC/bin/ca65 -t $TGT $C.s
 done
@@ -48,10 +47,7 @@ C=pvp-ai
 $XCC/bin/ld65 -o $(xform $C.$EXT) -t $TGT main.o initialize.o xm.o $TGT-specific.o process-vehicles.o render-objects.o ai.o -L $XCC/lib $TGT.lib
 
 # Move to the emulator
-for C in data text pvp-ai
-do
-	mv $(xform $C.$EXT) $EMU/
-done
+for C in data text pvp-ai ; do mv $(xform $C.$EXT) $EMU/ ; done
 
 # Copy to the emulator
 cp *.php *.json $EMU/

@@ -18,7 +18,7 @@ OUT=upper
 xform() {
     local x="$1"
 
-    if [[ $OUT == upper ]]; then
+    if [[ $OUT == upper ]] ; then
         echo "${x^^}"
     else
         echo "${x,,}"
@@ -33,8 +33,7 @@ $XCC/bin/ca65 -t $TGT $C-flt.s
 $XCC/bin/ld65 -o $(xform $C.$EXT) -t $TGT $C-flt.o -L $FLT/flt flt-$TGT.lib -L $XCC/lib $TGT.lib
 
 # Build explore
-for C in main initialize xm $TGT-specific process-vehicles scan-field render-objects
-do
+for C in main initialize xm $TGT-specific process-vehicles scan-field render-objects ; do
 	$XCC/bin/cc65 -t $TGT -Cl -Oir -I $XCC/include $C.c
 	$XCC/bin/ca65 -t $TGT $C.s
 done
@@ -42,10 +41,7 @@ C=explore
 $XCC/bin/ld65 -o $(xform $C.$EXT) -t $TGT main.o initialize.o xm.o $TGT-specific.o process-vehicles.o scan-field.o render-objects.o -L $XCC/lib $TGT.lib
 
 # Move to the emulator
-for C in data explore
-do
-	mv $(xform $C.$EXT) $EMU/
-done
+for C in data explore ; do mv $(xform $C.$EXT) $EMU/ ; done
 
 # Clean up
 rm *-flt.c *.s *.o
