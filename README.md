@@ -73,7 +73,7 @@ To achieve 5 frames/s, that corresponds to a budget of 0.20 s/frame or 200 ms/fr
 
 Should you want to build the demo, you’ll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
-Edit the `«flt-repo»/flt/build-cc65` script to point `XCC` to where the ***cc65*** repo is located, and run the script to build the `flt.lib` library.
+Edit the `«flt-repo»/flt/build-cc65` script to point `XCC` to where the ***cc65*** repo is located, and run the script to build the `flt-cx16.lib` library.
 
 Then edit the `«explore-repo»/cx16-v1/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `EXPLORE.PRG` and `DATA.PRG`.
 
@@ -102,7 +102,7 @@ About the AI, it uses only 13 bytes to correspond to various settings, e.g. evad
 
 As in `cx16-v1`, should you want to build the demo, you’ll need [cc65](https://github.com/cc65/cc65), [FLT](https://github.com/Russell-S-Harper/FLT), and [x16emu](https://github.com/x16community/x16-emulator). Check these repositories if there are any other dependencies. Be sure to adhere to the licensing terms provided in these repositories to ensure proper usage and compliance.
 
-Edit the `«flt-repo»/flt/build-cc65` script to point `XCC` to where the ***cc65*** repo is located, and run the script to build the `flt.lib` library.
+Edit the `«flt-repo»/flt/build-cc65` script to point `XCC` to where the ***cc65*** repo is located, and run the script to build the `flt-cx16.lib` library.
 
 Then edit the `«explore-repo»/cx16-v2/build-cc65-cx16` script to point `XCC`, `FLT`, and `EMU` to where the ***cc65***, ***FLT*** and ***x16emu*** repositories are located, and run the script to create `EXPLORE.PRG`, `TEXT.PRG`, and `DATA.PRG`.
 

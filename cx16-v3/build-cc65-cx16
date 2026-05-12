@@ -4,32 +4,54 @@
 # XCC=«path-to-cc65-repo»
 # FLT=«path-to-FLT-repo»
 # EMU=«path-to-x16-emulator»
+# TGT=«target»
+# EXT=«target-executable-extension»
+# OUT=«target-filename-case-upper-or-lower»
 
 XCC=~/Documents/development/cc65
 FLT=~/Documents/development/FLT
 EMU=~/Documents/development/x16-emulator/build
+TGT=cx16
+EXT=PRG
+OUT=upper
 
-# Build DATA.PRG
-php $FLT/flt/flt.php -i data.c -o data-flt.c -x "-DABSTRACT_2D -I $XCC/include -I $FLT/flt"
-$XCC/bin/cc65 -t cx16 -I $XCC/include data-flt.c
-$XCC/bin/ca65 -t cx16 data-flt.s
-$XCC/bin/ld65 -o DATA.PRG -t cx16 data-flt.o -L $FLT/flt flt.lib -L $XCC/lib cx16.lib
+xform() {
+    local x="$1"
 
-# Build TEXT.PRG
-$XCC/bin/cc65 -t cx16 -I $XCC/include text.c
-$XCC/bin/ca65 -t cx16 text.s
-$XCC/bin/ld65 -o TEXT.PRG -t cx16 text.o -L $FLT/flt flt.lib -L $XCC/lib cx16.lib
+    if [[ $OUT == upper ]]; then
+        echo "${x^^}"
+    else
+        echo "${x,,}"
+    fi
+}
 
-# Build PVP-AI.PRG
-for C in main initialize xm cx16-specific process-vehicles render-objects ai
+# Build data
+C=data
+php $FLT/flt/flt.php -i $C.c -o $C-flt.c -x "-DABSTRACT_2D -I $XCC/include -I $FLT/flt"
+$XCC/bin/cc65 -t $TGT -I $XCC/include $C-flt.c
+$XCC/bin/ca65 -t $TGT $C-flt.s
+$XCC/bin/ld65 -o $(xform $C.$EXT) -t $TGT $C-flt.o -L $FLT/flt flt-$TGT.lib -L $XCC/lib $TGT.lib
+
+# Build text
+C=text
+$XCC/bin/cc65 -t $TGT -I $XCC/include $C.c
+$XCC/bin/ca65 -t $TGT $C.s
+$XCC/bin/ld65 -o $(xform $C.$EXT) -t $TGT $C.o -L $XCC/lib $TGT.lib
+
+# Build pvp-ai
+for C in main initialize xm $TGT-specific process-vehicles render-objects ai
 do
-	$XCC/bin/cc65 -t cx16 -DREMOTE_AI -DABSTRACT_2D -DREMOVE_TMP -DUSER_SPACE=0x400 -Cl -Oir -I $XCC/include $C.c
-	$XCC/bin/ca65 -t cx16 $C.s
+	$XCC/bin/cc65 -t $TGT -DREMOTE_AI -DABSTRACT_2D -DREMOVE_TMP -DUSER_SPACE=0x400 -Cl -Oir -I $XCC/include $C.c
+	$XCC/bin/ca65 -t $TGT $C.s
 done
-$XCC/bin/ld65 -o PVP-AI.PRG -t cx16 main.o initialize.o xm.o cx16-specific.o process-vehicles.o render-objects.o ai.o -L $XCC/lib cx16.lib
+C=pvp-ai
+$XCC/bin/ld65 -o $(xform $C.$EXT) -t $TGT main.o initialize.o xm.o $TGT-specific.o process-vehicles.o render-objects.o ai.o -L $XCC/lib $TGT.lib
 
 # Move to the emulator
-mv DATA.PRG TEXT.PRG PVP-AI.PRG $EMU/
+for C in data text pvp-ai
+do
+	mv $(xform $C.$EXT) $EMU/
+done
 
 # Copy to the emulator
 cp *.php *.json $EMU/
@@ -37,11 +59,11 @@ cp *.php *.json $EMU/
 # Clean up
 rm *-flt.c *.s *.o
 
-# Run the emulator
+# Run the simulation
 cd $EMU
-#./x16emu -scale 2 -warp -prg DATA.PRG -run
-#./x16emu -scale 2 -warp -prg TEXT.PRG -run
-#./x16emu -scale 2 -mhz 8 -prg PVP-AI.PRG -run
+#./x16emu -scale 2 -warp -prg $(xform data.$EXT) -run
+#./x16emu -scale 2 -warp -prg $(xform text.$EXT) -run
+#./x16emu -scale 2 -mhz 8 -prg $(xform pvp-ai.$EXT) -run
 PHP=pvp-ai-working-stub.php
 if [[ -f $PHP ]] ; then
 	php $PHP
